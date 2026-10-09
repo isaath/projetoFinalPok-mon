@@ -99,6 +99,66 @@ class Pokemon
         $this->experiencia = $experiencia;
     }
 
+    
+    //MÉTODOS DE CRUD
+    
+    //método para salvar um pokemon no banco de dados
+    public function salvar() {
+        $conn = getConnection();
+        $stmt = $conn->prepare("INSERT INTO pokemons (nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, experiencia) VALUES (:nome, :hp, :hp_maximo, :forca_ataque, :defesa, :ataque_especial, :defesa_especial, :velocidade, :experiencia)");
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":hp", $this->hp);
+        $stmt->bindParam(":hp_maximo", $this->hp_maximo);
+        $stmt->bindParam(":forca_ataque", $this->forca_ataque);
+        $stmt->bindParam(":defesa", $this->defesa);
+        $stmt->bindParam(":ataque_especial", $this->ataque_especial);
+        $stmt->bindParam(":defesa_especial", $this->defesa_especial);
+        $stmt->bindParam(":velocidade", $this->velocidade);
+        $stmt->bindParam(":experiencia", $this->experiencia);
+        return $stmt->execute();
+    }
+
+
+    // Método para buscar um funcionario pelo ID
+    public static function buscarPorId(int $id_pokemon) {
+        $conn = getConnection();
+        $stmt = $conn->prepare("SELECT * FROM pokemons WHERE id_pokemon = :id_pokemon");
+        $stmt->bindParam(":id_pokemon", $id_pokemon);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+    // Método para listar todos os funcionarios
+    public static function listarTodos() {
+        $conn = getConnection();
+        $stmt = $conn->query("SELECT * FROM funcionarios");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    // Método para atualizar um funcionario
+    public function atualizar(int $id) {
+        $conn = getConnection();
+        $stmt = $conn->prepare("UPDATE funcionarios SET nome = :nome, cpf = :cpf, telefone = :telefone, curriculo = :curriculo WHERE id = :id");
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":cpf", $this->cpf);
+        $stmt->bindParam(":telefone", $this->telefone);
+        $stmt->bindParam(":curriculo", $this->curriculo);
+        $stmt->bindParam(":id", $id);
+        return $stmt->execute();
+    }
+
+
+    // Método para excluir um funcionario
+    public static function excluir($id) {
+        $conn = getConnection();
+        $stmt = $conn->prepare("DELETE FROM funcionarios WHERE id = :id");
+        $stmt->bindParam(":id", $id);
+        return $stmt->execute();
+    }
+}
+
 
     //metodos de batalha do pokefish
 
