@@ -9,7 +9,7 @@ class Pokemon
     private string $nome;
     private int $id_pokemon;
     private int $hp;
-    private int $hpMaximo;
+    private int $hp_maximo;
     private int $forca_ataque;
     private int $defesa;
     private int $ataque_especial;
@@ -44,11 +44,11 @@ class Pokemon
     }
     public function getHpMaximo(): int
     {
-        return $this->hpMaximo;
+        return $this->hp_maximo;
     }
-    public function setHpMaximo(int $hpMaximo): void
+    public function setHpMaximo(int $hp_maximo): void
     {
-        $this->hpMaximo = $hpMaximo;
+        $this->hp_maximo = $hp_maximo;
     }
     public function getForcaAtaque(): int
     {
@@ -129,38 +129,42 @@ class Pokemon
     }
 
 
-    // Método para listar todos os funcionarios
+    // Método para listar todos os pokemons
     public static function listarTodos() {
         $conn = getConnection();
-        $stmt = $conn->query("SELECT * FROM funcionarios");
+        $stmt = $conn->query("SELECT * FROM pokemons");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
-    // Método para atualizar um funcionario
+    // Método para atualizar um pokemon
     public function atualizar(int $id) {
         $conn = getConnection();
-        $stmt = $conn->prepare("UPDATE funcionarios SET nome = :nome, cpf = :cpf, telefone = :telefone, curriculo = :curriculo WHERE id = :id");
+        $stmt = $conn->prepare("UPDATE pokemons SET nome = :nome, hp = :hp, hp_maximo = :hp_maximo, forca_ataque = :forca_ataque, defesa = :defesa, ataque_especial = :ataque_especial, defesa_especial = :defesa_especial, velocidade = :velocidade, experiencia = :experiencia WHERE id_pokemon = :id_pokemon");
         $stmt->bindParam(":nome", $this->nome);
-        $stmt->bindParam(":cpf", $this->cpf);
-        $stmt->bindParam(":telefone", $this->telefone);
-        $stmt->bindParam(":curriculo", $this->curriculo);
-        $stmt->bindParam(":id", $id);
+        $stmt->bindParam(":hp", $this->hp);
+        $stmt->bindParam(":hp_maximo", $this->hp_maximo);
+        $stmt->bindParam(":forca_ataque", $this->forca_ataque);
+        $stmt->bindParam(":id_pokemon", $id_pokemon);
+        $stmt->bindParam(":defesa", $this->defesa);
+        $stmt->bindParam(":ataque_especial", $this->ataque_especial);
+        $stmt->bindParam(":defesa_especial", $this->defesa_especial);
+        $stmt->bindParam(":velocidade", $this->velocidade);
+        $stmt->bindParam(":experiencia", $this->experiencia);
         return $stmt->execute();
     }
 
 
-    // Método para excluir um funcionario
+    // Método para excluir um pokemon
     public static function excluir($id) {
         $conn = getConnection();
-        $stmt = $conn->prepare("DELETE FROM funcionarios WHERE id = :id");
+        $stmt = $conn->prepare("DELETE FROM pokemons WHERE id = :id");
         $stmt->bindParam(":id", $id);
         return $stmt->execute();
     }
-}
 
 
-    //metodos de batalha do pokefish
+     //metodos de batalha do pokefish
 
     public function receberDano(int $dano): void{ //definindo um metodo publico sem retorno
         
@@ -171,6 +175,10 @@ class Pokemon
             //this --> referencia o objeto atual, nesse caso o pokemon que recebeu o dano
         }
     }
+}
+
+
+   
 
     public function atacar(Pokemon $pokemonAlvo): void{ //definindo um metodo publico sem retorno
         $dano = $this->forca_ataque - $pokemonAlvo->getDefesa(); //calcular o dano subtraindo a defesa do alvo da força de ataque do atacante
