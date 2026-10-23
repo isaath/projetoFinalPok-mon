@@ -1,5 +1,5 @@
 body {
-    background-image: url('/img/tela_inicial.png');
+    background-image: url('./img/tela_inicial.png');
     background-attachment: fixed; /*fixa a imagem*/
     background-size: cover; /*preenche tudo*/
     background-position: center center; /*centraliza a imagem*/
