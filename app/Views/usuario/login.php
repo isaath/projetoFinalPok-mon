@@ -1,31 +1,56 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Login - Pokebagual</title>
-
-    <link rel="stylesheet" href="/public/css/global.css">
-    <link rel="stylesheet" href="/public/css/login.css">
+    <!-- Fonte Pixel Art -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../public/css/login.css">
 </head>
 <body>
 
-    <main class="tela-login">
-        <h1>Pokebagual</h1>
-        <h2>Entrar no jogo</h2>
+    <div class="cartao-login">
+        <h2 class="titulo-login">LOGIN DO USUÁRIO</h2>
 
-        <form action="" method="POST">
-            <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" required>
+        <form action="/login" method="POST" class="form-login">
+            <div class="corpo_cartao">
+                <!--foto do usr -->
+                <div class="box_foto_usr">
+                    <!--slides do sor!! -->
+                    <form action='upload.php' method='POST' enctype='multipart/form-data'>
+                        <input type='file' name='foto_usr' required>
+                    </form>
+                </div>
 
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" required>
+                <!-- Campos de Texto da Direita -->
+                <div class="box_inputs">
+                    <div class="campo-grupo">
+                        <label for="email">EMAIL:</label>
+                        <input type="email" id="email" name="email" required autocomplete="off">
+                    </div>
 
-            <a href="#" type="submit">Entrar</a>
+
+                    <div class="campo-grupo">
+                        <label for="nome">NOME DE USUÁRIO:</label>
+                        <input type="text" id="nome" name="nome" required autocomplete="off">
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="senha">SENHA:</label>
+                        <input type="password" id="senha" name="senha" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões Inferiores -->
+            <div class="box-botoes">
+                <button type="submit" class="btn-pixel">LOGIN</button>
+                <a href="../layouts/painel_jogar.php" class="btn-pixel">REGISTRAR</a>
+                <a href="../layouts/painel_inicial.php" class="btn-pixel">VOLTAR</a>
+            </div>
         </form>
-    </main>
+    </div>
 
 </body>
 </html>
