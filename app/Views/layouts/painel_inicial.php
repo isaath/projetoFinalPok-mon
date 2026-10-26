@@ -9,7 +9,7 @@
 </head>
 <body>
     <a href="../usuario/login.php" class="btn_login">
-    <img src="../../../public/css/img/btn_login.png" alt="Login" style="width: 400px !important; height: auto;">
-</a>
+        <img src="../../../public/css/img/btn_login.png" alt="Login" style="width: 400px !important; height: auto;">
+    </a>
 </body>
 </html>
