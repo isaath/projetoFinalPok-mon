@@ -1,0 +1,45 @@
+body {
+    background-image: url("img/tela_sobre.png");
+    background-attachment: fixed; /*fixa a imagem*/
+    background-size: cover; /*preenche tudo*/
+    background-position: center center; /*centraliza a imagem*/
+    background-repeat: no-repeat; /*evita q se repita*/
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+p{
+    text-align: justify;
+    font-size: 26px;
+    font-family: 'Coda', sans-serif;
+}
+
+.destaque {
+  color: rgb(0, 21, 128);
+  font-size: 28px;
+  text-align: center;
+}
+.historia_sobre {
+  margin-top: 70px;
+  margin-left: 300px;
+  margin-right: 300px;
+}
+
+.btn_pixel {
+   position: fixed;
+    margin-top: 600px;      
+    right: 50px; 
+}
+
+.btn_pixel img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn_pixel img:active {
+    transform: scale(0.95);
+}
