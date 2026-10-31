@@ -41,8 +41,8 @@ class UsuarioController
                         session_regenerate_id(true);
                         $_SESSION['usuario'] = $usuario;
 
-                        header('Location: index.php?rota=pokemons');
-                        exit;
+                       header('Location: ../app/Views/layouts/painel_jogar.php');
+exit;
                     }
                 }
             }
@@ -115,4 +115,5 @@ class UsuarioController
 
         require __DIR__ . '/../Views/usuario/registrar.php';
     }
+
 }

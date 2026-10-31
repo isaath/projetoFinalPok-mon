@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
-    background-image: url("img/login.png");
+    background-image: url("/projetoFinalPok-mon/public/css/img/login.png");
     background-attachment: fixed;
     background-size: cover;
     background-position: center center;
@@ -12,6 +12,8 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Press Start 2P', monospace;
+    padding: 16px;
+    box-sizing: border-box;
 }
 
 /* O Cartão Principal Cinza */
@@ -26,6 +28,8 @@ body {
         inset 0 -4px 0 #94a3b8,
         0 8px 0 rgba(0, 0, 0, 0.4);
     text-align: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* Título */
@@ -128,4 +132,19 @@ body {
 .btn-pixel:active {
     transform: translateY(2px);
     box-shadow: inset 0 1px 0 #94a3b8;
+}
+
+@media (max-width: 600px) {
+    .cartao-login {
+        width: 100%;
+        padding: 18px 14px;
+    }
+
+    .box-botoes {
+        flex-direction: column;
+    }
+
+    .btn-pixel {
+        width: 100%;
+    }
 }
