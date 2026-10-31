@@ -1,0 +1,38 @@
+body {
+    background-image: url("img/tela_jogar.png");
+    background-attachment: fixed; /*fixa a imagem*/
+    background-size: cover; /*preenche tudo*/
+    background-position: center center; /*centraliza a imagem*/
+    background-repeat: no-repeat; /*evita q se repita*/
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+
+.menu_lateral {
+    position: fixed;
+    top: 6.5vh;
+    left: 5.5vw;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.btn_jogar {
+    display: inline-block;
+    margin-top: 300px; 
+}
+
+.btn_pixel img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn_pixel img:active {
+    transform: scale(0.95);
+}
