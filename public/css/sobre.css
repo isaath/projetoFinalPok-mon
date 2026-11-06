@@ -1,9 +1,14 @@
+/*
+  Estilo da tela de apresentação do jogo.
+  Define o cenário da página, o texto da história e o botão de retorno.
+*/
 body {
+    /* Usa a ilustração da tela Sobre como cenário de fundo. */
     background-image: url("img/tela_sobre.png");
-    background-attachment: fixed; /*fixa a imagem*/
-    background-size: cover; /*preenche tudo*/
-    background-position: center center; /*centraliza a imagem*/
-    background-repeat: no-repeat; /*evita q se repita*/
+    background-attachment: fixed; /* Mantém a imagem fixa enquanto a página é renderizada. */
+    background-size: cover; /* Ajusta a imagem para cobrir todo o fundo. */
+    background-position: center center; /* Centraliza o cenário visualmente. */
+    background-repeat: no-repeat; /* Evita repetição da imagem. */
     margin: 0;
     height: 100vh;
     display: flex;
@@ -12,34 +17,41 @@ body {
     flex-direction: column;
 }
 
-p{
+p {
+    /* Define alinhamento, tamanho e fonte para o texto da história. */
     text-align: justify;
     font-size: 26px;
     font-family: 'Coda', sans-serif;
 }
 
 .destaque {
+  /* Dá ênfase à frase final da apresentação. */
   color: rgb(0, 21, 128);
   font-size: 28px;
   text-align: center;
 }
+
 .historia_sobre {
+  /* Afasta a caixa de texto das bordas e do topo da tela. */
   margin-top: 70px;
   margin-left: 300px;
   margin-right: 300px;
 }
 
 .btn_pixel {
+   /* Mantém o botão de retorno posicionado no canto inferior direito. */
    position: fixed;
     margin-top: 600px;      
     right: 50px; 
 }
 
 .btn_pixel img:hover {
+    /* Aumenta e clareia a imagem quando o ponteiro passa sobre o botão. */
     transform: scale(1.05);
     filter: brightness(1.1);
 }
 
 .btn_pixel img:active {
+    /* Reduz ligeiramente a imagem enquanto o botão está pressionado. */
     transform: scale(0.95);
 }

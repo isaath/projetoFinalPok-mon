@@ -1,9 +1,14 @@
+/*
+  Estilo da tela de painel de jogo.
+  Define a imagem de fundo, o menu lateral e os efeitos dos botões do jogo.
+*/
 body {
+    /* Define a imagem que representa o cenário do modo de jogo. */
     background-image: url("img/tela_jogar.png");
-    background-attachment: fixed; /*fixa a imagem*/
-    background-size: cover; /*preenche tudo*/
-    background-position: center center; /*centraliza a imagem*/
-    background-repeat: no-repeat; /*evita q se repita*/
+    background-attachment: fixed; /* Mantém a imagem fixa durante o scroll. */
+    background-size: cover; /* Preenche toda a janela. */
+    background-position: center center; /* Centraliza o cenário. */
+    background-repeat: no-repeat; /* Evita repetir a imagem. */
     margin: 0;
     height: 100vh;
     display: flex;
@@ -12,9 +17,8 @@ body {
     flex-direction: column;
 }
 
-
-
 .menu_lateral {
+    /* Mantém o menu lateral fixo na esquerda da tela. */
     position: fixed;
     top: 6.5vh;
     left: 5.5vw;
@@ -24,15 +28,18 @@ body {
 }
 
 .btn_jogar {
+    /* Posiciona o botão principal de jogo abaixo do centro da tela. */
     display: inline-block;
     margin-top: 300px; 
 }
 
 .btn_pixel img:hover {
+    /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
     transform: scale(1.05);
     filter: brightness(1.1);
 }
 
 .btn_pixel img:active {
+    /* Simula o botão sendo pressionado. */
     transform: scale(0.95);
 }
