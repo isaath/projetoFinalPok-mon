@@ -6,7 +6,21 @@
     <title>Pokebagual - Jogar</title>
     <link rel="stylesheet" href="../../../public/css/painel_jogar.css">
 </head>
+
+<script>
+    //Navegadores bloqueiam som automático até o usuário interagir com a página.
+    const musica = document.getElementById('musica');
+    musica.volume = 0.4; // 0 a 1
+
+    // tenta tocar; se for bloqueado, toca no primeiro clique
+    musica.play().catch(() => {
+        document.addEventListener('click', () => musica.play(), { once: true });
+    });
+</script>
+
 <body>
+    <audio id="musica" src="../../../public/audio/musica_jogar.mp3" loop autoplay></audio>
+
     <div class="menu_lateral">
         <a href="sobre.php" class="btn_pixel">
         <img src="../../../public/css/img/btn_sobre.png" alt="Sobre" style="width: 160px !important; height: auto;">
