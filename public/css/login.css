@@ -148,3 +148,9 @@ body {
         width: 100%;
     }
 }
+.box_foto_usr label {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

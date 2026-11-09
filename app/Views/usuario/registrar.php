@@ -17,10 +17,18 @@
             </p>
         <?php endif; ?>
 
-        <form action="index.php?rota=registrar" method="POST" class="form-login">
+        <form action="index.php?rota=registrar" method="POST" class="form-login" enctype="multipart/form-data">
             <div class="corpo_cartao">
+                <div class="box_foto_usr">
+    <label for="foto">
+        <img src="/projetoFinalPok-mon/public/css/img/foto_perfil.png" alt="Escolher foto de perfil" class="img-avatar" id="preview-foto">
+    </label>
+    <input type="file" id="foto" name="foto" accept="image/jpeg,image/png" hidden>
+</div>
                 <div class="box_inputs">
+                    
                     <div class="campo-grupo">
+
                         <label for="nome">NOME:</label>
                         <input
                             type="text"

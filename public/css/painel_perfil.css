@@ -1,0 +1,13 @@
+body {
+    background-image: url("img/tela_perfil.png");
+    background-attachment: fixed; /*fixa a imagem*/
+    background-size: cover; /*preenche tudo*/
+    background-position: center center; /*centraliza a imagem*/
+    background-repeat: no-repeat; /*evita q se repita*/
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}

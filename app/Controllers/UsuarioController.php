@@ -62,6 +62,15 @@ exit;
             $emailInformado = $_POST['email'] ?? '';
             $senha = $_POST['senha'] ?? '';
             $confirmacaoSenha = $_POST['confirmar_senha'] ?? '';
+            $foto = null;
+        $erroFoto = null;
+         if (!empty($_FILES['foto']['tmp_name'])) {
+                if ($_FILES['foto']['size'] > 2 * 1024 * 1024 || !@getimagesize($_FILES['foto']['tmp_name'])) {
+                    $erroFoto = 'A foto deve ser uma imagem de até 2MB.';
+                } else {
+                    $foto = file_get_contents($_FILES['foto']['tmp_name']);
+                }
+            }
 
             if (
                 !is_string($nomeInformado)
@@ -87,9 +96,11 @@ exit;
                     $erro = 'A senha não pode ultrapassar 72 bytes.';
                 } elseif ($senha !== $confirmacaoSenha) {
                     $erro = 'As senhas informadas não são iguais.';
+                } elseif ($erroFoto !== null) {
+                    $erro = $erroFoto;
                 } else {
                     try {
-                        $cadastrado = (new Usuario($this->db))->cadastrar($nome, $email, $senha);
+                        $cadastrado = (new Usuario($this->db))->cadastrar($nome, $email, $senha, $foto);
 
                         if (!$cadastrado) {
                             $erro = 'Este e-mail já está cadastrado.';
