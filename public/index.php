@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../app/Models/autoload.php';
 require_once __DIR__ . '/../app/Controllers/PokemonController.php';
 require_once __DIR__ . '/../app/Controllers/UsuarioController.php';
+require_once __DIR__ . '/../app/Controllers/BolichoController.php';
 
 // Lê as rotas definidas em routes.php.
 $rotas = require __DIR__ . '/../routes/routes.php';
