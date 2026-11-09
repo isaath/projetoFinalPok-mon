@@ -1,11 +1,12 @@
 <?php
 
-require_once "../models/batalha.php";
-
+// Controller que futuramente cuidará do fluxo de batalhas do jogo.
 class BatalhaController{
-    private $db;
+    // A propriedade armazena a conexão com o banco de dados.
+    private PDO $db;
 
-    public function __construct($db){
+    // O construtor recebe a conexão e salva em uma propriedade da classe.
+    public function __construct(PDO $db){
         $this->db = $db;
     }
 }

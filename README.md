@@ -71,22 +71,14 @@ Também são aplicados conceitos de programação orientada a objetos, como enca
 
 ## Banco de Dados
 
-O banco de dados é responsável por armazenar as informações dos usuários, Pokémon, equipes, itens e batalhas.
+O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as tabelas sem editar arquivos JSON:
 
-Entre as principais tabelas previstas estão:
+1. Inicie o **MySQL** no XAMPP.
+2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
+3. Execute o script. Ele cria o banco `bancodedados_pokefish`, suas tabelas e os tipos iniciais `Agua`, `Fogo` e `Planta`.
+4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
-* `usuarios`: informações dos usuários e seus perfis.
-* `tipos`: tipos de Pokémon disponíveis.
-* `pokemons`: atributos e informações dos Pokémon.
-* `times`: equipes criadas pelos jogadores.
-* `time_pokemons`: associação entre equipes e Pokémon.
-* `itens`: itens disponíveis na loja.
-* `inventarios`: itens pertencentes aos usuários.
-* `compras`: histórico de compras realizadas.
-* `batalhas`: informações gerais das batalhas.
-* `batalha_pokemons`: participação dos Pokémon nos combates.
-
-O banco de dados também contempla recursos como consultas SQL, visualizações (`Views`), gatilhos (`Triggers`) e transações, conforme os requisitos do projeto.
+O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
 
 ## Objetivos Acadêmicos
 

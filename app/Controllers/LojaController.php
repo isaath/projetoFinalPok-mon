@@ -1,11 +1,12 @@
 <?php
 
-require_once "../models/loja.php";
-
+// Controller que futuramente controlará as ações de compra e itens da loja.
 class LojaController{
-    private $db;
+    // Guarda a conexão com o banco usada pela loja.
+    private PDO $db;
 
-    public function __construct($db){
+    // Construtor recebe a conexão e armazena para uso posterior.
+    public function __construct(PDO $db){
         $this->db = $db;
     }
 }

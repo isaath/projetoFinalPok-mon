@@ -1,4 +1,9 @@
+/*
+  Estilo da página de listagem de Pokémon.
+  O layout usa grid para montar cards responsivos com imagem, tipos e estatísticas.
+*/
 :root {
+    /* Define a paleta e tipografia padrão da página. */
     color-scheme: light;
     font-family: Arial, Helvetica, sans-serif;
     color: #183042;
@@ -6,25 +11,30 @@
 }
 
 * {
+    /* Faz largura e altura incluírem padding e bordas nos cálculos. */
     box-sizing: border-box;
 }
 
 body {
+    /* Remove a margem padrão do navegador ao redor do documento. */
     margin: 0;
 }
 
 .container {
+    /* Centraliza o conteúdo e limita sua largura em telas grandes. */
     width: min(1120px, calc(100% - 32px));
     margin: 0 auto;
     padding: 40px 0 56px;
 }
 
 .page-header {
+    /* Separa visualmente o cabeçalho da grade de cards. */
     margin-bottom: 28px;
     text-align: center;
 }
 
 .eyebrow {
+    /* Estiliza o pequeno nome do projeto acima do título. */
     margin: 0 0 8px;
     color: #168b83;
     font-size: 0.8rem;
@@ -34,23 +44,27 @@ body {
 }
 
 h1 {
+    /* Destaca o título principal com tamanho adaptável à tela. */
     margin: 0;
     color: #123047;
     font-size: clamp(2rem, 5vw, 3rem);
 }
 
 .subtitle {
+    /* Exibe o texto auxiliar abaixo do título. */
     margin: 10px 0 0;
     color: #5e7280;
 }
 
 .pokemon-grid {
+    /* Cria colunas responsivas para os cards de Pokémon. */
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 18px;
 }
 
 .pokemon-card {
+    /* Dá aparência de cartão e esconde conteúdo que exceda suas bordas. */
     overflow: hidden;
     border: 1px solid #dce8e9;
     border-radius: 16px;
@@ -59,6 +73,7 @@ h1 {
 }
 
 .pokemon-image {
+    /* Reserva uma área uniforme para a imagem, sem distorcê-la. */
     display: block;
     width: 100%;
     height: 190px;
@@ -68,6 +83,7 @@ h1 {
 }
 
 .image-placeholder {
+    /* Centraliza o marcador quando a API não fornece imagem. */
     display: grid;
     place-items: center;
     color: #78909c;
@@ -75,10 +91,12 @@ h1 {
 }
 
 .pokemon-info {
+    /* Cria espaço interno para os dados do card. */
     padding: 16px;
 }
 
 .pokemon-info h2 {
+    /* Formata o nome do Pokémon dentro do cartão. */
     margin: 0 0 12px;
     color: #123047;
     font-size: 1.25rem;
@@ -86,6 +104,7 @@ h1 {
 }
 
 .pokemon-types {
+    /* Organiza selos de tipo e permite que quebrem para outra linha. */
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
@@ -93,6 +112,7 @@ h1 {
 }
 
 .type-badge {
+    /* Aparência de etiqueta para cada tipo do Pokémon. */
     padding: 5px 10px;
     border-radius: 999px;
     background: #dff3ee;
@@ -102,6 +122,7 @@ h1 {
 }
 
 .pokemon-stats {
+    /* Organiza os atributos em duas colunas. */
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -109,17 +130,20 @@ h1 {
 }
 
 .pokemon-stats div {
+    /* Cria uma pequena caixa de fundo para cada atributo. */
     padding: 9px 10px;
     border-radius: 9px;
     background: #f4f8fa;
 }
 
 .pokemon-stats dt {
+    /* Formata o rótulo do atributo, como HP ou Ataque. */
     color: #657985;
     font-size: 0.76rem;
 }
 
 .pokemon-stats dd {
+    /* Formata o valor numérico do atributo. */
     margin: 3px 0 0;
     color: #183042;
     font-size: 1rem;
@@ -127,24 +151,28 @@ h1 {
 }
 
 .evolution-info {
+    /* Separa visualmente a seção de evolução dos atributos. */
     margin-top: 16px;
     padding-top: 13px;
     border-top: 1px solid #e3ecee;
 }
 
 .evolution-info h3 {
+    /* Destaca o título da seção de evolução. */
     margin: 0 0 7px;
     color: #176e68;
     font-size: 0.85rem;
 }
 
 .evolution-info p {
+    /* Formata cada caminho evolutivo exibido. */
     margin: 4px 0;
     color: #4d6470;
     font-size: 0.9rem;
 }
 
 .message {
+    /* Aparência comum para avisos e mensagens da página. */
     padding: 16px;
     border-radius: 10px;
     background: #fff;
@@ -152,6 +180,7 @@ h1 {
 }
 
 .message-error {
+    /* Diferencia mensagens de erro com cores de alerta. */
     border: 1px solid #efb7b7;
     background: #fff2f2;
     color: #8e2525;
