@@ -7,6 +7,6 @@
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css">
 </head>
 <body>
-    <p>bolicho</p>
+    
 </body>
 </html>
