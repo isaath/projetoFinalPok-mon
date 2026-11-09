@@ -38,6 +38,12 @@
     <a href="/projetoFinalPok-mon/app/Views/usuario/perfil.php" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_perfil.png" alt="Perfil" style="width: 150px !important; height: auto;">
     </a>
+    <a href="/projetoFinalPok-mon/app/Views/bolicho/bolicho.php" class="btn_pixel">
+        <img src="/projetoFinalPok-mon/public/css/img/btn_bolicho.png" alt="Bolicho" style="width: 190px !important; height: auto;">
+    </a>
+    <a href="/projetoFinalPok-mon/app/Views/time/escolher_time.php" class="btn_pixel">
+        <img src="/projetoFinalPok-mon/public/css/img/btn_time.png" alt="Time" style="width: 150px !important; height: auto;">
+    </a>
 
 </div>
 
