@@ -11,3 +11,13 @@ body {
     align-items: center;
     flex-direction: column;
 }
+.btn_pixel img:hover {
+    /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn_pixel img:active {
+    /* Simula o botão sendo pressionado. */
+    transform: scale(0.95);
+}
