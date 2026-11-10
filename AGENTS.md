@@ -1,8 +1,8 @@
-# AGENTE.md — MONSTROBOLSO
+# AGENTE.md — POKEBAGUAL
 
 # 1. IDENTIFICAÇÃO DO PROJETO
 
-**Nome:** MONSTROBOLSO  
+**Nome:** PokeBagual
 **Desenvolvedores:** Henrique Miranda e Isadora Amaral  
 **Formato:** Trabalho em dupla  
 **Instituição:** IFRS  
