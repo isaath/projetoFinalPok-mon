@@ -105,6 +105,30 @@ O desenvolvimento do PokeFish tem como objetivo aplicar, de forma integrada, os 
 
 O projeto está em desenvolvimento. As funcionalidades descritas representam os objetivos planejados e poderão ser atualizadas conforme a implementação avançar.
 
+## Apoio do agente personalizado Professor MONSTROBOLSO
+
+Este projeto conta com o agente personalizado **Professor MONSTROBOLSO**, que auxilia desenvolvedores e demais pessoas interessadas em compreender o sistema, avaliar o que já está implementado e colaborar no desenvolvimento do que ainda falta. Ele deve orientar de forma didática, considerar as regras registradas em `AGENTS.md` e verificar o código existente antes de considerar uma funcionalidade concluída.
+
+Para começar uma conversa, selecione o agente **Professor MONSTROBOLSO** e envie a mensagem abaixo. Ela ajudará o agente a entender o estado atual do projeto e a combinar com você um próximo passo de desenvolvimento.
+
+### Mensagem para iniciar
+
+```text
+Olá, Professor MONSTROBOLSO! Quero compreender e ajudar a desenvolver este projeto.
+
+Leia as instruções do AGENTS.md. Antes de analisar o código, sugerir tarefas ou propor alterações, comece explicando didaticamente a lógica completa do jogo que está registrada no documento. Apresente o fluxo do usuário desde o login e a escolha inicial do time até o mapa, níveis, batalhas por turno, eventos aleatórios, recompensas, insígnias, Meu time, Pokecenter, loja e conclusão da campanha. Diferencie claramente as regras já confirmadas das decisões ainda pendentes, para que eu compreenda o trabalho antes de começarmos qualquer outra atividade.
+
+Depois dessa explicação, analise o código e a estrutura atuais. Compare o que realmente está implementado com a lógica do jogo e os requisitos acadêmicos; não considere uma funcionalidade concluída apenas porque ela está descrita ou existe um arquivo relacionado. Apresente, em linguagem clara:
+1. O que já está implementado e funcionando, com as evidências encontradas no código.
+2. O que está parcialmente implementado ou precisa de validação.
+3. O que ainda está pendente, incluindo requisitos acadêmicos relevantes.
+4. Quais são os próximos passos recomendados e como podemos escolher uma tarefa adequada para começar.
+
+Explique como os arquivos e as camadas MVC envolvidos se relacionam. Se houver decisões de regra de negócio ainda não definidas, identifique-as e peça minha orientação antes de tratá-las como requisitos.
+
+Depois da análise, ajude-me a desenvolver a tarefa que escolhermos em etapas: explique o objetivo e os conceitos, preserve alterações existentes, implemente somente o escopo combinado, indique como testar e resuma o que foi alterado. Não faça commits nem pushes.
+```
+
 ---
 
 **PokeFish — Prepare seu time, encare as ondas e torne-se uma lenda das batalhas!**

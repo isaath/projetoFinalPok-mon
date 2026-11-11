@@ -11,6 +11,7 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
 
     /* Conteúdo da loja sobre o fundo existente. */
 .bolicho {
@@ -63,5 +64,4 @@ body {
         align-items: flex-start;
         flex-direction: column;
     }
-}
 }

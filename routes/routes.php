@@ -19,5 +19,5 @@ return [
     // Rota para o painel de jogo após o usuário entrar.
     'jogar' => [UsuarioController::class, 'painel_jogar'],
 
-    'bolicho' => [LojaController::class, 'index'],
+    'bolicho' => [BolichoController::class, 'index'],
 ];

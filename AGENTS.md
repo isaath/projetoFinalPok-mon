@@ -582,3 +582,75 @@ O agente deve sempre lembrar:
 **PRIORIDADE MÁXIMA: desenvolver um MONSTROBOLSO funcional, tecnicamente correto, organizado e que cumpra integralmente os critérios de avaliação, garantindo que Henrique e Isadora compreendam tudo o que foi desenvolvido.**
 
 **NÃO SEJA APENAS UM PROGRAMADOR. SEJA TAMBÉM O PROFESSOR QUE NOS AJUDA A APRENDER A PROGRAMAR.**
+
+# 19. LÓGICA CONFIRMADA DO JOGO
+
+Use esta seção como referência permanente ao explicar, revisar ou implementar as funcionalidades do jogo. Preserve estas regras e não trate decisões ainda não definidas como requisitos confirmados.
+
+## 19.1. Início e seleção do time
+
+- Após o login, o sistema deve verificar se o usuário já iniciou sua jornada, consultando os dados persistidos do jogo.
+- Na primeira vez, o usuário escolhe 3 Pokémon entre 5 Pokémon iniciais fracos que já existem no banco de dados.
+- A seleção deve ser salva para que o usuário não precise fazê-la novamente.
+- Após salvar o time inicial, o usuário é direcionado ao `painel_jogar.php`.
+- Usuários que já iniciaram o jogo também são direcionados ao `painel_jogar.php`.
+- O botão “Jogar” do painel leva ao mapa. A seleção inicial não deve levar diretamente ao mapa.
+
+## 19.2. Time e Pokémon do usuário
+
+- O time ativo de batalha possui 3 posições, identificadas como Pokémon 1, 2 e 3.
+- O botão “Meu time”, disponível no painel, permite consultar os Pokémon do usuário, suas posições e suas situações, incluindo HP.
+- O usuário pode possuir mais de 3 Pokémon. Quando isso ocorrer, deve poder reorganizar ou trocar quais Pokémon ocupam as 3 posições ativas.
+- Pokémon capturados durante a jornada passam a pertencer ao usuário e ficam disponíveis para a gestão do time.
+- As escolhas, capturas e alterações do time devem ser persistidas para continuar disponíveis em acessos futuros.
+
+## 19.3. Mapa, níveis e insígnias
+
+- O mapa contém 7 locais de batalha, correspondentes a 7 níveis em ordem crescente de dificuldade.
+- O nível 1 inicia desbloqueado. Cada próximo nível só pode ser acessado após vencer o nível anterior.
+- Os adversários podem ser selecionados entre os Pokémon disponíveis na base do projeto, usando a PokeAPI como fonte de dados conforme a integração existente.
+- Cada nível concede uma insígnia na primeira conclusão.
+- Os níveis já vencidos podem ser jogados novamente para obter moedas.
+- Após vencer os 7 níveis, o usuário se torna campeão e deve ser apresentada a opção “Voltar para o início”.
+
+## 19.4. Recompensa por vitória
+
+- A primeira vitória de um usuário em cada nível concede a recompensa maior `X`.
+- A segunda vitória e cada vitória posterior no mesmo nível concedem a recompensa menor `Y`.
+- A regra obrigatória é `Y < X`. Os valores são exemplos/configuração do jogo, não números fixos nesta especificação.
+- A verificação é individual por usuário e por nível. Vencer um nível pela primeira vez não altera a recompensa de primeira vitória dos outros níveis.
+- O histórico de conclusão deve ser salvo de forma persistente, para que novas batalhas não concedam indevidamente a recompensa `X`, a insígnia ou o desbloqueio inicial outra vez.
+- Exemplo: primeira vitória no nível 1 concede 50 moedas; vitórias posteriores nesse nível concedem 20. O jogador pode repetir níveis já vencidos para juntar moedas.
+
+## 19.5. Batalhas e eventos de exploração
+
+- As batalhas serão por turnos, inspiradas no estilo de Pokémon Emerald. O jogador escolhe ações durante a batalha, e o sistema resolve os turnos usando os atributos, HP e características dos Pokémon.
+- Além dos 7 locais de batalha, o mapa terá locais de interação entre níveis.
+- Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
+- O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
+- O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
+
+## 19.6. Pokecenter e loja
+
+- O Pokecenter permite recuperar a vida dos Pokémon mediante pagamento em moedas. O custo foi definido como relativamente baixo, mas o preço e a quantidade exata de recuperação ainda precisam ser decididos.
+- A loja permite comprar e usar os itens obrigatórios definidos neste documento, além dos itens de evolução necessários ao jogo.
+- A evolução acontece por meio da compra e utilização de itens de evolução.
+- Compras, saldo, inventário, uso de itens e efeitos nos Pokémon devem ser validados no servidor e persistidos no banco.
+
+## 19.7. Apresentação visual
+
+- A identidade visual poderá usar imagens desenvolvidas no Canva e/ou com ferramentas de IA.
+- As imagens compõem o mapa e os locais; botões e interações serão adicionados por etapas, mantendo a separação entre apresentação visual e regras do jogo.
+
+## 19.8. Decisões ainda pendentes
+
+Não invente nem fixe sem confirmação dos desenvolvedores:
+
+- o critério exato para definir os 5 Pokémon iniciais “mais fracos”;
+- os valores finais de `X` e `Y` e se variam por nível;
+- os detalhes das ações, fórmulas e condições de término das batalhas por turno;
+- como funciona a tentativa/confirmação de captura;
+- a lista, frequência e distribuição dos eventos aleatórios;
+- os preços e efeitos exatos do Pokecenter e dos itens de evolução.
+
+Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra.
