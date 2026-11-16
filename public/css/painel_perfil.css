@@ -11,6 +11,13 @@ body {
     align-items: center;
     flex-direction: column;
 }
+
+.btn_pixel {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+}
+
 .btn_pixel img:hover {
     /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
     transform: scale(1.05);
