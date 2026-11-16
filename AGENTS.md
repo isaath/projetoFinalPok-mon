@@ -591,6 +591,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 - Após o login, o sistema deve verificar se o usuário já iniciou sua jornada, consultando os dados persistidos do jogo.
 - Na primeira vez, o usuário escolhe 3 Pokémon entre 5 Pokémon iniciais fracos que já existem no banco de dados.
+- Os cinco iniciais aprovados são Vulpix, Bellsprout, Charmander, Squirtle e Bulbasaur: os cinco menores totais de atributos base entre os nove nomes configurados no serviço da PokeAPI.
 - A seleção deve ser salva para que o usuário não precise fazê-la novamente.
 - Após salvar o time inicial, o usuário é direcionado ao `painel_jogar.php`.
 - Usuários que já iniciaram o jogo também são direcionados ao `painel_jogar.php`.
@@ -599,8 +600,11 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 ## 19.2. Time e Pokémon do usuário
 
 - O time ativo de batalha possui 3 posições, identificadas como Pokémon 1, 2 e 3.
-- O botão “Meu time”, disponível no painel, permite consultar os Pokémon do usuário, suas posições e suas situações, incluindo HP.
-- O usuário pode possuir mais de 3 Pokémon. Quando isso ocorrer, deve poder reorganizar ou trocar quais Pokémon ocupam as 3 posições ativas.
+- O botão “Meu time”, disponível no painel, permite consultar todos os Pokémon do usuário, suas posições, reservas e situações, incluindo HP.
+- Em `time_pokemons`, posições 1 a 3 são o time ativo e posições a partir de 4 representam Pokémon na reserva.
+- Ao colocar um Pokémon da reserva no time ativo, ele substitui a posição 3 e o Pokémon substituído passa para a reserva.
+- Ao alterar a prioridade para uma posição anterior, os Pokémon entre as posições são deslocados para preservar a ordem.
+- O usuário pode possuir mais de 3 Pokémon. Quando isso ocorrer, deve poder reorganizar a ordem dos 3 ativos e trocar um ativo pela reserva.
 - Pokémon capturados durante a jornada passam a pertencer ao usuário e ficam disponíveis para a gestão do time.
 - As escolhas, capturas e alterações do time devem ser persistidas para continuar disponíveis em acessos futuros.
 
@@ -615,12 +619,24 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 ## 19.4. Recompensa por vitória
 
-- A primeira vitória de um usuário em cada nível concede a recompensa maior `X`.
-- A segunda vitória e cada vitória posterior no mesmo nível concedem a recompensa menor `Y`.
-- A regra obrigatória é `Y < X`. Os valores são exemplos/configuração do jogo, não números fixos nesta especificação.
+- A primeira vitória de um usuário em cada nível concede a recompensa indicada na tabela.
+- A segunda vitória e cada vitória posterior no mesmo nível concedem a recompensa de repetição indicada na tabela.
+- Os valores aprovados são:
+
+| Nível | Primeira vitória | Repetições |
+|---|---:|---:|
+| 1 | 50 | 20 |
+| 2 | 70 | 25 |
+| 3 | 90 | 30 |
+| 4 | 110 | 35 |
+| 5 | 130 | 40 |
+| 6 | 150 | 45 |
+| 7 | 170 | 50 |
+
+- A primeira campanha completa concede 770 Pokédollars em recompensas de batalha.
 - A verificação é individual por usuário e por nível. Vencer um nível pela primeira vez não altera a recompensa de primeira vitória dos outros níveis.
 - O histórico de conclusão deve ser salvo de forma persistente, para que novas batalhas não concedam indevidamente a recompensa `X`, a insígnia ou o desbloqueio inicial outra vez.
-- Exemplo: primeira vitória no nível 1 concede 50 moedas; vitórias posteriores nesse nível concedem 20. O jogador pode repetir níveis já vencidos para juntar moedas.
+- O jogador pode repetir níveis já vencidos para juntar moedas.
 
 ## 19.5. Batalhas e eventos de exploração
 
@@ -632,8 +648,27 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 ## 19.6. Pokecenter e loja
 
-- O Pokecenter permite recuperar a vida dos Pokémon mediante pagamento em moedas. O custo foi definido como relativamente baixo, mas o preço e a quantidade exata de recuperação ainda precisam ser decididos.
+- O Pokecenter restaura o HP de todos os Pokémon associados aos times do usuário, inclusive os desmaiados, até o HP máximo.
+- Cada visita custa 40 Pokédollars, cobrados uma única vez. Não há cobrança quando todos já estão com HP completo.
+- A cura é individual por jogador e não pode alterar o HP dos registros globais de Pokémon.
 - A loja permite comprar e usar os itens obrigatórios definidos neste documento, além dos itens de evolução necessários ao jogo.
+- Os preços aprovados para os itens obrigatórios são:
+
+| Item | Preço |
+|---|---:|
+| Potion | 25 |
+| Super Potion | 50 |
+| Hyper Potion | 100 |
+| Max Potion | 180 |
+| Full Restore | 220 |
+| Antidote | 15 |
+| Burn Heal | 15 |
+| Ice Heal | 15 |
+| Awakening | 15 |
+| Paralyze Heal | 15 |
+| Full Heal | 30 |
+| Revive | 70 |
+
 - A evolução acontece por meio da compra e utilização de itens de evolução.
 - Compras, saldo, inventário, uso de itens e efeitos nos Pokémon devem ser validados no servidor e persistidos no banco.
 
@@ -646,11 +681,9 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 Não invente nem fixe sem confirmação dos desenvolvedores:
 
-- o critério exato para definir os 5 Pokémon iniciais “mais fracos”;
-- os valores finais de `X` e `Y` e se variam por nível;
 - os detalhes das ações, fórmulas e condições de término das batalhas por turno;
 - como funciona a tentativa/confirmação de captura;
 - a lista, frequência e distribuição dos eventos aleatórios;
-- os preços e efeitos exatos do Pokecenter e dos itens de evolução.
+- a lista, os preços e os efeitos dos itens de evolução.
 
 Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra.

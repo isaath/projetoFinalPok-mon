@@ -1,4 +1,5 @@
 <?php
+use App\Models\TimeInicial;
 
 // Carrega o modelo de usuário para autenticação e cadastro.
 require_once __DIR__ . '/../Models/Usuario.php';
@@ -50,15 +51,25 @@ class UsuarioController
                     if ($usuario === null) {
                         $erro = 'E-mail ou senha inválidos.';
                     } else {
-                        // Gera novo identificador da sessão para segurança.
-                        session_regenerate_id(true);
+                        try {
+                            $jornadaIniciada = (new TimeInicial($this->db))
+                                ->jornadaIniciada((int) $usuario['id_usuario']);
+                        } catch (PDOException | RuntimeException $exception) {
+                            error_log('Erro ao consultar o time inicial no login: ' . $exception->getMessage());
+                            $erro = 'Não foi possível carregar seu progresso. Tente novamente.';
+                        }
 
-                        // Guarda os dados do usuário autenticado na sessão.
-                        $_SESSION['usuario'] = $usuario;
+                        if ($erro === null) {
+                            // Gera novo identificador da sessão para segurança.
+                            session_regenerate_id(true);
 
-                        // Redireciona para a rota do painel, que verifica a sessão.
-                        header('Location: index.php?rota=jogar');
-                        exit;
+                            // Guarda os dados do usuário autenticado na sessão.
+                            $_SESSION['usuario'] = $usuario;
+
+                            $rota = $jornadaIniciada ? 'jogar' : 'escolher_time';
+                            header('Location: index.php?rota=' . $rota);
+                            exit;
+                        }
                     }
                 }
             }
@@ -71,8 +82,37 @@ class UsuarioController
     // Exibe o painel do jogo somente para um usuário autenticado.
     public function painel_jogar(): void
     {
-        if (!isset($_SESSION['usuario']) || !is_array($_SESSION['usuario'])) {
+        if (
+            !isset($_SESSION['usuario'])
+            || !is_array($_SESSION['usuario'])
+            || !isset($_SESSION['usuario']['id_usuario'])
+        ) {
             header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $idUsuario = filter_var(
+            $_SESSION['usuario']['id_usuario'],
+            FILTER_VALIDATE_INT
+        );
+
+        if ($idUsuario === false || $idUsuario < 1) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        try {
+            $jornadaIniciada = (new TimeInicial($this->db))
+                ->jornadaIniciada($idUsuario);
+        } catch (PDOException | RuntimeException $exception) {
+            error_log('Erro ao verificar o time antes de abrir o painel: ' . $exception->getMessage());
+            http_response_code(500);
+            echo 'Não foi possível carregar seu progresso agora.';
+            return;
+        }
+
+        if (!$jornadaIniciada) {
+            header('Location: index.php?rota=escolher_time');
             exit;
         }
 

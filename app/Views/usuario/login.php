@@ -13,6 +13,7 @@ $email = $email ?? '';
     <title>Login - Pokebagual</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/login.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
     <!-- Cartão visual que agrupa o título, mensagens e formulário de login. -->

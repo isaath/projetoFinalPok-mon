@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel inicial</title>
     <link rel="stylesheet" href="../../../public/css/painel_inicial.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
 

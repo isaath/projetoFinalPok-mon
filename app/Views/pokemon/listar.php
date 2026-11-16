@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokémon | Pokebagual</title>
     <link rel="stylesheet" href="css/pokemon.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
     <!-- Conteúdo principal da tela de Pokémon. -->

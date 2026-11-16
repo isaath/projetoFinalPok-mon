@@ -19,5 +19,14 @@ return [
     // Rota para o painel de jogo após o usuário entrar.
     'jogar' => [UsuarioController::class, 'painel_jogar'],
 
+    // Primeira escolha persistente do time do usuário.
+    'escolher_time' => [TimeController::class, 'escolher'],
+
+    // Exibe Pokémon ativos e reservas e permite reorganizar o time.
+    'meu_time' => [TimeController::class, 'meuTime'],
+
     'bolicho' => [BolichoController::class, 'index'],
+
+    // Pokecenter: consulta e restaura os Pokémon associados aos times do usuário.
+    'centro' => [CentroController::class, 'index'],
 ];

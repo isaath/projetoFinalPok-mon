@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokebagual - Jogar</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/painel_jogar.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 
 <body>
@@ -41,7 +42,8 @@
     <a href="/projetoFinalPok-mon/app/Views/bolicho/bolicho.php" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_bolicho.png" alt="Bolicho" style="width: 190px !important; height: auto;">
     </a>
-    <a href="/projetoFinalPok-mon/app/Views/time/escolher_time.php" class="btn_pixel">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=centro" class="btn_centro">Pokecenter</a>
+    <a href="/projetoFinalPok-mon/public/index.php?rota=meu_time" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_time.png" alt="Time" style="width: 150px !important; height: auto;">
     </a>
 
