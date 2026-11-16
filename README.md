@@ -75,10 +75,65 @@ O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as t
 
 1. Inicie o **MySQL** no XAMPP.
 2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
-3. Execute o script. Ele cria o banco `bancodedados_pokefish`, suas tabelas e os tipos iniciais `Agua`, `Fogo` e `Planta`.
+3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. O script cria o banco `bancodedados_pokefish`, suas tabelas, os tipos `Agua`, `Fogo` e `Planta`, e os cinco Pokémon iniciais usados na escolha do time. Ele pode ser executado novamente para completar esses cadastros sem duplicá-los.
 4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
 O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
+
+### Decisões de jogo aprovadas
+
+As regras abaixo foram decididas por Henrique e Isadora. Mantenha código e documentação alinhados com elas; não mude esses valores sem consultar os desenvolvedores. O documento de referência para regras do agente é `AGENTS.md`, seções 19.1, 19.4 e 19.6.
+
+**Escolha do time inicial:** no primeiro login, o jogador escolhe três entre os cinco Pokémon com menor soma dos atributos base entre os nove nomes de `PokeApiService`:
+
+| Pokémon | Soma dos atributos base |
+|---|---:|
+| Vulpix | 299 |
+| Bellsprout | 300 |
+| Charmander | 309 |
+| Squirtle | 314 |
+| Bulbasaur | 318 |
+
+A seleção é persistida nas posições 1, 2 e 3. Depois de salvar, o jogador vai ao painel; nos próximos acessos, também segue diretamente ao painel.
+
+O botão **Time** mostra os três Pokémon ativos e os demais na reserva. É possível reorganizar a prioridade da equipe ou colocar uma reserva no lugar do terceiro Pokémon ativo; o Pokémon substituído passa para a reserva.
+
+**Recompensas por batalha:**
+
+| Nível | Primeira vitória | Cada repetição |
+|---|---:|---:|
+| 1 | 50 | 20 |
+| 2 | 70 | 25 |
+| 3 | 90 | 30 |
+| 4 | 110 | 35 |
+| 5 | 130 | 40 |
+| 6 | 150 | 45 |
+| 7 | 170 | 50 |
+
+A primeira campanha completa rende 770 Pokédollars em recompensas de primeira vitória. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
+
+**Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 Pokédollars uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
+
+**Preços aprovados da loja:**
+
+| Item | Preço |
+|---|---:|
+| Potion | 25 |
+| Super Potion | 50 |
+| Hyper Potion | 100 |
+| Max Potion | 180 |
+| Full Restore | 220 |
+| Antidote | 15 |
+| Burn Heal | 15 |
+| Ice Heal | 15 |
+| Awakening | 15 |
+| Paralyze Heal | 15 |
+| Full Heal | 30 |
+| Revive | 70 |
+
+Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
+
+**Ainda pendente de decisão:** fórmulas e condições detalhadas das batalhas por turno, regra de captura, eventos aleatórios e lista/preço/efeitos dos itens de evolução. Não assuma valores para esses pontos sem consultar os desenvolvedores.
 
 ## Objetivos Acadêmicos
 

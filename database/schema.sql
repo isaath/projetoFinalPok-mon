@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS times (
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Associação entre times e Pokémon, incluindo a posição de cada Pokémon no time.
+-- Pokémon pertencentes ao usuário: posições 1 a 3 são ativas; a partir de 4 ficam na reserva.
 CREATE TABLE IF NOT EXISTS time_pokemons (
     id_time_pokemon INT UNSIGNED NOT NULL AUTO_INCREMENT,
     posicao TINYINT UNSIGNED NOT NULL,
@@ -84,6 +84,17 @@ CREATE TABLE IF NOT EXISTS time_pokemons (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+-- Guarda o HP por Pokémon associado a um time, sem alterar o cadastro global do Pokémon.
+CREATE TABLE IF NOT EXISTS time_pokemons_estado (
+    id_time_pokemon INT UNSIGNED NOT NULL,
+    hp_atual INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_time_pokemon),
+    CONSTRAINT fk_time_pokemons_estado_time_pokemon
+        FOREIGN KEY (id_time_pokemon) REFERENCES time_pokemons (id_time_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Itens que podem ser comprados na loja.
 CREATE TABLE IF NOT EXISTS itens_loja (
     id_item INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -94,6 +105,55 @@ CREATE TABLE IF NOT EXISTS itens_loja (
     valor_efeito INT NOT NULL DEFAULT 0,
     PRIMARY KEY (id_item)
 ) ENGINE=InnoDB;
+
+-- Preços aprovados para os itens obrigatórios. A consulta evita duplicá-los ao reexecutar o script.
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Potion', 'cura_hp', 25, 'Recupera 20 HP.', 20
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Potion');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Super Potion', 'cura_hp', 50, 'Recupera 50 HP.', 50
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Super Potion');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Hyper Potion', 'cura_hp', 100, 'Recupera 200 HP.', 200
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Hyper Potion');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Max Potion', 'cura_hp', 180, 'Recupera 100% do HP.', 100
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Max Potion');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Full Restore', 'cura_hp_status', 220, 'Recupera 100% do HP e cura todos os status.', 100
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Full Restore');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Antidote', 'cura_status', 15, 'Cura envenenamento.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Antidote');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Burn Heal', 'cura_status', 15, 'Cura queimadura.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Burn Heal');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Ice Heal', 'cura_status', 15, 'Cura congelamento.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Ice Heal');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Awakening', 'cura_status', 15, 'Cura sono.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Awakening');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Paralyze Heal', 'cura_status', 15, 'Cura paralisia.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Paralyze Heal');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Full Heal', 'cura_status', 30, 'Cura todas as condições de status.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Full Heal');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Revive', 'revive', 70, 'Revive um Pokémon desmaiado com metade da vida.', 50
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Revive');
 
 -- Itens atualmente pertencentes a cada usuário.
 CREATE TABLE IF NOT EXISTS inventario (
@@ -175,3 +235,44 @@ CREATE TABLE IF NOT EXISTS batalha_pokemons (
 -- Cria os três tipos básicos sem duplicá-los caso o script seja executado novamente.
 INSERT IGNORE INTO tipos (nome)
 VALUES ('Agua'), ('Fogo'), ('Planta');
+
+-- Cinco opções iniciais aprovadas: são os menores totais de atributos base entre os nove nomes do PokeApiService.
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Vulpix', 38, 38, 41, 40, 50, 65, 65, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Fogo'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'vulpix')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Bellsprout', 50, 50, 75, 35, 70, 30, 40, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'bellsprout')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Charmander', 39, 39, 52, 43, 60, 50, 65, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Fogo'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'charmander')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Squirtle', 44, 44, 48, 65, 50, 64, 43, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Agua'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'squirtle')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Bulbasaur', 45, 45, 49, 49, 65, 65, 45, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'bulbasaur')
+LIMIT 1;

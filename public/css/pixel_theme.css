@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    color-scheme: light;
+    --pixel-ink: #17243b;
+    --pixel-paper: #e5ebf5;
+    --pixel-highlight: #fff;
+    --pixel-shadow: #34445d;
+    --pixel-green: #23654f;
+    --pixel-green-dark: #174735;
+    --pixel-red: #8e2525;
+}
+
+body {
+    color: var(--pixel-ink);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.etiqueta,
+.eyebrow,
+.campo-grupo label {
+    font-family: 'Press Start 2P', monospace;
+    line-height: 1.7;
+}
+
+h1 {
+    font-size: clamp(1.15rem, 2.5vw, 1.7rem);
+}
+
+h2 {
+    font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+}
+
+h3 {
+    font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+}
+
+.selecao,
+.centro,
+.pagina-time,
+.cartao-login,
+.cartao-pokemon,
+.pokemon-card,
+.card-item,
+.visita,
+.vazio,
+.message {
+    border-color: var(--pixel-ink);
+    border-radius: 0;
+    box-shadow: 4px 4px 0 var(--pixel-shadow);
+}
+
+.selecao,
+.centro,
+.pagina-time,
+.cartao-login {
+    border-width: 4px;
+    background-color: rgb(229 235 245 / 97%);
+}
+
+.cartao-pokemon,
+.pokemon-card,
+.card-item,
+.visita,
+.vazio,
+.message {
+    border-width: 3px;
+}
+
+.posicao,
+.tipo-pokemon,
+.type-badge {
+    border: 2px solid var(--pixel-ink);
+    border-radius: 0;
+    background: #d3deef;
+    color: var(--pixel-ink);
+}
+
+button,
+.btn_centro,
+.box-botoes .btn-pixel {
+    border: 3px solid var(--pixel-ink);
+    border-radius: 0;
+    background: var(--pixel-paper);
+    color: var(--pixel-ink);
+    box-shadow:
+        inset 3px 3px 0 var(--pixel-highlight),
+        3px 3px 0 var(--pixel-ink);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.58rem;
+    line-height: 1.8;
+    text-decoration: none;
+    transition: transform 100ms steps(2, end), box-shadow 100ms steps(2, end);
+}
+
+.btn_centro {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+}
+
+.box-botoes .btn-pixel {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button:hover:not(:disabled),
+.btn_centro:hover,
+.box-botoes .btn-pixel:hover {
+    transform: translate(-2px, -2px);
+    background: #f5d761;
+    box-shadow:
+        inset 3px 3px 0 var(--pixel-highlight),
+        5px 5px 0 var(--pixel-ink);
+}
+
+button:active:not(:disabled),
+.btn_centro:active,
+.box-botoes .btn-pixel:active {
+    transform: translate(2px, 2px);
+    box-shadow: inset 2px 2px 0 var(--pixel-shadow);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.voltar {
+    display: inline-flex;
+    padding: 8px 10px;
+    border: 2px solid var(--pixel-ink);
+    background: var(--pixel-paper);
+    box-shadow: 3px 3px 0 var(--pixel-ink);
+    color: var(--pixel-ink);
+    text-decoration: none;
+}
+
+.voltar:hover {
+    background: #f5d761;
+}
+
+input,
+select,
+textarea,
+.campo-grupo input {
+    border: 2px solid var(--pixel-ink);
+    border-radius: 0;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--pixel-green);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #f2c94c;
+    outline-offset: 3px;
+}
+
+.mensagem,
+.mensagem-erro,
+.message,
+.vazio {
+    border: 2px solid var(--pixel-ink);
+    border-radius: 0;
+}
+
+.mensagem.erro,
+.mensagem-erro,
+.message-error {
+    border-color: var(--pixel-red);
+}
+
+.btn_pixel img,
+.btn_login img {
+    display: block;
+    image-rendering: pixelated;
+}
+
+.pokemon-image {
+    image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -9,6 +9,8 @@ require_once __DIR__ . '/../app/Models/autoload.php';
 require_once __DIR__ . '/../app/Controllers/PokemonController.php';
 require_once __DIR__ . '/../app/Controllers/UsuarioController.php';
 require_once __DIR__ . '/../app/Controllers/BolichoController.php';
+require_once __DIR__ . '/../app/Controllers/CentroController.php';
+require_once __DIR__ . '/../app/Controllers/TimeController.php';
 
 // Lê as rotas definidas em routes.php.
 $rotas = require __DIR__ . '/../routes/routes.php';
@@ -27,9 +29,13 @@ if (!is_string($rota) || !array_key_exists($rota, $rotas)) {
 // Extrai o Controller e o método que devem tratar a rota atual.
 [$controllerClass, $acao] = $rotas[$rota];
 
-// Se a rota for de usuário, precisa-se passar a conexão com o banco para o Controller.
-if ($controllerClass === UsuarioController::class) {
-    $controller = new UsuarioController(getConnection());
+// Controllers que acessam dados recebem a conexão PDO configurada pela aplicação.
+if (
+    $controllerClass === UsuarioController::class
+    || $controllerClass === CentroController::class
+    || $controllerClass === TimeController::class
+) {
+    $controller = new $controllerClass(getConnection());
 } else {
     // Para os demais Controllers, instancia sem parâmetros extras.
     $controller = new $controllerClass();
