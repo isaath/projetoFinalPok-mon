@@ -1,0 +1,35 @@
+
+/*
+  Estilo da tela inicial do jogo.
+  A imagem de fundo e o botão principal são os elementos centrais desta página.
+*/
+body {
+    /* Define a imagem de fundo da tela inicial. */
+    background-image: url("img/tela_inicial.png");
+    background-attachment: fixed; /* Fixa a imagem no fundo da página. */
+    background-size: cover; /* Faz a imagem cobrir toda a área visível. */
+    background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
+    background-repeat: no-repeat; /* Evita repetição da imagem. */
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.btn_login {
+    display: inline-block;
+    margin-top: 200px; /* Ajusta a posição vertical para não cobrir o título Pokébagual. */
+}
+
+.btn_login img:hover {
+    /* Realça a imagem de login ao passar o ponteiro sobre ela. */
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn_login img:active {
+    /* Reduz a imagem durante o clique. */
+    transform: scale(0.95);
+}

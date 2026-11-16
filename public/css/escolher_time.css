@@ -1,0 +1,169 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 16px;
+    background-color: #18263c;
+    background-image:
+        linear-gradient(rgba(15, 24, 39, 0.32), rgba(15, 24, 39, 0.32)),
+        url("img/tela_jogar.png");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #173b35;
+    font-family: Arial, sans-serif;
+}
+
+.selecao {
+    width: min(1050px, 100%);
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 40px);
+    border: 4px solid #d8f3dc;
+    border-radius: 20px;
+    background: #f7fcf8;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+}
+
+.cabecalho {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.etiqueta {
+    margin: 0;
+    color: #40916c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+
+h1 {
+    margin: 8px 0;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+}
+
+.cabecalho p:last-child {
+    margin: 0;
+    color: #52796f;
+}
+
+.grade-pokemons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 16px;
+}
+
+.cartao-pokemon {
+    position: relative;
+    display: flex;
+    min-height: 230px;
+    flex-direction: column;
+    align-items: center;
+    padding: 22px 16px;
+    border: 2px solid #b7d9c5;
+    border-radius: 16px;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cartao-pokemon:hover {
+    transform: translateY(-3px);
+    border-color: #52b788;
+}
+
+.cartao-pokemon:has(input:checked) {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px #b7e4c7;
+}
+
+.cartao-pokemon input {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 20px;
+    height: 20px;
+    accent-color: #2d6a4f;
+}
+
+.nome-pokemon {
+    margin-top: 12px;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.tipo-pokemon {
+    margin-top: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #d8f3dc;
+    color: #1b4332;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.atributos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+    width: 100%;
+    margin-top: 18px;
+    color: #52796f;
+    font-size: 0.82rem;
+}
+
+.atributos span {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.atributos strong {
+    color: #173b35;
+}
+
+.acoes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.acoes p {
+    margin: 0;
+    font-weight: 700;
+}
+
+button {
+    padding: 13px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #2d6a4f;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+button:hover {
+    background: #1b4332;
+}
+
+.mensagem-erro {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #ffe3e3;
+    color: #8a1c1c;
+}
+
+@media (max-width: 550px) {
+    .acoes {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

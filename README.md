@@ -71,22 +71,69 @@ Também são aplicados conceitos de programação orientada a objetos, como enca
 
 ## Banco de Dados
 
-O banco de dados é responsável por armazenar as informações dos usuários, Pokémon, equipes, itens e batalhas.
+O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as tabelas sem editar arquivos JSON:
 
-Entre as principais tabelas previstas estão:
+1. Inicie o **MySQL** no XAMPP.
+2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
+3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. O script cria o banco `bancodedados_pokefish`, suas tabelas, os tipos `Agua`, `Fogo` e `Planta`, e os cinco Pokémon iniciais usados na escolha do time. Ele pode ser executado novamente para completar esses cadastros sem duplicá-los.
+4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
-* `usuarios`: informações dos usuários e seus perfis.
-* `tipos`: tipos de Pokémon disponíveis.
-* `pokemons`: atributos e informações dos Pokémon.
-* `times`: equipes criadas pelos jogadores.
-* `time_pokemons`: associação entre equipes e Pokémon.
-* `itens`: itens disponíveis na loja.
-* `inventarios`: itens pertencentes aos usuários.
-* `compras`: histórico de compras realizadas.
-* `batalhas`: informações gerais das batalhas.
-* `batalha_pokemons`: participação dos Pokémon nos combates.
+O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
 
-O banco de dados também contempla recursos como consultas SQL, visualizações (`Views`), gatilhos (`Triggers`) e transações, conforme os requisitos do projeto.
+### Decisões de jogo aprovadas
+
+As regras abaixo foram decididas por Henrique e Isadora. Mantenha código e documentação alinhados com elas; não mude esses valores sem consultar os desenvolvedores. O documento de referência para regras do agente é `AGENTS.md`, seções 19.1, 19.4 e 19.6.
+
+**Escolha do time inicial:** no primeiro login, o jogador escolhe três entre os cinco Pokémon com menor soma dos atributos base entre os nove nomes de `PokeApiService`:
+
+| Pokémon | Soma dos atributos base |
+|---|---:|
+| Vulpix | 299 |
+| Bellsprout | 300 |
+| Charmander | 309 |
+| Squirtle | 314 |
+| Bulbasaur | 318 |
+
+A seleção é persistida nas posições 1, 2 e 3. Depois de salvar, o jogador vai ao painel; nos próximos acessos, também segue diretamente ao painel.
+
+O botão **Time** mostra os três Pokémon ativos e os demais na reserva. É possível reorganizar a prioridade da equipe ou colocar uma reserva no lugar do terceiro Pokémon ativo; o Pokémon substituído passa para a reserva.
+
+**Recompensas por batalha:**
+
+| Nível | Primeira vitória | Cada repetição |
+|---|---:|---:|
+| 1 | 50 | 20 |
+| 2 | 70 | 25 |
+| 3 | 90 | 30 |
+| 4 | 110 | 35 |
+| 5 | 130 | 40 |
+| 6 | 150 | 45 |
+| 7 | 170 | 50 |
+
+A primeira campanha completa rende 770 Pokédollars em recompensas de primeira vitória. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
+
+**Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 Pokédollars uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
+
+**Preços aprovados da loja:**
+
+| Item | Preço |
+|---|---:|
+| Potion | 25 |
+| Super Potion | 50 |
+| Hyper Potion | 100 |
+| Max Potion | 180 |
+| Full Restore | 220 |
+| Antidote | 15 |
+| Burn Heal | 15 |
+| Ice Heal | 15 |
+| Awakening | 15 |
+| Paralyze Heal | 15 |
+| Full Heal | 30 |
+| Revive | 70 |
+
+Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
+
+**Ainda pendente de decisão:** fórmulas e condições detalhadas das batalhas por turno, regra de captura, eventos aleatórios e lista/preço/efeitos dos itens de evolução. Não assuma valores para esses pontos sem consultar os desenvolvedores.
 
 ## Objetivos Acadêmicos
 
@@ -112,6 +159,30 @@ O desenvolvimento do PokeFish tem como objetivo aplicar, de forma integrada, os 
 ## Status do Projeto
 
 O projeto está em desenvolvimento. As funcionalidades descritas representam os objetivos planejados e poderão ser atualizadas conforme a implementação avançar.
+
+## Apoio do agente personalizado Professor MONSTROBOLSO
+
+Este projeto conta com o agente personalizado **Professor MONSTROBOLSO**, que auxilia desenvolvedores e demais pessoas interessadas em compreender o sistema, avaliar o que já está implementado e colaborar no desenvolvimento do que ainda falta. Ele deve orientar de forma didática, considerar as regras registradas em `AGENTS.md` e verificar o código existente antes de considerar uma funcionalidade concluída.
+
+Para começar uma conversa, selecione o agente **Professor MONSTROBOLSO** e envie a mensagem abaixo. Ela ajudará o agente a entender o estado atual do projeto e a combinar com você um próximo passo de desenvolvimento.
+
+### Mensagem para iniciar
+
+```text
+Olá, Professor MONSTROBOLSO! Quero compreender e ajudar a desenvolver este projeto.
+
+Leia as instruções do AGENTS.md. Antes de analisar o código, sugerir tarefas ou propor alterações, comece explicando didaticamente a lógica completa do jogo que está registrada no documento. Apresente o fluxo do usuário desde o login e a escolha inicial do time até o mapa, níveis, batalhas por turno, eventos aleatórios, recompensas, insígnias, Meu time, Pokecenter, loja e conclusão da campanha. Diferencie claramente as regras já confirmadas das decisões ainda pendentes, para que eu compreenda o trabalho antes de começarmos qualquer outra atividade.
+
+Depois dessa explicação, analise o código e a estrutura atuais. Compare o que realmente está implementado com a lógica do jogo e os requisitos acadêmicos; não considere uma funcionalidade concluída apenas porque ela está descrita ou existe um arquivo relacionado. Apresente, em linguagem clara:
+1. O que já está implementado e funcionando, com as evidências encontradas no código.
+2. O que está parcialmente implementado ou precisa de validação.
+3. O que ainda está pendente, incluindo requisitos acadêmicos relevantes.
+4. Quais são os próximos passos recomendados e como podemos escolher uma tarefa adequada para começar.
+
+Explique como os arquivos e as camadas MVC envolvidos se relacionam. Se houver decisões de regra de negócio ainda não definidas, identifique-as e peça minha orientação antes de tratá-las como requisitos.
+
+Depois da análise, ajude-me a desenvolver a tarefa que escolhermos em etapas: explique o objetivo e os conceitos, preserve alterações existentes, implemente somente o escopo combinado, indique como testar e resuma o que foi alterado. Não faça commits nem pushes.
+```
 
 ---
 

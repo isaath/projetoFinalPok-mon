@@ -1,0 +1,179 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 16px;
+    background-color: #18263c;
+    background-image:
+        linear-gradient(rgba(15, 24, 39, 0.32), rgba(15, 24, 39, 0.32)),
+        url("img/tela_jogar.png");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #173b35;
+    font-family: Arial, sans-serif;
+}
+
+.centro {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    padding: 28px;
+    border: 4px solid #2d6a4f;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 12px 32px rgba(23, 59, 53, 0.18);
+}
+
+.voltar {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #1b4332;
+    font-weight: 700;
+}
+
+.cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.etiqueta {
+    margin: 0;
+    color: #40916c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+h1 {
+    margin: 6px 0;
+    font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.cabecalho p {
+    margin-top: 8px;
+}
+
+.saldo {
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: #d8f3dc;
+    white-space: nowrap;
+}
+
+.mensagem {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #d8f3dc;
+}
+
+.mensagem.erro {
+    background: #ffe3e3;
+    color: #8a1c1c;
+}
+
+.lista-pokemons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+}
+
+.cartao-pokemon {
+    padding: 16px;
+    border: 1px solid #b7d9c5;
+    border-radius: 12px;
+    background: #f7fcf8;
+}
+
+.pokemon-dados h2,
+.pokemon-dados p {
+    margin: 0 0 8px;
+}
+
+.pokemon-dados p {
+    color: #52796f;
+    font-size: 0.9rem;
+}
+
+.barra-hp {
+    height: 12px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #e6e6e6;
+}
+
+.barra-hp span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #52b788;
+}
+
+.hp {
+    margin: 8px 0 0;
+    text-align: right;
+    font-weight: 700;
+}
+
+.visita {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+    padding: 18px;
+    border-radius: 12px;
+    background: #eaf6ee;
+}
+
+.visita h2,
+.visita p {
+    margin: 0 0 8px;
+}
+
+.preco {
+    font-weight: 700;
+}
+
+button {
+    padding: 13px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #2d6a4f;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+button:hover {
+    background: #1b4332;
+}
+
+.vazio {
+    padding: 28px;
+    border-radius: 12px;
+    background: #f7fcf8;
+}
+
+@media (max-width: 600px) {
+    .centro {
+        padding: 20px;
+    }
+
+    .cabecalho,
+    .visita {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .saldo {
+        width: fit-content;
+    }
+}

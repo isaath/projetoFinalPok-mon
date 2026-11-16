@@ -1,0 +1,197 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 28px 16px;
+    background-color: #18263c;
+    background-image:
+        linear-gradient(rgba(15, 24, 39, 0.32), rgba(15, 24, 39, 0.32)),
+        url("img/tela_jogar.png");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #173b35;
+    font-family: Arial, sans-serif;
+}
+
+.pagina-time {
+    width: min(1050px, 100%);
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px);
+    border: 4px solid #d8f3dc;
+    border-radius: 20px;
+    background: #f7fcf8;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+}
+
+.voltar {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #1b4332;
+    font-weight: 700;
+}
+
+.cabecalho-time {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.etiqueta {
+    margin: 0;
+    color: #40916c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+
+h1 {
+    margin: 8px 0;
+    font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.cabecalho-time p:last-child {
+    color: #52796f;
+}
+
+.secao-time {
+    margin-top: 24px;
+}
+
+.titulo-secao {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.titulo-secao h2 {
+    margin: 0;
+}
+
+.titulo-secao span,
+.tipo,
+.papel {
+    color: #52796f;
+    font-size: 0.9rem;
+}
+
+.grade-time {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.grade-reservas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+}
+
+.cartao-pokemon {
+    padding: 16px;
+    border: 2px solid #b7d9c5;
+    border-radius: 14px;
+    background: white;
+}
+
+.cartao-pokemon h3 {
+    margin: 12px 0 4px;
+    font-size: 1.3rem;
+}
+
+.cartao-pokemon p {
+    margin: 6px 0;
+}
+
+.posicao {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #d8f3dc;
+    color: #1b4332;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.vida {
+    font-weight: 700;
+}
+
+.papel {
+    min-height: 18px;
+}
+
+.botoes-prioridade {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+button {
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #2d6a4f;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+button:hover {
+    background: #1b4332;
+}
+
+.reserva {
+    font-size: 0.94rem;
+}
+
+.reserva h3 {
+    margin-top: 0;
+}
+
+.reserva button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.aviso-reserva {
+    color: #52796f;
+    font-size: 0.9rem;
+}
+
+.vazio {
+    padding: 16px;
+    border-radius: 10px;
+    background: #edf6f0;
+}
+
+.mensagem {
+    padding: 12px 16px;
+    border-radius: 10px;
+}
+
+.mensagem.sucesso {
+    background: #d8f3dc;
+}
+
+.mensagem.erro {
+    background: #ffe3e3;
+    color: #8a1c1c;
+}
+
+@media (max-width: 700px) {
+    .grade-time {
+        grid-template-columns: 1fr;
+    }
+
+    .titulo-secao {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
