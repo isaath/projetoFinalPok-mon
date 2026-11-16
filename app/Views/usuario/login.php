@@ -64,7 +64,7 @@ $email = $email ?? '';
                          style="width: 125px !important; height: auto;">
                 </button>
                 <a href="/projetoFinalPok-mon/public/index.php?rota=registrar" class="btn_pixel">
-                    <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Registrar"
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_registrar.png" alt="Registrar"
                          style="width: 125px !important; height: auto;">
                 </a>
                 <a href="/projetoFinalPok-mon/public/index.php?rota=pokemons" class="btn_pixel">
