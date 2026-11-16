@@ -98,8 +98,14 @@ $email = $email ?? '';
 
             <!-- Botão de envio do cadastro e link para retornar ao login. -->
             <div class="box-botoes">
-                <button type="submit" class="btn-pixel">REGISTRAR</button>
-                <a href="index.php?rota=login" class="btn-pixel">VOLTAR AO LOGIN</a>
+                <button type="submit" class="btn_pixel">
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Registrar"
+                         style="width: 170px !important; height: auto;">
+                </button>
+                <a href="index.php?rota=login" class="btn_pixel">
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Voltar ao login"
+                         style="width: 170px !important; height: auto;">
+                </a>
             </div>
         </form>
     </div>

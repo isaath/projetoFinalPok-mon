@@ -33,25 +33,6 @@ body {
     margin-top: 300px; 
 }
 
-.btn_centro {
-    display: inline-block;
-    width: fit-content;
-    padding: 10px 16px;
-    border: 3px solid #fff;
-    border-radius: 8px;
-    background: #2d6a4f;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    font-weight: 700;
-    text-decoration: none;
-    text-shadow: 1px 1px #173b35;
-}
-
-.btn_centro:hover {
-    background: #1b4332;
-    transform: scale(1.05);
-}
-
 .btn_pixel img:hover {
     /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
     transform: scale(1.05);

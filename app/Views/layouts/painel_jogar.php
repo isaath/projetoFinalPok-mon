@@ -42,7 +42,10 @@
     <a href="/projetoFinalPok-mon/app/Views/bolicho/bolicho.php" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_bolicho.png" alt="Bolicho" style="width: 190px !important; height: auto;">
     </a>
-    <a href="/projetoFinalPok-mon/public/index.php?rota=centro" class="btn_centro">Pokecenter</a>
+    <a href="/projetoFinalPok-mon/public/index.php?rota=centro" class="btn_pixel">
+        <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png" alt="Pokecenter"
+             style="width: 150px !important; height: auto;">
+    </a>
     <a href="/projetoFinalPok-mon/public/index.php?rota=meu_time" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_time.png" alt="Time" style="width: 150px !important; height: auto;">
     </a>

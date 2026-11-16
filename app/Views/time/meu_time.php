@@ -15,7 +15,10 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
 </head>
 <body>
     <main class="pagina-time">
-        <a class="voltar" href="/projetoFinalPok-mon/public/index.php?rota=jogar">Voltar ao painel</a>
+        <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
+            <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar ao painel"
+                 style="width: 150px !important; height: auto;">
+        </a>
 
         <header class="cabecalho-time">
             <p class="etiqueta">GERENCIE SUA EQUIPE</p>
@@ -73,7 +76,11 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                             <input type="hidden" name="id_time_pokemon"
                                                    value="<?= (int) $pokemon['id_time_pokemon'] ?>">
                                             <input type="hidden" name="posicao" value="<?= $destino ?>">
-                                            <button type="submit">Mover para <?= $destino ?>ª opção</button>
+                                            <button type="submit" class="btn_pixel">
+                                                <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png"
+                                                     alt="Mover para <?= $destino ?>ª opção"
+                                                     style="width: 150px !important; height: auto;">
+                                            </button>
                                         </form>
                                     <?php endif; ?>
                                 <?php endfor; ?>
@@ -109,7 +116,11 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                 <input type="hidden" name="acao" value="colocar">
                                 <input type="hidden" name="id_time_pokemon"
                                        value="<?= (int) $pokemon['id_time_pokemon'] ?>">
-                                <button type="submit">Colocar no lugar do Pokémon 3</button>
+                                <button type="submit" class="btn_pixel">
+                                    <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png"
+                                         alt="Colocar no lugar do Pokémon 3"
+                                         style="width: 170px !important; height: auto;">
+                                </button>
                             </form>
                         </article>
                     <?php endforeach; ?>

@@ -59,7 +59,11 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
 
                 <div class="acoes">
                     <p id="contador-selecao" aria-live="polite">Selecionados: 0 de 3</p>
-                    <button type="submit">Confirmar meu time</button>
+                    <button type="submit" class="btn_pixel">
+                        <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png"
+                             alt="Confirmar meu time"
+                             style="width: 220px !important; height: auto;">
+                    </button>
                 </div>
             </form>
 

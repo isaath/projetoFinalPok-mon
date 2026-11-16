@@ -18,16 +18,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.centro {
-    width: min(900px, 100%);
-    margin: 0 auto;
-    padding: 28px;
-    border: 4px solid #2d6a4f;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 12px 32px rgba(23, 59, 53, 0.18);
-}
-
 .voltar {
     display: inline-block;
     margin-bottom: 20px;
@@ -163,10 +153,6 @@ button:hover {
 }
 
 @media (max-width: 600px) {
-    .centro {
-        padding: 20px;
-    }
-
     .cabecalho,
     .visita {
         flex-direction: column;

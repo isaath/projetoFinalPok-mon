@@ -8,8 +8,11 @@
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
-    <main class="centro">
-        <a class="voltar" href="/projetoFinalPok-mon/public/index.php?rota=jogar">Voltar ao painel</a>
+    <main class="painel-pixel">
+        <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
+            <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar ao painel"
+                 style="width: 150px !important; height: auto;">
+        </a>
 
         <header class="cabecalho">
             <div>
@@ -72,7 +75,10 @@
                 <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=centro">
                     <input type="hidden" name="csrf_token"
                            value="<?= htmlspecialchars($_SESSION['csrf_centro'], ENT_QUOTES, 'UTF-8') ?>">
-                    <button type="submit">Curar todos</button>
+                    <button type="submit" class="btn_pixel">
+                        <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png" alt="Curar todos"
+                             style="width: 170px !important; height: auto;">
+                    </button>
                 </form>
             </section>
         <?php endif; ?>
