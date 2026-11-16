@@ -12,15 +12,14 @@
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
-    <main class="historia_sobre painel-pixel">
-        <a href="painel_jogar.php" class="btn_pixel">
-            <img src="../../../public/css/img/btn_voltar.png" alt="Voltar ao painel"
-                 style="width: 150px !important; height: auto;">
+    <a href="/projetoFinalPok-mon/app/Views/layouts/painel_jogar.php" class="btn_pixel">
+            <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
         </a>
+    <main class="historia_sobre painel-pixel">
+        
 
         <header>
             <p class="etiqueta">CONHEÇA O POKEBAGUAL</p>
-            <h1>Sobre o jogo</h1>
         </header>
 
         <p>

@@ -76,11 +76,12 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                             <input type="hidden" name="id_time_pokemon"
                                                    value="<?= (int) $pokemon['id_time_pokemon'] ?>">
                                             <input type="hidden" name="posicao" value="<?= $destino ?>">
-                                            <button type="submit" class="btn_pixel">
-                                                <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png"
-                                                     alt="Mover para <?= $destino ?>ª opção"
-                                                     style="width: 150px !important; height: auto;">
-                                            </button>
+
+                                            <button type="submit" class="btn_pixel" style="background: none; border: none; padding: 0; cursor: pointer;">
+    <img src="/projetoFinalPok-mon/public/css/img/mudar_p_<?= $destino ?>.png" 
+         alt="Mover para <?= $destino ?>ª opção" 
+         style="width: 150px !important; height: auto;">
+</button>
                                         </form>
                                     <?php endif; ?>
                                 <?php endfor; ?>
