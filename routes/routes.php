@@ -19,6 +19,9 @@ return [
     // Rota para o painel de jogo após o usuário entrar.
     'jogar' => [UsuarioController::class, 'painel_jogar'],
 
+    // Exibe os dados do usuário autenticado.
+    'perfil' => [UsuarioController::class, 'perfil'],
+
     // Primeira escolha persistente do time do usuário.
     'escolher_time' => [TimeController::class, 'escolher'],
 

@@ -119,6 +119,38 @@ class UsuarioController
         require __DIR__ . '/../Views/layouts/painel_jogar.php';
     }
 
+    public function perfil(): void
+    {
+        $idUsuario = filter_var(
+            $_SESSION['usuario']['id_usuario'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        if ($idUsuario === false || $idUsuario === null || $idUsuario < 1) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $erro = null;
+
+        try {
+            $perfil = (new Usuario($this->db))->buscarPerfil($idUsuario);
+        } catch (PDOException $exception) {
+            error_log('Erro ao carregar o perfil do usuário: ' . $exception->getMessage());
+            http_response_code(500);
+            $perfil = null;
+            $erro = 'Não foi possível carregar seu perfil agora.';
+        }
+
+        if ($perfil === null && $erro === null) {
+            unset($_SESSION['usuario']);
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        require __DIR__ . '/../Views/usuario/perfil.php';
+    }
+
     // Método responsável pelo cadastro de usuários.
     public function registrar(): void
     {
@@ -135,12 +167,31 @@ class UsuarioController
             $senha = $_POST['senha'] ?? '';
             $confirmacaoSenha = $_POST['confirmar_senha'] ?? '';
             $foto = null;
-        $erroFoto = null;
-         if (!empty($_FILES['foto']['tmp_name'])) {
-                if ($_FILES['foto']['size'] > 2 * 1024 * 1024 || !@getimagesize($_FILES['foto']['tmp_name'])) {
+            $tipoFoto = null;
+            $erroFoto = null;
+
+            if (!empty($_FILES['foto']['tmp_name'])) {
+                $informacoesImagem = @getimagesize($_FILES['foto']['tmp_name']);
+
+                if (
+                    $_FILES['foto']['size'] > 2 * 1024 * 1024
+                    || $informacoesImagem === false
+                    || !in_array(
+                        $informacoesImagem['mime'] ?? '',
+                        ['image/jpeg', 'image/png'],
+                        true
+                    )
+                ) {
                     $erroFoto = 'A foto deve ser uma imagem de até 2MB.';
                 } else {
-                    $foto = file_get_contents($_FILES['foto']['tmp_name']);
+                    $conteudoFoto = file_get_contents($_FILES['foto']['tmp_name']);
+
+                    if ($conteudoFoto === false) {
+                        $erroFoto = 'Não foi possível ler a foto enviada.';
+                    } else {
+                        $foto = $conteudoFoto;
+                        $tipoFoto = $informacoesImagem['mime'];
+                    }
                 }
             }
 
@@ -176,7 +227,13 @@ class UsuarioController
                 } else {
                     try {
                         // Tenta cadastrar o usuário no banco.
-                        $cadastrado = (new Usuario($this->db))->cadastrar($nome, $email, $senha, $foto);
+                        $cadastrado = (new Usuario($this->db))->cadastrar(
+                            $nome,
+                            $email,
+                            $senha,
+                            $foto,
+                            $tipoFoto
+                        );
 
                         // Se já existir e-mail duplicado, mostra erro.
                         if (!$cadastrado) {

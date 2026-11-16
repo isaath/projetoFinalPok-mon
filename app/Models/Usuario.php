@@ -47,8 +47,29 @@ class Usuario
         ];
     }
 
+    public function buscarPerfil(int $idUsuario): ?array
+    {
+        $consulta = $this->db->prepare(
+            'SELECT nome, foto, tipo_foto
+             FROM usuarios
+             WHERE id_usuario = :id_usuario
+             LIMIT 1'
+        );
+        $consulta->execute(['id_usuario' => $idUsuario]);
+
+        $perfil = $consulta->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($perfil) ? $perfil : null;
+    }
+
     // Cadastra um novo usuário, validando se o e-mail já existe.
-    public function cadastrar(string $nome, string $email, string $senha): bool
+    public function cadastrar(
+        string $nome,
+        string $email,
+        string $senha,
+        ?string $foto = null,
+        ?string $tipoFoto = null
+    ): bool
     {
         // Busca se já existe algum usuário com esse e-mail.
         $consulta = $this->db->prepare(
@@ -67,16 +88,27 @@ class Usuario
         // Criptografa a senha usando password_hash, nunca gravando texto puro.
         $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
-        // Insere o novo usuário no banco com saldo inicial zerado e data atual.
+        // Salva também a foto opcional como conteúdo binário no banco.
         $insercao = $this->db->prepare(
-            'INSERT INTO usuarios (nome, email, senha, dinheiro, data_cadastro)
-             VALUES (:nome, :email, :senha, 0, CURRENT_TIMESTAMP)'
+            'INSERT INTO usuarios
+                (nome, email, senha, dinheiro, data_cadastro, foto, tipo_foto)
+             VALUES
+                (:nome, :email, :senha, 0, CURRENT_TIMESTAMP, :foto, :tipo_foto)'
         );
-        $insercao->execute([
-            'nome' => $nome,
-            'email' => $email,
-            'senha' => $hashSenha,
-        ]);
+        $insercao->bindValue(':nome', $nome);
+        $insercao->bindValue(':email', $email);
+        $insercao->bindValue(':senha', $hashSenha);
+        $insercao->bindValue(
+            ':foto',
+            $foto,
+            $foto === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+        );
+        $insercao->bindValue(
+            ':tipo_foto',
+            $tipoFoto,
+            $tipoFoto === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+        );
+        $insercao->execute();
 
         // Retorna true quando o cadastro foi concluído com sucesso.
         return true;
