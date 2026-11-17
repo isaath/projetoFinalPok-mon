@@ -90,6 +90,29 @@ class PokeApiService
         return $pokemons;
     }
 
+    public function obterImagem(string $nome): string
+    {
+        $slug = strtolower(trim($nome));
+        $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', $slug), '-');
+
+        if ($slug === '') {
+            throw new InvalidArgumentException('O nome do Pokémon não é válido para consulta.');
+        }
+
+        $detalhes = $this->get(self::BASE_URL . '/pokemon/' . rawurlencode($slug));
+        $imagem = $detalhes['sprites']['front_default']
+            ?? $detalhes['sprites']['other']['official-artwork']['front_default']
+            ?? null;
+
+        if (!is_string($imagem) || substr($imagem, 0, 8) !== 'https://') {
+            throw new UnexpectedValueException(
+                'A PokeAPI não retornou uma imagem válida para ' . $nome . '.'
+            );
+        }
+
+        return $imagem;
+    }
+
     // Recebe a cadeia evolutiva da PokeAPI e transforma em caminhos de evolução legíveis.
     private function obterCaminhosEvolutivos(array $especie, array $caminhoAtual = []): array
     {

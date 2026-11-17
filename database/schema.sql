@@ -53,6 +53,24 @@ CREATE TABLE IF NOT EXISTS pokemons (
         ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
+-- Mantém todos os tipos de cada espécie. id_tipo em pokemons continua como tipo principal
+-- para compatibilidade com as telas e consultas já existentes.
+CREATE TABLE IF NOT EXISTS pokemon_tipos (
+    id_pokemon INT UNSIGNED NOT NULL,
+    id_tipo INT UNSIGNED NOT NULL,
+    ordem TINYINT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_pokemon, id_tipo),
+    UNIQUE KEY uq_pokemon_tipos_ordem (id_pokemon, ordem),
+    CONSTRAINT fk_pokemon_tipos_pokemon
+        FOREIGN KEY (id_pokemon) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_pokemon_tipos_tipo
+        FOREIGN KEY (id_tipo) REFERENCES tipos (id_tipo)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 -- Times criados pelos usuários.
 CREATE TABLE IF NOT EXISTS times (
     id_time INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -234,9 +252,11 @@ CREATE TABLE IF NOT EXISTS batalha_pokemons (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- Cria os três tipos básicos sem duplicá-los caso o script seja executado novamente.
+-- Cria os tipos usados pelo time inicial e pelos ginásios da jornada sem duplicá-los.
 INSERT IGNORE INTO tipos (nome)
-VALUES ('Agua'), ('Fogo'), ('Planta');
+VALUES
+    ('Agua'), ('Fogo'), ('Planta'), ('Eletrico'), ('Pedra'), ('Terra'),
+    ('Veneno'), ('Psiquico'), ('Voador'), ('Inseto'), ('Normal');
 
 -- Cinco opções iniciais aprovadas: são os menores totais de atributos base entre os nove nomes do PokeApiService.
 INSERT INTO pokemons
@@ -278,3 +298,358 @@ FROM tipos
 WHERE tipos.nome = 'Planta'
   AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'bulbasaur')
 LIMIT 1;
+
+-- Evoluções dos cinco Pokémon iniciais, com atributos base consultados na PokeAPI.
+-- O nível começa em 1 como os demais cadastros; a regra de evolução por itens é separada.
+-- O tipo principal fica em pokemons.id_tipo; pokemon_tipos também registra os tipos secundários.
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Ivysaur', 60, 60, 62, 63, 80, 80, 60, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'ivysaur')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Venusaur', 80, 80, 82, 83, 100, 100, 80, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'venusaur')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Charmeleon', 58, 58, 64, 58, 80, 65, 80, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Fogo'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'charmeleon')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Charizard', 78, 78, 84, 78, 109, 85, 100, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Fogo'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'charizard')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Wartortle', 59, 59, 63, 80, 65, 80, 58, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Agua'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'wartortle')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Blastoise', 79, 79, 83, 100, 85, 105, 78, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Agua'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'blastoise')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Weepinbell', 65, 65, 90, 50, 85, 45, 55, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'weepinbell')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Victreebel', 80, 80, 105, 65, 100, 70, 70, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'victreebel')
+LIMIT 1;
+
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT 1, 'Ninetales', 73, 73, 76, 75, 81, 100, 100, tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Fogo'
+  AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'ninetales')
+LIMIT 1;
+
+-- Pokémon da Geração I usados pelos sete líderes de ginásio.
+-- Os atributos são os valores base consultados na PokeAPI; espécies/tipos foram
+-- ajustados para a tipagem existente na Geração I (por exemplo, sem Aço ou Fada).
+INSERT INTO pokemons
+    (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
+SELECT
+    1,
+    catalogo.nome,
+    catalogo.hp,
+    catalogo.hp,
+    catalogo.ataque,
+    catalogo.defesa,
+    catalogo.ataque_especial,
+    catalogo.defesa_especial,
+    catalogo.velocidade,
+    tipo_principal.id_tipo
+FROM (
+    SELECT 'Geodude' AS nome, 40 AS hp, 80 AS ataque, 100 AS defesa, 30 AS ataque_especial, 30 AS defesa_especial, 20 AS velocidade, 'Pedra' AS tipo_principal
+    UNION ALL SELECT 'Rhyhorn', 80, 85, 95, 30, 30, 25, 'Terra'
+    UNION ALL SELECT 'Onix', 35, 45, 160, 30, 45, 70, 'Pedra'
+    UNION ALL SELECT 'Psyduck', 50, 52, 48, 65, 50, 55, 'Agua'
+    UNION ALL SELECT 'Tentacool', 40, 40, 35, 50, 100, 70, 'Agua'
+    UNION ALL SELECT 'Seadra', 55, 65, 95, 95, 45, 85, 'Agua'
+    UNION ALL SELECT 'Magnemite', 25, 35, 70, 95, 55, 45, 'Eletrico'
+    UNION ALL SELECT 'Voltorb', 40, 30, 50, 55, 55, 100, 'Eletrico'
+    UNION ALL SELECT 'Electrode', 60, 50, 70, 80, 80, 150, 'Eletrico'
+    UNION ALL SELECT 'Gloom', 60, 65, 70, 85, 75, 40, 'Planta'
+    UNION ALL SELECT 'Tangela', 65, 55, 115, 100, 40, 60, 'Planta'
+    UNION ALL SELECT 'Parasect', 60, 95, 80, 60, 80, 30, 'Inseto'
+    UNION ALL SELECT 'Koffing', 40, 65, 95, 60, 45, 35, 'Veneno'
+    UNION ALL SELECT 'Golbat', 75, 80, 70, 65, 75, 90, 'Veneno'
+    UNION ALL SELECT 'Muk', 105, 105, 75, 65, 100, 50, 'Veneno'
+    UNION ALL SELECT 'Kadabra', 40, 35, 30, 120, 70, 105, 'Psiquico'
+    UNION ALL SELECT 'Hypno', 85, 73, 70, 73, 115, 67, 'Psiquico'
+    UNION ALL SELECT 'Mr. Mime', 40, 45, 65, 100, 120, 90, 'Psiquico'
+    UNION ALL SELECT 'Nidoking', 81, 102, 77, 85, 75, 85, 'Veneno'
+    UNION ALL SELECT 'Rhydon', 105, 130, 120, 45, 45, 40, 'Terra'
+    UNION ALL SELECT 'Golem', 80, 120, 130, 55, 65, 45, 'Pedra'
+) AS catalogo
+INNER JOIN tipos AS tipo_principal
+    ON tipo_principal.nome = catalogo.tipo_principal
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM pokemons AS existente
+    WHERE LOWER(existente.nome) = LOWER(catalogo.nome)
+);
+
+-- Preenche o tipo principal na relação completa sem alterar os registros existentes.
+INSERT IGNORE INTO pokemon_tipos (id_pokemon, id_tipo, ordem)
+SELECT pokemons.id_pokemon, pokemons.id_tipo, 1
+FROM pokemons
+WHERE pokemons.id_tipo IS NOT NULL;
+
+-- Tipos secundários de espécies existentes e dos Pokémon dos ginásios.
+-- As relações são adicionadas somente quando ambos os cadastros existem.
+INSERT IGNORE INTO pokemon_tipos (id_pokemon, id_tipo, ordem)
+SELECT pokemon.id_pokemon, tipo.id_tipo, 2
+FROM (
+    SELECT 'Bulbasaur' AS nome_pokemon, 'Veneno' AS nome_tipo
+    UNION ALL SELECT 'Ivysaur', 'Veneno'
+    UNION ALL SELECT 'Venusaur', 'Veneno'
+    UNION ALL SELECT 'Bellsprout', 'Veneno'
+    UNION ALL SELECT 'Weepinbell', 'Veneno'
+    UNION ALL SELECT 'Victreebel', 'Veneno'
+    UNION ALL SELECT 'Charizard', 'Voador'
+    UNION ALL SELECT 'Geodude', 'Terra'
+    UNION ALL SELECT 'Rhyhorn', 'Pedra'
+    UNION ALL SELECT 'Onix', 'Terra'
+    UNION ALL SELECT 'Tentacool', 'Veneno'
+    UNION ALL SELECT 'Gloom', 'Veneno'
+    UNION ALL SELECT 'Parasect', 'Planta'
+    UNION ALL SELECT 'Golbat', 'Voador'
+    UNION ALL SELECT 'Nidoking', 'Terra'
+    UNION ALL SELECT 'Rhydon', 'Pedra'
+    UNION ALL SELECT 'Golem', 'Terra'
+) AS tipos_secundarios
+INNER JOIN pokemons AS pokemon
+    ON LOWER(pokemon.nome) = LOWER(tipos_secundarios.nome_pokemon)
+INNER JOIN tipos AS tipo
+    ON tipo.nome = tipos_secundarios.nome_tipo;
+
+-- Líderes, ginásios e insígnias. O progresso de vitória é individual por usuário
+-- e fica em treinadores_progresso, não nesta tabela de cadastro.
+CREATE TABLE IF NOT EXISTS treinadores (
+    id_treinador INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    nivel_jornada TINYINT UNSIGNED NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    nome_insignia VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    id_tipo_especialidade INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_treinador),
+    UNIQUE KEY uq_treinadores_nivel (nivel_jornada),
+    CONSTRAINT fk_treinadores_tipo
+        FOREIGN KEY (id_tipo_especialidade) REFERENCES tipos (id_tipo)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Guarda os três Pokémon de cada líder, sua posição na batalha e a ordem de
+-- liberação para captura (do menor ao maior total de atributos base).
+CREATE TABLE IF NOT EXISTS treinador_pokemons (
+    id_treinador INT UNSIGNED NOT NULL,
+    id_pokemon INT UNSIGNED NOT NULL,
+    ordem_batalha TINYINT UNSIGNED NOT NULL,
+    ordem_captura TINYINT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_treinador, id_pokemon),
+    UNIQUE KEY uq_treinador_ordem_batalha (id_treinador, ordem_batalha),
+    UNIQUE KEY uq_treinador_ordem_captura (id_treinador, ordem_captura),
+    CONSTRAINT fk_treinador_pokemons_treinador
+        FOREIGN KEY (id_treinador) REFERENCES treinadores (id_treinador)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_treinador_pokemons_pokemon
+        FOREIGN KEY (id_pokemon) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Cada usuário tem seu próprio número de vitórias e capturas liberadas por líder.
+-- vitorias > 0 indica que o treinador já foi vencido ao menos uma vez.
+CREATE TABLE IF NOT EXISTS treinadores_progresso (
+    id_usuario INT UNSIGNED NOT NULL,
+    id_treinador INT UNSIGNED NOT NULL,
+    vitorias INT UNSIGNED NOT NULL DEFAULT 0,
+    capturas_desbloqueadas TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    data_primeira_vitoria DATETIME NULL,
+    data_ultima_vitoria DATETIME NULL,
+    PRIMARY KEY (id_usuario, id_treinador),
+    CONSTRAINT fk_treinadores_progresso_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_treinadores_progresso_treinador
+        FOREIGN KEY (id_treinador) REFERENCES treinadores (id_treinador)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Histórico de Pokémon liberados e efetivamente capturados por usuário.
+-- A restrição única impede reivindicar duas vezes a mesma recompensa.
+CREATE TABLE IF NOT EXISTS capturas_treinadores (
+    id_captura INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_usuario INT UNSIGNED NOT NULL,
+    id_treinador INT UNSIGNED NOT NULL,
+    id_pokemon INT UNSIGNED NOT NULL,
+    id_time_pokemon INT UNSIGNED NULL,
+    ordem_captura TINYINT UNSIGNED NOT NULL,
+    data_captura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_captura),
+    UNIQUE KEY uq_captura_usuario_treinador_ordem (id_usuario, id_treinador, ordem_captura),
+    UNIQUE KEY uq_captura_time_pokemon (id_time_pokemon),
+    CONSTRAINT fk_capturas_treinadores_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_capturas_treinadores_treinador
+        FOREIGN KEY (id_treinador) REFERENCES treinadores (id_treinador)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_capturas_treinadores_pokemon
+        FOREIGN KEY (id_pokemon) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_capturas_treinadores_time_pokemon
+        FOREIGN KEY (id_time_pokemon) REFERENCES time_pokemons (id_time_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Relaciona cada registro de batalha já existente ao líder desafiado.
+CREATE TABLE IF NOT EXISTS batalha_treinadores (
+    id_batalha INT UNSIGNED NOT NULL,
+    id_treinador INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_batalha),
+    CONSTRAINT fk_batalha_treinadores_batalha
+        FOREIGN KEY (id_batalha) REFERENCES batalhas (id_batalha)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_batalha_treinadores_treinador
+        FOREIGN KEY (id_treinador) REFERENCES treinadores (id_treinador)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Cadastra os sete líderes clássicos da região de Kanto sem duplicar níveis.
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 1, 'Brock', 'Insígnia Rocha', 'Líder do ginásio especializado em Pokémon de Pedra.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Pedra'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 1)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 2, 'Misty', 'Insígnia Cascata', 'Líder do ginásio especializado em Pokémon de Água.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Agua'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 2)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 3, 'Lt. Surge', 'Insígnia Trovão', 'Líder do ginásio especializado em Pokémon Elétricos.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Eletrico'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 3)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 4, 'Erika', 'Insígnia Arco-íris', 'Líder do ginásio especializado em Pokémon de Planta.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Planta'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 4)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 5, 'Koga', 'Insígnia Alma', 'Líder do ginásio especializado em Pokémon Venenosos.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Veneno'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 5)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 6, 'Sabrina', 'Insígnia Pântano', 'Líder do ginásio especializado em Pokémon Psíquicos.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Psiquico'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 6)
+LIMIT 1;
+
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 7, 'Giovanni', 'Insígnia Terra', 'Líder do ginásio especializado em Pokémon de Terra.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Terra'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 7)
+LIMIT 1;
+
+-- Cada equipe começa pelo Pokémon mais fraco e termina pelo mais forte.
+-- A ordem de captura também usa o total dos atributos base, do menor ao maior.
+INSERT IGNORE INTO treinador_pokemons (id_treinador, id_pokemon, ordem_batalha, ordem_captura)
+SELECT treinadores.id_treinador, pokemons.id_pokemon, equipe.ordem_batalha, equipe.ordem_captura
+FROM (
+    SELECT 1 AS nivel_jornada, 'Geodude' AS nome_pokemon, 1 AS ordem_batalha, 1 AS ordem_captura
+    UNION ALL SELECT 1, 'Rhyhorn', 2, 2
+    UNION ALL SELECT 1, 'Onix', 3, 3
+    UNION ALL SELECT 2, 'Psyduck', 1, 1
+    UNION ALL SELECT 2, 'Tentacool', 2, 2
+    UNION ALL SELECT 2, 'Seadra', 3, 3
+    UNION ALL SELECT 3, 'Magnemite', 1, 1
+    UNION ALL SELECT 3, 'Voltorb', 2, 2
+    UNION ALL SELECT 3, 'Electrode', 3, 3
+    UNION ALL SELECT 4, 'Gloom', 1, 1
+    UNION ALL SELECT 4, 'Tangela', 3, 3
+    UNION ALL SELECT 4, 'Parasect', 2, 2
+    UNION ALL SELECT 5, 'Koffing', 1, 1
+    UNION ALL SELECT 5, 'Golbat', 2, 2
+    UNION ALL SELECT 5, 'Muk', 3, 3
+    UNION ALL SELECT 6, 'Kadabra', 1, 1
+    UNION ALL SELECT 6, 'Hypno', 3, 3
+    UNION ALL SELECT 6, 'Mr. Mime', 2, 2
+    UNION ALL SELECT 7, 'Nidoking', 3, 3
+    UNION ALL SELECT 7, 'Rhydon', 1, 1
+    UNION ALL SELECT 7, 'Golem', 2, 2
+) AS equipe
+INNER JOIN treinadores
+    ON treinadores.nivel_jornada = equipe.nivel_jornada
+INNER JOIN pokemons
+    ON LOWER(pokemons.nome) = LOWER(equipe.nome_pokemon);
+
+-- A equipe de cada líder começa pelo Pokémon mais fraco e termina pelo mais forte.
+-- O ajuste temporário evita colisões nas chaves únicas ao reordenar dados existentes.
+UPDATE treinador_pokemons AS equipe
+INNER JOIN treinadores
+    ON treinadores.id_treinador = equipe.id_treinador
+SET equipe.ordem_batalha = equipe.ordem_captura + 10
+WHERE treinadores.nivel_jornada IN (4, 6, 7);
+
+UPDATE treinador_pokemons AS equipe
+INNER JOIN treinadores
+    ON treinadores.id_treinador = equipe.id_treinador
+SET equipe.ordem_batalha = equipe.ordem_captura
+WHERE treinadores.nivel_jornada IN (4, 6, 7);

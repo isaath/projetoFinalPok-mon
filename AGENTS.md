@@ -612,8 +612,25 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 - O mapa contém 7 locais de batalha, correspondentes a 7 níveis em ordem crescente de dificuldade.
 - O nível 1 inicia desbloqueado. Cada próximo nível só pode ser acessado após vencer o nível anterior.
-- Os adversários podem ser selecionados entre os Pokémon disponíveis na base do projeto, usando a PokeAPI como fonte de dados conforme a integração existente.
-- Cada nível concede uma insígnia na primeira conclusão.
+- Ao clicar em “Jogar”, o fluxo futuro deve abrir o mapa; o jogador escolhe um local desbloqueado para iniciar a batalha. O mapa ainda não está implementado.
+- Os sete adversários são líderes de ginásio da região de Kanto, com equipes formadas por espécies da Geração I que não fazem parte do time inicial cadastrado:
+
+| Nível | Líder | Especialidade | Insígnia | Equipe |
+|---|---|---|---|---|
+| 1 | Brock | Pedra | Rocha | Geodude, Rhyhorn e Onix |
+| 2 | Misty | Água | Cascata | Psyduck, Tentacool e Seadra |
+| 3 | Lt. Surge | Elétrico | Trovão | Magnemite, Voltorb e Electrode |
+| 4 | Erika | Planta | Arco-íris | Gloom, Parasect e Tangela |
+| 5 | Koga | Veneno | Alma | Koffing, Golbat e Muk |
+| 6 | Sabrina | Psíquico | Pântano | Kadabra, Mr. Mime e Hypno |
+| 7 | Giovanni | Terra | Terra | Rhydon, Golem e Nidoking |
+
+- Os três Pokémon de cada treinador possuem uma ordem de batalha definida.
+- A ordem de entrada de cada equipe começa pelo Pokémon com menor total de atributos base e termina pelo mais forte.
+- No início do combate, o Pokémon da posição 1 do jogador enfrenta o Pokémon de ordem 1 do treinador; cada lado avança para o próximo da sua ordem quando o ativo desmaia.
+- A configuração prevê os tipos da Geração I; não aplicar tipos introduzidos posteriormente, como Aço ou Fada, a Magnemite ou Mr. Mime.
+- A especialidade e a insígnia pertencem ao treinador. O histórico de vitória e o progresso da jornada são individuais por usuário.
+- Cada nível concede sua insígnia na primeira vitória daquele usuário contra o líder.
 - Os níveis já vencidos podem ser jogados novamente para obter moedas.
 - Após vencer os 7 níveis, o usuário se torna campeão e deve ser apresentada a opção “Voltar para o início”.
 
@@ -641,10 +658,15 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 ## 19.5. Batalhas e eventos de exploração
 
 - As batalhas serão por turnos, inspiradas no estilo de Pokémon Emerald. O jogador escolhe ações durante a batalha, e o sistema resolve os turnos usando os atributos, HP e características dos Pokémon.
+- Cada treinador possui três Pokémon cadastrados para a batalha.
+- Após vencer um mesmo treinador pela primeira vez, o Pokémon adversário com menor total de atributos base fica disponível para captura; na segunda vitória, o intermediário; na terceira, o de maior total.
+- A ordem de liberação para captura é salva junto à equipe do treinador. O progresso e as capturas reivindicadas são individuais por usuário; vencer novamente não deve duplicar uma captura já reivindicada.
+- A disponibilidade por vitórias está definida; a forma de tentar/concluir a captura dentro da batalha ainda precisa ser definida antes de implementar essa ação.
 - Além dos 7 locais de batalha, o mapa terá locais de interação entre níveis.
 - Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
 - O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
 - O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
+- A tela de batalha atual é somente uma prévia visual temporária; não representa uma batalha funcional.
 
 ## 19.6. Pokecenter e loja
 
@@ -676,6 +698,8 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 - A identidade visual poderá usar imagens desenvolvidas no Canva e/ou com ferramentas de IA.
 - As imagens compõem o mapa e os locais; botões e interações serão adicionados por etapas, mantendo a separação entre apresentação visual e regras do jogo.
+- A batalha apresenta os sprites dos Pokémon do usuário e do adversário usando a PokeAPI.
+- A PokeAPI não fornece retratos de treinadores; não presumir uma imagem de treinador disponível nesse serviço.
 
 ## 19.8. Decisões ainda pendentes
 

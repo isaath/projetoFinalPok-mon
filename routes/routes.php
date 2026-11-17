@@ -32,4 +32,7 @@ return [
 
     // Pokecenter: consulta e restaura os Pokémon associados aos times do usuário.
     'centro' => [CentroController::class, 'index'],
+
+    // Protótipo visual da batalha; as regras serão implementadas em etapas.
+    'batalha' => [BatalhaController::class, 'index'],
 ];

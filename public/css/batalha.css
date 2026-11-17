@@ -1,0 +1,406 @@
+.battle-page {
+    min-height: 100vh;
+    margin: 0;
+    padding: 28px 18px 48px;
+    background:
+        linear-gradient(90deg, rgb(27 49 67 / 7%) 1px, transparent 1px),
+        linear-gradient(rgb(27 49 67 / 7%) 1px, transparent 1px),
+        linear-gradient(145deg, #8ecbb2, #c7dfad 54%, #f0d891);
+    background-size: 8px 8px, 8px 8px, auto;
+}
+
+.battle-shell {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.battle-header {
+    margin-bottom: 22px;
+    padding: 18px 22px;
+    border: 4px solid #17243b;
+    background: #e5ebf5;
+    box-shadow: 5px 5px 0 #34445d;
+    text-align: center;
+}
+
+.battle-back {
+    display: block;
+    width: fit-content;
+    margin-bottom: 12px;
+    color: #174735;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.battle-header .eyebrow,
+.trainer-card .eyebrow {
+    margin: 8px 0;
+    color: #4b5c77;
+    font-size: 0.62rem;
+}
+
+.battle-header h1 {
+    margin: 8px 0;
+}
+
+.battle-message {
+    margin: 0 0 16px;
+    padding: 12px;
+    border: 3px solid #17243b;
+    background: #fff;
+    box-shadow: 4px 4px 0 #34445d;
+    text-align: center;
+}
+
+.battle-message-error {
+    border-color: #8e2525;
+    color: #8e2525;
+}
+
+.battle-lead {
+    margin: 4px 0 14px;
+    font-weight: 700;
+}
+
+.preview-label {
+    display: inline-block;
+    padding: 7px 10px;
+    border: 2px solid #8e2525;
+    background: #fff0d6;
+    color: #8e2525;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.battle-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 20px;
+    align-items: start;
+}
+
+.battle-main,
+.trainer-card {
+    border: 4px solid #17243b;
+    background: rgb(229 235 245 / 97%);
+    box-shadow: 5px 5px 0 #34445d;
+}
+
+.battle-main {
+    padding: 20px;
+}
+
+.battle-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    border: 2px solid #17243b;
+    background: #d3deef;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.battle-score span:not(.score-divider) {
+    display: grid;
+    gap: 5px;
+}
+
+.battle-score strong {
+    font-size: 0.9rem;
+}
+
+.score-divider {
+    color: #8e2525;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+}
+
+.arena {
+    display: grid;
+    gap: 12px;
+}
+
+.combatant {
+    display: grid;
+    grid-template-columns: minmax(90px, 124px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    min-height: 160px;
+    padding: 18px;
+    border: 3px solid #17243b;
+}
+
+.combatant-player {
+    background: #d9eedb;
+}
+
+.combatant-opponent {
+    background: #f2dfc9;
+}
+
+.combatant-portrait {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+}
+
+.combatant-image {
+    display: block;
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(3px 4px 0 rgb(23 36 59 / 28%));
+}
+
+.combatant-symbol,
+.trainer-avatar {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border: 4px solid #17243b;
+    background: #f5d761;
+    box-shadow: inset 4px 4px 0 #fff;
+    color: #17243b;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.combatant-symbol {
+    font-size: 1.1rem;
+}
+
+.combatant-copy h2 {
+    margin: 2px 0 6px;
+    overflow-wrap: anywhere;
+}
+
+.combatant-copy p {
+    margin: 4px 0;
+    font-size: 0.9rem;
+}
+
+.combatant-label {
+    color: #4b5c77;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.52rem !important;
+}
+
+.hp-placeholder {
+    height: 12px;
+    margin-top: 12px;
+    border: 2px solid #17243b;
+    background: #fff;
+}
+
+.hp-placeholder span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(90deg, #d6dbe3 0 8px, #fff 8px 10px);
+}
+
+.combatant-copy small {
+    display: block;
+    margin-top: 5px;
+    color: #4b5c77;
+}
+
+.arena-vs {
+    justify-self: center;
+    padding: 4px 12px;
+    border: 2px solid #17243b;
+    background: #fff;
+    color: #8e2525;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+}
+
+.battle-log {
+    min-height: 105px;
+    margin-top: 18px;
+    padding: 14px;
+    border: 3px solid #17243b;
+    background: #fff;
+}
+
+.battle-log h2,
+.trainer-card h3 {
+    margin: 0 0 10px;
+    font-size: 0.72rem;
+}
+
+.battle-log p {
+    margin: 6px 0;
+}
+
+.log-note,
+.capture-preview small {
+    color: #5b6170;
+    font-size: 0.82rem;
+}
+
+.battle-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.battle-actions button {
+    min-height: 54px;
+    padding: 8px;
+}
+
+.trainer-card {
+    padding: 20px;
+    text-align: center;
+}
+
+.trainer-avatar {
+    display: grid;
+    place-items: center;
+    width: min(112px, 100%);
+    height: 136px;
+    margin: 12px auto;
+    overflow: hidden;
+    border: 4px solid #17243b;
+    background: #d3deef;
+    box-shadow: inset 4px 4px 0 #fff;
+    color: #17243b;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.9rem;
+}
+
+.trainer-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.trainer-image-note {
+    margin: 16px 0 0;
+    color: #34445d;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.trainer-image-note code {
+    overflow-wrap: anywhere;
+}
+
+.trainer-card h2 {
+    margin: 8px 0;
+}
+
+.trainer-specialty {
+    margin: 4px 0 14px;
+}
+
+.badge-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    margin: 12px 0 20px;
+    padding: 10px 6px;
+    border: 2px solid #17243b;
+    background: #fff;
+    font-weight: 700;
+}
+
+.badge-stone {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #17243b;
+    background: #9da9b6;
+    transform: rotate(45deg);
+}
+
+.trainer-team {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.trainer-team li {
+    padding: 9px;
+    border: 2px solid #17243b;
+    background: #fff;
+    font-weight: 700;
+}
+
+.trainer-team li span {
+    display: inline-block;
+    margin-right: 8px;
+    color: #596a83;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+}
+
+.capture-preview {
+    margin-top: 20px;
+    padding: 12px 10px;
+    border: 2px dashed #23654f;
+    background: #e7f2e7;
+    text-align: left;
+}
+
+.capture-preview h3 {
+    text-align: center;
+}
+
+.capture-preview p {
+    margin: 7px 0;
+    font-size: 0.84rem;
+}
+
+@media (max-width: 760px) {
+    .battle-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .trainer-card {
+        order: -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .battle-page {
+        padding: 14px 10px 28px;
+    }
+
+    .battle-main,
+    .trainer-card {
+        padding: 14px;
+    }
+
+    .combatant {
+        grid-template-columns: 68px minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .combatant-image {
+        width: 68px;
+        height: 68px;
+    }
+
+    .combatant-symbol {
+        width: 60px;
+        height: 60px;
+    }
+
+    .battle-actions {
+        grid-template-columns: 1fr;
+    }
+}
