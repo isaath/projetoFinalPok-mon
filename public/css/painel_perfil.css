@@ -1,18 +1,16 @@
 body {
-    /* Define a imagem de fundo da tela com desenho de cenário do jogo. */
-    background-image: url("/projetoFinalPok-mon/public/css/img/tela_perfil.png");
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
+    /* Define a imagem de fundo da tela inicial. */
+    background-image: url("img/tela_perfil.png?v=2");
+    background-attachment: fixed; /* Fixa a imagem no fundo da página. */
+    background-size: cover; /* Faz a imagem cobrir toda a área visível. */
+    background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
+    background-repeat: no-repeat; /* Evita repetição da imagem. */
     margin: 0;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Press Start 2P', monospace;
-    padding: 16px;
-    box-sizing: border-box;
+    flex-direction: column;
 }
 
 .perfil {
@@ -40,6 +38,7 @@ body {
     place-items: center;
     border: 4px solid #2d6a4f;
     border-radius: 50%;
+    aspect-ratio: 1;
     background: #d8f3dc;
     color: #1b4332;
     font-weight: 700;
@@ -49,6 +48,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 50%;
 }
 
 .nome-perfil {
@@ -65,4 +65,13 @@ body {
         width: 150px;
         height: 150px;
     }
+}
+
+.btn_pixel {
+    position: fixed; /* Fixa o botão na janela do navegador */
+    bottom: 20px;    /* Distância da borda inferior da tela */
+    right: 20px;     /* Distância da borda direita da tela */
+    z-index: 1000;   /* Garante que o botão fique por cima de outros elementos */
+    display: inline-block;
+    transition: transform 0.1s ease; /* Suaviza o efeito ao passar o mouse */
 }

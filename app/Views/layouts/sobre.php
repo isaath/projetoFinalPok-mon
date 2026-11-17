@@ -12,9 +12,7 @@
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
 <body>
-    <a href="/projetoFinalPok-mon/app/Views/layouts/painel_jogar.php" class="btn_pixel">
-            <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
-        </a>
+    
     <main class="historia_sobre painel-pixel">
         
 
@@ -36,5 +34,8 @@
             Monte seu time, explore o cenário e prove que você é um verdadeiro mestre Pokémon!
         </p>
     </main>
+    <a href="/projetoFinalPok-mon/app/Views/layouts/painel_jogar.php" class="btn_pixel">
+            <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
+        </a>
 </body>
 </html>

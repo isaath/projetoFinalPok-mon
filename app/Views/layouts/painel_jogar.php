@@ -36,7 +36,7 @@
     <a href="/projetoFinalPok-mon/app/Views/layouts/painel_inicial.php" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_home.png" alt="Home" style="width: 180px !important; height: auto;">
     </a>
-    <a href="/projetoFinalPok-mon/app/Views/usuario/perfil.php" class="btn_pixel">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=perfil" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_perfil.png" alt="Perfil" style="width: 180px !important; height: auto;">
     </a>
     <a href="/projetoFinalPok-mon/app/Views/bolicho/bolicho.php" class="btn_pixel">
