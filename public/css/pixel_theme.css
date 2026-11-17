@@ -224,3 +224,12 @@ button.btn_pixel:active:not(:disabled) {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* imagem da api */
+.imagem-pokemon {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 8px;
+    object-fit: contain;
+}

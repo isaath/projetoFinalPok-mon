@@ -6,6 +6,7 @@
     <title>Pokecenter - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/centro.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
     <main class="painel-pixel">
@@ -47,6 +48,12 @@
                         : 0;
                     ?>
                     <article class="cartao-pokemon">
+                        <img
+    class="imagem-pokemon"
+    data-nome="<?= htmlspecialchars(strtolower($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>"
+    alt="Imagem de <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>"
+    loading="lazy"
+>
                         <div class="pokemon-dados">
                             <h2><?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?></h2>
                             <p>

@@ -12,6 +12,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
     <title>Meu time | PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/meu_time.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
     <main class="pagina-time">
@@ -52,7 +53,12 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                         <?php $posicaoAtual = (int) $pokemon['posicao']; ?>
                         <article class="cartao-pokemon ativo">
                             <span class="posicao">Pokémon <?= $posicaoAtual ?></span>
-                            <h3><?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?></h3>
+                            <img
+                                class="imagem-pokemon"
+                                data-nome="<?= htmlspecialchars(strtolower($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="Imagem de <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>"
+                                loading="lazy"
+                            ><h3><?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?></h3>
                             <p class="tipo">
                                 <?= htmlspecialchars($pokemon['tipo'] ?? 'Sem tipo', ENT_QUOTES, 'UTF-8') ?>
                             </p>
@@ -104,7 +110,12 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                 <div class="grade-reservas">
                     <?php foreach ($reservas as $pokemon): ?>
                         <article class="cartao-pokemon reserva">
-                            <h3><?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?></h3>
+                            <img
+    class="imagem-pokemon"
+    data-nome="<?= htmlspecialchars(strtolower($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>"
+    alt="Imagem de <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>"
+    loading="lazy"
+><h3><?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?></h3>
                             <p class="tipo">
                                 <?= htmlspecialchars($pokemon['tipo'] ?? 'Sem tipo', ENT_QUOTES, 'UTF-8') ?>
                             </p>

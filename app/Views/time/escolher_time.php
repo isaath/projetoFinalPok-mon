@@ -12,6 +12,7 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
     <title>Escolha seu time | PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/escolher_time.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
     <main class="selecao">
@@ -41,6 +42,12 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
                                 value="<?= (int) $pokemon['id_pokemon'] ?>"
                             >
                             <span class="marca-selecao" aria-hidden="true"></span>
+                            <img
+    class="imagem-pokemon"
+    data-nome="<?= htmlspecialchars(strtolower($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>"
+    alt="Imagem de <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>"
+    loading="lazy"
+>
                             <span class="nome-pokemon">
                                 <?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>
                             </span>
