@@ -75,7 +75,7 @@ O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as t
 
 1. Inicie o **MySQL** no XAMPP.
 2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
-3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. O script cria o banco `bancodedados_pokefish`, suas tabelas, os tipos usados pelo jogo, os Pokémon iniciais e suas evoluções, e os Pokémon das equipes dos sete ginásios de Kanto. Também cadastra os líderes, suas equipes, a ordem de batalha e a ordem de liberação das capturas. O script pode ser executado novamente para completar os cadastros sem duplicar os registros.
+3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. O script cria o banco `bancodedados_pokefish`, suas tabelas, os tipos usados pelo jogo, os Pokémon iniciais e suas evoluções, e os Pokémon das equipes dos oito ginásios de Kanto. Também cadastra os líderes, suas equipes, a ordem de batalha e a ordem de liberação das capturas. O script pode ser executado novamente para completar os cadastros sem duplicar os registros.
 4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
 O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
@@ -109,14 +109,15 @@ O botão **Time** mostra os três Pokémon ativos e os demais na reserva. É pos
 | 5 | 130 | 40 |
 | 6 | 150 | 45 |
 | 7 | 170 | 50 |
+| 8 | 190 | 55 |
 
-A primeira campanha completa rende 770 Pokédollars em recompensas de primeira vitória. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
+A primeira campanha completa rende 960 Pokédollars em recompensas de primeira vitória. O nível 7 mantém a recompensa aprovada de 170/50 para Blaine; o nível 8 concede 190/55 a Giovanni. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
 
-**Jornada de ginásios:** os níveis seguem Brock (Rocha), Misty (Cascata), Lt. Surge (Trovão), Erika (Arco-íris), Koga (Alma), Sabrina (Pântano) e Giovanni (Terra). Cada líder possui três Pokémon da Geração I, cadastrados separadamente dos Pokémon disponíveis inicialmente ao jogador. As equipes começam com o membro mais fraco e terminam com o mais forte; insígnias e vitórias são registradas por usuário. A PokeAPI fornece os sprites dos Pokémon, mas não possui retratos de treinadores.
+**Jornada de ginásios:** os níveis seguem Brock (Rocha), Misty (Cascata), Lt. Surge (Trovão), Erika (Arco-íris), Koga (Alma), Sabrina (Pântano), Blaine (Vulcão) e Giovanni (Terra). Os quatro primeiros líderes têm três Pokémon; de Koga em diante, cada líder tem quatro Pokémon da Geração I. As espécies adversárias são cadastradas separadamente do time inicial do jogador. As equipes começam com o membro mais fraco e terminam com o mais forte; insígnias e vitórias são registradas por usuário. A PokeAPI fornece os sprites dos Pokémon, mas não possui retratos de treinadores.
 
-O fluxo planejado do botão **Jogar** é abrir o mapa dos sete ginásios e permitir que o usuário escolha um nível desbloqueado. O mapa ainda está pendente; por enquanto, a rota de prévia mostra o primeiro confronto do nível 1.
+O fluxo planejado do botão **Jogar** é abrir o mapa dos oito ginásios e permitir que o usuário escolha um nível desbloqueado. O mapa ainda está pendente; por enquanto, a rota de prévia mostra o primeiro confronto do nível 1. Para consultar uma prévia de outro nível, use o parâmetro `nivel` na rota da batalha, de 1 a 8.
 
-**Capturas dos líderes:** a primeira vitória contra cada líder libera para captura o membro mais fraco da equipe; a segunda libera o intermediário e a terceira, o mais forte. O sistema mantém o progresso por usuário e registra capturas reivindicadas para impedir duplicação. A tentativa e as condições da captura ainda serão implementadas em uma etapa posterior.
+**Capturas dos líderes:** contra equipes de quatro Pokémon, cada uma das quatro primeiras vitórias libera um Pokémon para captura, do mais fraco ao mais forte. O sistema mantém o progresso por usuário e registra capturas reivindicadas para impedir duplicação. A tentativa e as condições da captura ainda serão implementadas em uma etapa posterior.
 
 **Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 Pokédollars uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
 

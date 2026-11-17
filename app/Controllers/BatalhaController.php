@@ -37,12 +37,23 @@ class BatalhaController
         $erroBatalha = null;
         $erroImagem = null;
 
-        try {
-            $dadosPrevia = (new Batalha($this->db))->carregarPrevia($idUsuario, 1);
-        } catch (PDOException | RuntimeException $exception) {
-            error_log('Erro ao carregar a prévia da batalha: ' . $exception->getMessage());
-            http_response_code(500);
-            $erroBatalha = 'Não foi possível carregar os dados da batalha agora.';
+        $nivelPrevia = filter_input(INPUT_GET, 'nivel', FILTER_VALIDATE_INT);
+        if ($nivelPrevia === null) {
+            $nivelPrevia = 1;
+        }
+
+        if ($nivelPrevia === false || $nivelPrevia < 1 || $nivelPrevia > 8) {
+            http_response_code(400);
+            $erroBatalha = 'O nível da prévia deve estar entre 1 e 8.';
+            $nivelPrevia = 1;
+        } else {
+            try {
+                $dadosPrevia = (new Batalha($this->db))->carregarPrevia($idUsuario, $nivelPrevia);
+            } catch (PDOException | RuntimeException $exception) {
+                error_log('Erro ao carregar a prévia da batalha: ' . $exception->getMessage());
+                http_response_code(500);
+                $erroBatalha = 'Não foi possível carregar os dados da batalha agora.';
+            }
         }
 
         if (

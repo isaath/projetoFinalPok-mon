@@ -374,7 +374,7 @@ WHERE tipos.nome = 'Fogo'
   AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'ninetales')
 LIMIT 1;
 
--- Pokémon da Geração I usados pelos sete líderes de ginásio.
+-- Pokémon da Geração I usados pelos oito líderes de ginásio.
 -- Os atributos são os valores base consultados na PokeAPI; espécies/tipos foram
 -- ajustados para a tipagem existente na Geração I (por exemplo, sem Aço ou Fada).
 INSERT INTO pokemons
@@ -412,6 +412,12 @@ FROM (
     UNION ALL SELECT 'Nidoking', 81, 102, 77, 85, 75, 85, 'Veneno'
     UNION ALL SELECT 'Rhydon', 105, 130, 120, 45, 45, 40, 'Terra'
     UNION ALL SELECT 'Golem', 80, 120, 130, 55, 65, 45, 'Pedra'
+    UNION ALL SELECT 'Weezing', 65, 90, 120, 85, 70, 60, 'Veneno'
+    UNION ALL SELECT 'Alakazam', 55, 50, 45, 135, 95, 120, 'Psiquico'
+    UNION ALL SELECT 'Growlithe', 55, 70, 45, 70, 50, 60, 'Fogo'
+    UNION ALL SELECT 'Ponyta', 50, 85, 55, 65, 65, 90, 'Fogo'
+    UNION ALL SELECT 'Rapidash', 65, 100, 70, 80, 80, 105, 'Fogo'
+    UNION ALL SELECT 'Arcanine', 90, 110, 80, 100, 80, 95, 'Fogo'
 ) AS catalogo
 INNER JOIN tipos AS tipo_principal
     ON tipo_principal.nome = catalogo.tipo_principal
@@ -492,6 +498,13 @@ CREATE TABLE IF NOT EXISTS treinador_pokemons (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+-- Migra a posição de Giovanni da antiga jornada de sete níveis para o nível 8.
+-- O nível 7 fica disponível para o ginásio de Blaine.
+UPDATE treinadores
+SET nivel_jornada = 8
+WHERE nome = 'Giovanni'
+  AND nivel_jornada = 7;
+
 -- Cada usuário tem seu próprio número de vitórias e capturas liberadas por líder.
 -- vitorias > 0 indica que o treinador já foi vencido ao menos uma vez.
 CREATE TABLE IF NOT EXISTS treinadores_progresso (
@@ -558,7 +571,7 @@ CREATE TABLE IF NOT EXISTS batalha_treinadores (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- Cadastra os sete líderes clássicos da região de Kanto sem duplicar níveis.
+-- Cadastra os oito líderes clássicos da região de Kanto sem duplicar níveis.
 INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
 SELECT 1, 'Brock', 'Insígnia Rocha', 'Líder do ginásio especializado em Pokémon de Pedra.', tipos.id_tipo
 FROM tipos
@@ -602,14 +615,30 @@ WHERE tipos.nome = 'Psiquico'
 LIMIT 1;
 
 INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
-SELECT 7, 'Giovanni', 'Insígnia Terra', 'Líder do ginásio especializado em Pokémon de Terra.', tipos.id_tipo
+SELECT 7, 'Blaine', 'Insígnia Vulcão', 'Líder do ginásio especializado em Pokémon de Fogo.', tipos.id_tipo
 FROM tipos
-WHERE tipos.nome = 'Terra'
+WHERE tipos.nome = 'Fogo'
   AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 7)
 LIMIT 1;
 
--- Cada equipe começa pelo Pokémon mais fraco e termina pelo mais forte.
--- A ordem de captura também usa o total dos atributos base, do menor ao maior.
+INSERT INTO treinadores (nivel_jornada, nome, nome_insignia, descricao, id_tipo_especialidade)
+SELECT 8, 'Giovanni', 'Insígnia Terra', 'Líder do ginásio especializado em Pokémon de Terra.', tipos.id_tipo
+FROM tipos
+WHERE tipos.nome = 'Terra'
+  AND NOT EXISTS (SELECT 1 FROM treinadores WHERE nivel_jornada = 8)
+LIMIT 1;
+
+-- Desloca temporariamente as ordens dos níveis 5 a 8 para permitir a inclusão
+-- e reordenação idempotente das equipes maiores sem colidir com as chaves únicas.
+UPDATE treinador_pokemons AS equipe
+INNER JOIN treinadores
+    ON treinadores.id_treinador = equipe.id_treinador
+SET equipe.ordem_batalha = equipe.ordem_batalha + 10,
+    equipe.ordem_captura = equipe.ordem_captura + 10
+WHERE treinadores.nivel_jornada BETWEEN 5 AND 8;
+
+-- As equipes começam pelo Pokémon mais fraco e terminam pelo mais forte.
+-- A ordem de captura também acompanha o total dos atributos base, do menor ao maior.
 INSERT IGNORE INTO treinador_pokemons (id_treinador, id_pokemon, ordem_batalha, ordem_captura)
 SELECT treinadores.id_treinador, pokemons.id_pokemon, equipe.ordem_batalha, equipe.ordem_captura
 FROM (
@@ -627,29 +656,52 @@ FROM (
     UNION ALL SELECT 4, 'Parasect', 2, 2
     UNION ALL SELECT 5, 'Koffing', 1, 1
     UNION ALL SELECT 5, 'Golbat', 2, 2
-    UNION ALL SELECT 5, 'Muk', 3, 3
+    UNION ALL SELECT 5, 'Weezing', 3, 3
+    UNION ALL SELECT 5, 'Muk', 4, 4
     UNION ALL SELECT 6, 'Kadabra', 1, 1
-    UNION ALL SELECT 6, 'Hypno', 3, 3
     UNION ALL SELECT 6, 'Mr. Mime', 2, 2
-    UNION ALL SELECT 7, 'Nidoking', 3, 3
-    UNION ALL SELECT 7, 'Rhydon', 1, 1
-    UNION ALL SELECT 7, 'Golem', 2, 2
+    UNION ALL SELECT 6, 'Hypno', 3, 3
+    UNION ALL SELECT 6, 'Alakazam', 4, 4
+    UNION ALL SELECT 7, 'Growlithe', 1, 1
+    UNION ALL SELECT 7, 'Ponyta', 2, 2
+    UNION ALL SELECT 7, 'Rapidash', 3, 3
+    UNION ALL SELECT 7, 'Arcanine', 4, 4
+    UNION ALL SELECT 8, 'Rhyhorn', 1, 1
+    UNION ALL SELECT 8, 'Rhydon', 2, 2
+    UNION ALL SELECT 8, 'Golem', 3, 3
+    UNION ALL SELECT 8, 'Nidoking', 4, 4
 ) AS equipe
 INNER JOIN treinadores
     ON treinadores.nivel_jornada = equipe.nivel_jornada
 INNER JOIN pokemons
     ON LOWER(pokemons.nome) = LOWER(equipe.nome_pokemon);
 
--- A equipe de cada líder começa pelo Pokémon mais fraco e termina pelo mais forte.
--- O ajuste temporário evita colisões nas chaves únicas ao reordenar dados existentes.
-UPDATE treinador_pokemons AS equipe
+-- Reaplica as ordens finais da batalha e da captura após a migração temporária.
+UPDATE treinador_pokemons AS treinador_pokemon
 INNER JOIN treinadores
-    ON treinadores.id_treinador = equipe.id_treinador
-SET equipe.ordem_batalha = equipe.ordem_captura + 10
-WHERE treinadores.nivel_jornada IN (4, 6, 7);
-
-UPDATE treinador_pokemons AS equipe
-INNER JOIN treinadores
-    ON treinadores.id_treinador = equipe.id_treinador
-SET equipe.ordem_batalha = equipe.ordem_captura
-WHERE treinadores.nivel_jornada IN (4, 6, 7);
+    ON treinadores.id_treinador = treinador_pokemon.id_treinador
+INNER JOIN (
+    SELECT 5 AS nivel_jornada, 'Koffing' AS nome_pokemon, 1 AS ordem
+    UNION ALL SELECT 5, 'Golbat', 2
+    UNION ALL SELECT 5, 'Weezing', 3
+    UNION ALL SELECT 5, 'Muk', 4
+    UNION ALL SELECT 6, 'Kadabra', 1
+    UNION ALL SELECT 6, 'Mr. Mime', 2
+    UNION ALL SELECT 6, 'Hypno', 3
+    UNION ALL SELECT 6, 'Alakazam', 4
+    UNION ALL SELECT 7, 'Growlithe', 1
+    UNION ALL SELECT 7, 'Ponyta', 2
+    UNION ALL SELECT 7, 'Rapidash', 3
+    UNION ALL SELECT 7, 'Arcanine', 4
+    UNION ALL SELECT 8, 'Rhyhorn', 1
+    UNION ALL SELECT 8, 'Rhydon', 2
+    UNION ALL SELECT 8, 'Golem', 3
+    UNION ALL SELECT 8, 'Nidoking', 4
+) AS ordem_final
+    ON ordem_final.nivel_jornada = treinadores.nivel_jornada
+INNER JOIN pokemons
+    ON LOWER(pokemons.nome) = LOWER(ordem_final.nome_pokemon)
+   AND pokemons.id_pokemon = treinador_pokemon.id_pokemon
+SET treinador_pokemon.ordem_batalha = ordem_final.ordem,
+    treinador_pokemon.ordem_captura = ordem_final.ordem
+WHERE treinadores.nivel_jornada BETWEEN 5 AND 8;

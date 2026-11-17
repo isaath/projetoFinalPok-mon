@@ -11,7 +11,7 @@ $equipeTreinador = $dadosPrevia['equipe_treinador'] ?? [];
 $nomeTreinador = $treinador['nome'] ?? 'Treinador';
 $insignia = $treinador['nome_insignia'] ?? 'Insígnia pendente';
 $especialidade = $treinador['especialidade'] ?? 'Tipo pendente';
-$nivel = (int) ($treinador['nivel_jornada'] ?? 1);
+$nivel = (int) ($treinador['nivel_jornada'] ?? $nivelPrevia);
 $iniciaisTreinador = strtoupper(substr($nomeTreinador, 0, 2));
 $arquivoImagemTreinador = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $nomeTreinador), '-'));
 $imagemTreinadorDisponivel = is_file(
@@ -43,7 +43,7 @@ $percentualHpAdversario = $hpMaximoAdversario > 0
             <a class="battle-back" href="/projetoFinalPok-mon/public/index.php?rota=jogar">
                 &larr; Voltar ao painel
             </a>
-            <p class="eyebrow">JORNADA KANTO · NÍVEL <?= $nivel ?> DE 7</p>
+            <p class="eyebrow">JORNADA KANTO · NÍVEL <?= $nivel ?> DE 8</p>
             <h1>Ginásio <?= htmlspecialchars($especialidade, ENT_QUOTES, 'UTF-8') ?></h1>
             <p class="battle-lead">
                 Desafio contra <?= htmlspecialchars($nomeTreinador, ENT_QUOTES, 'UTF-8') ?>
@@ -69,7 +69,7 @@ $percentualHpAdversario = $hpMaximoAdversario > 0
                 <div class="battle-score">
                     <span>SEU TIME <strong>3 Pokémon</strong></span>
                     <span class="score-divider" aria-hidden="true">VS</span>
-                    <span>GINÁSIO <strong>3 Pokémon</strong></span>
+                    <span>GINÁSIO <strong><?= count($equipeTreinador) ?> Pokémon</strong></span>
                 </div>
 
                 <div class="arena">

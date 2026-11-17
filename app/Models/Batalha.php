@@ -16,6 +16,10 @@ class Batalha
 
     public function carregarPrevia(int $idUsuario, int $nivel): array
     {
+        if ($nivel < 1 || $nivel > 8) {
+            throw new RuntimeException('O nível informado não pertence à jornada de Kanto.');
+        }
+
         $pokemonsDoUsuario = (new TimePokemon($this->db))->listarDoUsuario($idUsuario);
         $pokemonInicial = null;
 
@@ -62,9 +66,11 @@ class Batalha
         $consulta->execute(['nivel' => $nivel]);
         $equipeTreinador = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
-        if (count($equipeTreinador) !== 3) {
+        $quantidadeEsperada = $nivel >= 5 ? 4 : 3;
+        if (count($equipeTreinador) !== $quantidadeEsperada) {
             throw new RuntimeException(
-                'A equipe do treinador do nível ' . $nivel . ' não possui três Pokémon cadastrados.'
+                'A equipe do treinador do nível ' . $nivel
+                . ' não possui os ' . $quantidadeEsperada . ' Pokémon esperados.'
             );
         }
 

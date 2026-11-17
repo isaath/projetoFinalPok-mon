@@ -610,10 +610,10 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 ## 19.3. Mapa, níveis e insígnias
 
-- O mapa contém 7 locais de batalha, correspondentes a 7 níveis em ordem crescente de dificuldade.
+- O mapa contém 8 locais de batalha, correspondentes a 8 níveis em ordem crescente de dificuldade.
 - O nível 1 inicia desbloqueado. Cada próximo nível só pode ser acessado após vencer o nível anterior.
 - Ao clicar em “Jogar”, o fluxo futuro deve abrir o mapa; o jogador escolhe um local desbloqueado para iniciar a batalha. O mapa ainda não está implementado.
-- Os sete adversários são líderes de ginásio da região de Kanto, com equipes formadas por espécies da Geração I que não fazem parte do time inicial cadastrado:
+- Os oito adversários são líderes de ginásio da região de Kanto, com equipes formadas por espécies da Geração I:
 
 | Nível | Líder | Especialidade | Insígnia | Equipe |
 |---|---|---|---|---|
@@ -621,18 +621,20 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 | 2 | Misty | Água | Cascata | Psyduck, Tentacool e Seadra |
 | 3 | Lt. Surge | Elétrico | Trovão | Magnemite, Voltorb e Electrode |
 | 4 | Erika | Planta | Arco-íris | Gloom, Parasect e Tangela |
-| 5 | Koga | Veneno | Alma | Koffing, Golbat e Muk |
-| 6 | Sabrina | Psíquico | Pântano | Kadabra, Mr. Mime e Hypno |
-| 7 | Giovanni | Terra | Terra | Rhydon, Golem e Nidoking |
+| 5 | Koga | Veneno | Alma | Koffing, Golbat, Weezing e Muk |
+| 6 | Sabrina | Psíquico | Pântano | Kadabra, Mr. Mime, Hypno e Alakazam |
+| 7 | Blaine | Fogo | Vulcão | Growlithe, Ponyta, Rapidash e Arcanine |
+| 8 | Giovanni | Terra | Terra | Rhyhorn, Rhydon, Golem e Nidoking |
 
-- Os três Pokémon de cada treinador possuem uma ordem de batalha definida.
+- Os níveis 1 a 4 possuem três Pokémon por treinador; do nível 5 ao 8, cada treinador possui quatro.
+- A ordem de batalha também define a sequência de capturas: nos níveis 1 a 4, uma captura é liberada em cada uma das três primeiras vitórias; nos níveis 5 a 8, em cada uma das quatro primeiras vitórias.
 - A ordem de entrada de cada equipe começa pelo Pokémon com menor total de atributos base e termina pelo mais forte.
 - No início do combate, o Pokémon da posição 1 do jogador enfrenta o Pokémon de ordem 1 do treinador; cada lado avança para o próximo da sua ordem quando o ativo desmaia.
 - A configuração prevê os tipos da Geração I; não aplicar tipos introduzidos posteriormente, como Aço ou Fada, a Magnemite ou Mr. Mime.
 - A especialidade e a insígnia pertencem ao treinador. O histórico de vitória e o progresso da jornada são individuais por usuário.
 - Cada nível concede sua insígnia na primeira vitória daquele usuário contra o líder.
 - Os níveis já vencidos podem ser jogados novamente para obter moedas.
-- Após vencer os 7 níveis, o usuário se torna campeão e deve ser apresentada a opção “Voltar para o início”.
+- Após vencer os 8 níveis, o usuário se torna campeão e deve ser apresentada a opção “Voltar para o início”.
 
 ## 19.4. Recompensa por vitória
 
@@ -649,8 +651,10 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 | 5 | 130 | 40 |
 | 6 | 150 | 45 |
 | 7 | 170 | 50 |
+| 8 | 190 | 55 |
 
-- A primeira campanha completa concede 770 Pokédollars em recompensas de batalha.
+- A progressão de recompensas foi estendida ao nível 8: Blaine (nível 7) mantém a recompensa aprovada de 170/50 e Giovanni (nível 8) recebe 190/55.
+- A primeira campanha completa concede 960 Pokédollars em recompensas de batalha.
 - A verificação é individual por usuário e por nível. Vencer um nível pela primeira vez não altera a recompensa de primeira vitória dos outros níveis.
 - O histórico de conclusão deve ser salvo de forma persistente, para que novas batalhas não concedam indevidamente a recompensa `X`, a insígnia ou o desbloqueio inicial outra vez.
 - O jogador pode repetir níveis já vencidos para juntar moedas.
@@ -658,11 +662,11 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 ## 19.5. Batalhas e eventos de exploração
 
 - As batalhas serão por turnos, inspiradas no estilo de Pokémon Emerald. O jogador escolhe ações durante a batalha, e o sistema resolve os turnos usando os atributos, HP e características dos Pokémon.
-- Cada treinador possui três Pokémon cadastrados para a batalha.
-- Após vencer um mesmo treinador pela primeira vez, o Pokémon adversário com menor total de atributos base fica disponível para captura; na segunda vitória, o intermediário; na terceira, o de maior total.
+- Os treinadores dos níveis 1 a 4 possuem três Pokémon; os dos níveis 5 a 8 possuem quatro.
+- Após vencer um mesmo treinador, um Pokémon adversário fica disponível por vitória, seguindo a ordem do menor para o maior total de atributos base: nas equipes de três membros, isso ocorre nas três primeiras vitórias; nas equipes de quatro, nas quatro primeiras.
 - A ordem de liberação para captura é salva junto à equipe do treinador. O progresso e as capturas reivindicadas são individuais por usuário; vencer novamente não deve duplicar uma captura já reivindicada.
 - A disponibilidade por vitórias está definida; a forma de tentar/concluir a captura dentro da batalha ainda precisa ser definida antes de implementar essa ação.
-- Além dos 7 locais de batalha, o mapa terá locais de interação entre níveis.
+- Além dos 8 locais de batalha, o mapa terá locais de interação entre níveis.
 - Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
 - O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
 - O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
