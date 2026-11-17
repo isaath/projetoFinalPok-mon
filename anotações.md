@@ -9,17 +9,17 @@ O projeto possui funcionalidades já operacionais, mas ainda não está pronto c
 
 ## Conflitos e problemas prioritários
 
-1. **Regras de batalha divergentes.** O [README.md](./README.md) define limite de 10 turnos, desempate por prioridade/velocidade e efetividade entre Água, Fogo e Elétrico. O [AGENTS.md](./AGENTS.md) deixa fórmulas e condições de término pendentes, e a tela da batalha é apenas uma prévia. As Traits em [aguaTrait.php](./app/Traits/aguaTrait.php), [fogoTrait.php](./app/Traits/fogoTrait.php) e [plantaTrait.php](./app/Traits/plantaTrait.php) usam Água, Fogo e Planta. É necessário decidir e documentar uma regra única antes de implementar o combate.
+1. **Regras de batalha divergentes — resolvido na atualização de 17/11/2026.** A ordem das ações e a efetividade dos tipos foram padronizadas na seção “Regras de batalha aprovadas” do [README.md](./README.md) e na seção 19.5 do [AGENTS.md](./AGENTS.md), após consulta a referências sobre FireRed/LeafGreen. A prioridade ordena as ações; a Velocidade desempata ações de mesma prioridade; a efetividade de tipos altera o dano, não a ordem. Os Pokémon mantêm suas tipagens da Geração I, conforme decisão dos desenvolvedores. A fórmula completa de dano e o encerramento do combate continuam pendentes. Traits não são mais requisito obrigatório, conforme decisão dos desenvolvedores; as existentes não foram removidas nesta atualização documental.
 
-2. **Rota da loja com erro de instanciação.** O [BolichoController.php](./app/Controllers/BolichoController.php) exige uma conexão PDO no construtor, mas o [index.php](./public/index.php) não a fornece para essa classe. Assim, acessar `?rota=bolicho` deve gerar erro. A tela [bolicho.php](./app/Views/bolicho/bolicho.php) é apenas visual; não há compra nem uso de itens.
+2. **Loja ainda sem operações.** O Controller agora recebe PDO e a rota mostra a tela do Bolicho para usuários autenticados. A tela [bolicho.php](./app/Views/bolicho/bolicho.php) continua sendo apenas visual; compras e uso de itens ficam para a implementação da loja.
 
-3. **Listagem de Pokémon não usa o catálogo completo do banco.** A rota principal consulta uma lista fixa de nove espécies da PokeAPI pelo [PokemonController.php](./app/Controllers/PokemonController.php). O Model [Pokemon.php](./app/Models/Pokemon.php) tem método para listar o banco, mas ele não está conectado a essa tela. No banco local há 41 espécies.
+3. **Listagem de Pokémon — corrigido nesta atualização.** A rota principal lê o catálogo do banco pelo [PokemonController.php](./app/Controllers/PokemonController.php) e [Pokemon.php](./app/Models/Pokemon.php); a PokeAPI é usada no navegador apenas para sprites. No banco local havia 41 espécies na última verificação.
 
-4. **Links diretos para Views.** O [painel_jogar.php](./app/Views/layouts/painel_jogar.php) aponta diretamente a arquivos em `app/Views`, em vez de passar pelas rotas e Controllers. Como nem todas as Views verificam autenticação, esse fluxo pode contornar as proteções do Controller quando o diretório do projeto é servido pelo Apache.
+4. **Links diretos para Views — corrigido nesta atualização.** A navegação usa rotas e Controllers, e [app/.htaccess](./app/.htaccess) bloqueia requisições HTTP diretas à pasta interna `app`.
 
-5. **Migração de foto de perfil pode falhar no banco atual.** O [migracao_foto_perfil.sql](./database/migracao_foto_perfil.sql) adiciona colunas que já existem no [schema.sql](./database/schema.sql). O comentário limita seu uso a bancos antigos; executá-la depois do schema atual causaria erro por colunas duplicadas.
+5. **Migração de foto de perfil — consolidada nesta atualização.** Os campos de foto já fazem parte do [schema.sql](./database/schema.sql), único script a executar para criar um banco novo. O arquivo de migração separado foi removido.
 
-6. **Nome do projeto inconsistente.** A documentação e as telas usam “PokeFish”, “PokeBagual” e “MONSTROBOLSO”.
+6. **Nome do projeto — corrigido nesta atualização.** O nome oficial é PokeBagual; a documentação e as telas foram padronizadas com essa identidade.
 
 ## Estado das funcionalidades
 
@@ -42,7 +42,7 @@ O projeto possui funcionalidades já operacionais, mas ainda não está pronto c
 **Presentes ou parcialmente demonstrados:**
 
 - MVC básico, autoload e consultas PDO.
-- A classe Pokémon possui dez atributos privados; há herança e Traits para tipos.
+- A classe Pokémon possui dez atributos privados e há herança. Traits existem no código, mas não são mais requisito obrigatório.
 - Há transações PDO no gerenciamento de time e no Pokecenter.
 - Existe tabela para logs de batalha, mas a aplicação ainda não a preenche.
 

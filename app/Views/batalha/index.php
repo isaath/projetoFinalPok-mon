@@ -33,7 +33,7 @@ $percentualHpAdversario = $hpMaximoAdversario > 0
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prévia de batalha - Pokebagual</title>
+    <title>Prévia de batalha - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css">
 </head>

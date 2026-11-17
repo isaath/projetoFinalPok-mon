@@ -20,7 +20,7 @@ body {
 
 .btn_login {
     display: inline-block;
-    margin-top: 200px; /* Ajusta a posição vertical para não cobrir o título Pokébagual. */
+    margin-top: 200px; /* Ajusta a posição vertical para não cobrir o título PokeBagual. */
 }
 
 .btn_login img:hover {

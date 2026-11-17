@@ -12,6 +12,7 @@ require_once __DIR__ . '/../app/Controllers/BolichoController.php';
 require_once __DIR__ . '/../app/Controllers/CentroController.php';
 require_once __DIR__ . '/../app/Controllers/TimeController.php';
 require_once __DIR__ . '/../app/Controllers/BatalhaController.php';
+require_once __DIR__ . '/../app/Controllers/PaginaController.php';
 
 // Lê as rotas definidas em routes.php.
 $rotas = require __DIR__ . '/../routes/routes.php';
@@ -33,6 +34,8 @@ if (!is_string($rota) || !array_key_exists($rota, $rotas)) {
 // Controllers que acessam dados recebem a conexão PDO configurada pela aplicação.
 if (
     $controllerClass === UsuarioController::class
+    || $controllerClass === PokemonController::class
+    || $controllerClass === BolichoController::class
     || $controllerClass === CentroController::class
     || $controllerClass === TimeController::class
     || $controllerClass === BatalhaController::class

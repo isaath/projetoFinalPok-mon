@@ -97,6 +97,11 @@ h1 {
     font-size: 3rem;
 }
 
+.pokemon-image[hidden],
+.image-placeholder[hidden] {
+    display: none;
+}
+
 .pokemon-info {
     /* Cria espaço interno para os dados do card. */
     padding: 16px;
@@ -155,27 +160,6 @@ h1 {
     color: #183042;
     font-size: 1rem;
     font-weight: 700;
-}
-
-.evolution-info {
-    /* Separa visualmente a seção de evolução dos atributos. */
-    margin-top: 16px;
-    padding-top: 13px;
-    border-top: 1px solid #e3ecee;
-}
-
-.evolution-info h3 {
-    /* Destaca o título da seção de evolução. */
-    margin: 0 0 7px;
-    color: #176e68;
-    font-size: 0.85rem;
-}
-
-.evolution-info p {
-    /* Formata cada caminho evolutivo exibido. */
-    margin: 4px 0;
-    color: #4d6470;
-    font-size: 0.9rem;
 }
 
 .message {

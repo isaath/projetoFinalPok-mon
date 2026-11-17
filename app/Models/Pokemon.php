@@ -179,13 +179,43 @@ class Pokemon
     }
 
     // Retorna todos os registros da tabela como uma lista de arrays associativos.
-    public static function listarTodos(): array
+    public static function listarTodos(?PDO $db = null): array
     {
-        $conn = \getConnection();
-        $stmt = $conn->query('SELECT * FROM pokemons');
+        $conn = $db ?? \getConnection();
+        $stmt = $conn->query(
+            'SELECT pokemon.id_pokemon,
+                    pokemon.nome,
+                    pokemon.hp,
+                    pokemon.hp_maximo,
+                    pokemon.forca_ataque,
+                    pokemon.defesa,
+                    pokemon.ataque_especial,
+                    pokemon.defesa_especial,
+                    pokemon.velocidade,
+                    COALESCE(
+                        (
+                            SELECT GROUP_CONCAT(tipo.nome ORDER BY relacao.ordem SEPARATOR \'|\')
+                            FROM pokemon_tipos AS relacao
+                            INNER JOIN tipos AS tipo ON tipo.id_tipo = relacao.id_tipo
+                            WHERE relacao.id_pokemon = pokemon.id_pokemon
+                        ),
+                        tipo_principal.nome
+                    ) AS tipos
+             FROM pokemons AS pokemon
+             LEFT JOIN tipos AS tipo_principal
+                ON tipo_principal.id_tipo = pokemon.id_tipo
+             ORDER BY pokemon.nome'
+        );
 
-        // fetchAll lê todas as linhas obtidas pela consulta.
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $pokemons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($pokemons as $indice => $pokemon) {
+            $pokemons[$indice]['tipos'] = is_string($pokemon['tipos'])
+                && $pokemon['tipos'] !== ''
+                ? explode('|', $pokemon['tipos'])
+                : [];
+        }
+
+        return $pokemons;
     }
 
     // Atualiza no banco os campos do objeto identificado pelo ID recebido.

@@ -10,6 +10,10 @@ return [
     // Lista de Pokémon também pode ser acessada pela URL /pokemons.
     'pokemons' => [PokemonController::class, 'listarPokemons'],
 
+    // Páginas públicas sem acesso ao banco de dados.
+    'inicio' => [PaginaController::class, 'inicio'],
+    'sobre' => [PaginaController::class, 'sobre'],
+
     // Rota de autenticação do usuário.
     'login' => [UsuarioController::class, 'login'],
 

@@ -6,7 +6,7 @@
     <!-- Define codificação, responsividade, título e CSS do painel. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokebagual - Jogar</title>
+    <title>PokeBagual - Jogar</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/painel_jogar.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
 </head>
@@ -30,16 +30,16 @@
 
     <!-- Menu de navegação lateral para as telas auxiliares. -->
     <div class="menu_lateral">
-        <a href="/projetoFinalPok-mon/app/Views/layouts/sobre.php" class="btn_pixel">
+        <a href="/projetoFinalPok-mon/public/index.php?rota=sobre" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_sobre.png" alt="Sobre" style="width: 185px !important; height: auto;">
     </a>
-    <a href="/projetoFinalPok-mon/app/Views/layouts/painel_inicial.php" class="btn_pixel">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=inicio" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_home.png" alt="Home" style="width: 170px !important; height: auto;">
     </a>
     <a href="/projetoFinalPok-mon/public/index.php?rota=perfil" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_perfil.png" alt="Perfil" style="width: 160px !important; height: auto;">
     </a>
-    <a href="/projetoFinalPok-mon/app/Views/bolicho/bolicho.php" class="btn_pixel">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=bolicho" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_bolicho.png" alt="Bolicho" style="width: 200px !important; height: auto;">
     </a>
     <a href="/projetoFinalPok-mon/public/index.php?rota=centro" class="btn_pixel">

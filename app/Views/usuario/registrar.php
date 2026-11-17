@@ -10,7 +10,7 @@ $email = $email ?? '';
     <!-- Metadados da página e arquivos de fonte e estilo. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Pokebagual</title>
+    <title>Cadastro - PokeBagual</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">

@@ -10,7 +10,7 @@ $email = $email ?? '';
     <!-- Metadados para caracteres, adaptação a dispositivos e título da aba. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Pokebagual</title>
+    <title>Login - PokeBagual</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/login.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
@@ -67,7 +67,7 @@ $email = $email ?? '';
                     <img src="/projetoFinalPok-mon/public/css/img/btn_registrar.png" alt="Registrar"
                          style="width: 125px !important; height: auto;">
                 </a>
-                <a href="/projetoFinalPok-mon/app/Views/layouts/painel_inicial.php" class="btn_pixel">
+                <a href="/projetoFinalPok-mon/public/index.php?rota=inicio" class="btn_pixel">
     <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar"
          style="width: 125px !important; height: auto;">
 </a>

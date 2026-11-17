@@ -9,4 +9,14 @@ class BolichoController{
     public function __construct(PDO $db){
         $this->db = $db;
     }
+
+    public function index(): void
+    {
+        if (!isset($_SESSION['usuario']['id_usuario'])) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        require __DIR__ . '/../Views/bolicho/bolicho.php';
+    }
 }

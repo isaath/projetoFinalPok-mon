@@ -1,8 +1,8 @@
-# PokeFish
+# PokeBagual
 
 ## Sobre o Projeto
 
-O **PokeFish** é um jogo de batalhas inspirado no universo Pokémon, com uma temática voltada para praias e elementos tropicais. O jogador poderá montar sua própria equipe de criaturas, participar de batalhas, conquistar recompensas, comprar itens na loja e evoluir seus Pokémon.
+O **PokeBagual** é um jogo web acadêmico inspirado no universo Pokémon, com uma jornada ambientada na região de Kanto e identidade visual ligada ao Rio Grande do Sul.
 
 O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdisciplinar, integrando os conhecimentos das disciplinas de Programação Orientada a Objetos I, Linguagens para a Web II e Banco de Dados II.
 
@@ -10,41 +10,35 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 
 * **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
-* **Sistema de batalhas:** combates por turnos contra outros jogadores ou adversários controlados pelo sistema.
-* **Tipos de Pokémon:** sistema de vantagens e desvantagens entre os tipos Água, Fogo e Elétrico.
+* **Sistema de batalhas:** há uma prévia visual; o combate por turnos ainda será implementado.
+* **Tipos de Pokémon:** as regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens de espécies da Geração I.
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
 * **Inventário:** gerenciamento dos itens adquiridos pelo jogador.
 * **Evolução:** possibilidade de evoluir Pokémon utilizando itens específicos.
 * **Sistema de recompensas:** obtenção de Pokédollars após vencer batalhas.
 * **Histórico de batalhas:** registro dos resultados e informações dos combates.
-* **Consumo de API:** utilização de uma API externa para obtenção de dados.
+* **Consumo de API:** obtenção dos sprites dos Pokémon pela PokeAPI; o catálogo e os atributos exibidos vêm do banco de dados do projeto.
 * **Interface web:** telas para navegação, gerenciamento da equipe, loja e batalhas.
 
-## Regras das Batalhas
+## Regras de batalha aprovadas
 
-As batalhas acontecem por turnos, permitindo que o jogador escolha entre atacar, utilizar um item ou trocar de Pokémon.
+O combate ainda não está implementado: a tela atual é uma prévia. Quando for desenvolvido, usará Pokémon FireRed/LeafGreen (Geração III) como referência para prioridade e efetividade de tipos, sem tentar reproduzir todos os sistemas do jogo original.
 
-A ordem dos turnos é definida pelos seguintes critérios:
+### Ordem das ações
 
-1. Pokémon com maior prioridade age primeiro.
-2. Em caso de empate na prioridade, o Pokémon com maior velocidade age primeiro.
-3. Se houver empate nos dois atributos, a ordem será definida aleatoriamente.
+1. A ação com maior prioridade ocorre primeiro, mesmo que o Pokémon seja mais lento.
+2. Entre ações com a mesma prioridade, o Pokémon com maior Velocidade age primeiro.
+3. Se a prioridade e a Velocidade empatarem, a ordem é sorteada.
 
-### Vantagens entre os Tipos
+### Efetividade dos tipos
 
-O sistema utiliza três tipos de Pokémon:
+A efetividade altera o dano, não a ordem de ação. Será usado o gráfico de tipos das Gerações II a V, aplicável a FireRed/LeafGreen: 17 tipos e nenhum tipo Fada. Ataques super efetivos têm multiplicador 2; ataques pouco efetivos, 0,5; imunidades, 0. Contra um Pokémon de dois tipos, os multiplicadores defensivos são multiplicados. Um movimento do mesmo tipo do atacante recebe STAB de 1,5.
 
-* **Água:** forte contra Fogo e fraco contra Elétrico.
-* **Fogo:** forte contra Elétrico e fraco contra Água.
-* **Elétrico:** forte contra Água e fraco contra Fogo.
+As espécies do projeto mantêm as tipagens da Geração I, por decisão dos desenvolvedores. Por exemplo, Magnemite permanece Elétrico e Mr. Mime permanece Psíquico; não se aplicam os tipos Aço ou Fada adicionados posteriormente.
 
-Os ataques causam o dobro do dano quando possuem vantagem de tipo e metade do dano quando possuem desvantagem.
+Essas regras de ordem e tipo estão aprovadas. A fórmula completa de dano, as ações disponíveis e as condições/limite de término ainda precisam ser definidos antes do combate funcional.
 
-### Condições de Vitória
-
-* O jogador perde quando todos os seus Pokémon são derrotados.
-* As batalhas possuem um limite de 10 turnos.
-* Caso nenhum jogador tenha todos os seus Pokémon derrotados ao final do décimo turno, vence aquele que possuir a maior quantidade total de HP restante na equipe.
+Referências: [gráfico de tipos Gerações II–V e jogos aplicáveis](https://pokemondb.net/type/old), [prioridade de movimentos](https://pokemondb.net/move/quick-attack) e [cálculo de dano e STAB](https://www.serebii.net/games/damage.shtml).
 
 ## Tecnologias Utilizadas
 
@@ -75,7 +69,7 @@ O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as t
 
 1. Inicie o **MySQL** no XAMPP.
 2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
-3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. O script cria o banco `bancodedados_pokefish`, suas tabelas, os tipos usados pelo jogo, os Pokémon iniciais e suas evoluções, e os Pokémon das equipes dos oito ginásios de Kanto. Também cadastra os líderes, suas equipes, a ordem de batalha e a ordem de liberação das capturas. O script pode ser executado novamente para completar os cadastros sem duplicar os registros.
+3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. Este é o único script necessário para uma instalação nova: cria o banco `bancodedados_pokefish`, as tabelas (incluindo os campos de foto de perfil), os tipos, os Pokémon e evoluções cadastrados e as equipes dos oito ginásios de Kanto. Não há migração adicional para executar em um banco novo.
 4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
 O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
@@ -140,11 +134,11 @@ O fluxo planejado do botão **Jogar** é abrir o mapa dos oito ginásios e permi
 
 Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
 
-**Ainda pendente de decisão:** fórmulas e condições detalhadas das batalhas por turno, como a tentativa de captura será feita, eventos aleatórios e lista/preço/efeitos dos itens de evolução. A disponibilidade progressiva de capturas por vitória já foi definida acima.
+**Ainda pendente de decisão:** fórmula completa de dano, ações disponíveis e condições/limite de término das batalhas; como a tentativa de captura será feita; eventos aleatórios; e lista/preço/efeitos dos itens de evolução. A ordem de ação, efetividade de tipos e disponibilidade progressiva de capturas por vitória já foram definidas acima.
 
 ## Objetivos Acadêmicos
 
-O desenvolvimento do PokeFish tem como objetivo aplicar, de forma integrada, os conhecimentos adquiridos nas disciplinas envolvidas, incluindo:
+O desenvolvimento do PokeBagual tem como objetivo aplicar, de forma integrada, os conhecimentos adquiridos nas disciplinas envolvidas, incluindo:
 
 * Programação orientada a objetos em PHP e JavaScript.
 * Organização de aplicações utilizando MVC.
@@ -167,16 +161,16 @@ O desenvolvimento do PokeFish tem como objetivo aplicar, de forma integrada, os 
 
 O projeto está em desenvolvimento. As funcionalidades descritas representam os objetivos planejados e poderão ser atualizadas conforme a implementação avançar.
 
-## Apoio do agente personalizado Professor MONSTROBOLSO
+## Apoio do agente personalizado Professor PokeBagual
 
-Este projeto conta com o agente personalizado **Professor MONSTROBOLSO**, que auxilia desenvolvedores e demais pessoas interessadas em compreender o sistema, avaliar o que já está implementado e colaborar no desenvolvimento do que ainda falta. Ele deve orientar de forma didática, considerar as regras registradas em `AGENTS.md` e verificar o código existente antes de considerar uma funcionalidade concluída.
+Este projeto conta com o agente personalizado **Professor PokeBagual**, que auxilia desenvolvedores e demais pessoas interessadas em compreender o sistema, avaliar o que já está implementado e colaborar no desenvolvimento do que ainda falta. Ele deve orientar de forma didática, considerar as regras registradas em `AGENTS.md` e verificar o código existente antes de considerar uma funcionalidade concluída.
 
-Para começar uma conversa, selecione o agente **Professor MONSTROBOLSO** e envie a mensagem abaixo. Ela ajudará o agente a entender o estado atual do projeto e a combinar com você um próximo passo de desenvolvimento.
+Para começar uma conversa, selecione o agente **Professor PokeBagual** e envie a mensagem abaixo. Ela ajudará o agente a entender o estado atual do projeto e a combinar com você um próximo passo de desenvolvimento.
 
 ### Mensagem para iniciar
 
 ```text
-Olá, Professor MONSTROBOLSO! Quero compreender e ajudar a desenvolver este projeto.
+Olá, Professor PokeBagual! Quero compreender e ajudar a desenvolver este projeto.
 
 Leia as instruções do AGENTS.md. Antes de analisar o código, sugerir tarefas ou propor alterações, comece explicando didaticamente a lógica completa do jogo que está registrada no documento. Apresente o fluxo do usuário desde o login e a escolha inicial do time até o mapa, níveis, batalhas por turno, eventos aleatórios, recompensas, insígnias, Meu time, Pokecenter, loja e conclusão da campanha. Diferencie claramente as regras já confirmadas das decisões ainda pendentes, para que eu compreenda o trabalho antes de começarmos qualquer outra atividade.
 
@@ -193,4 +187,4 @@ Depois da análise, ajude-me a desenvolver a tarefa que escolhermos em etapas: e
 
 ---
 
-**PokeFish — Prepare seu time, encare as ondas e torne-se uma lenda das batalhas!**
+**PokeBagual — Monte seu time e conquiste as insígnias de Kanto!**

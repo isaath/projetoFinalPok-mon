@@ -12,7 +12,7 @@ $nomePerfil = (string) ($perfil['nome'] ?? '');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil do Usuário</title>
+    <title>PokeBagual | Perfil do usuário</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/centro.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/painel_perfil.css?v=2">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
@@ -51,7 +51,7 @@ $nomePerfil = (string) ($perfil['nome'] ?? '');
             </section>
         <?php endif; ?>
     </main>
-    <a href="/projetoFinalPok-mon/app/Views/layouts/painel_jogar.php" class="btn_pixel">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
             <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
         </a>
 </body>

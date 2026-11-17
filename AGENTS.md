@@ -1,4 +1,4 @@
-# AGENTE.md — POKEBAGUAL
+# AGENTE.md — PokeBagual
 
 # 1. IDENTIFICAÇÃO DO PROJETO
 
@@ -13,7 +13,7 @@
 - Linguagens para a Web II;
 - Banco de Dados II.
 
-O MONSTROBOLSO é um projeto acadêmico desenvolvido em dupla, cujo objetivo é criar um jogo web inspirado na mecânica de Pokémon, utilizando PHP orientado a objetos, JavaScript e banco de dados.
+O PokeBagual é um projeto acadêmico desenvolvido em dupla, cujo objetivo é criar um jogo web inspirado na mecânica de Pokémon, utilizando PHP orientado a objetos, JavaScript e banco de dados.
 
 O projeto deve atender integralmente aos requisitos funcionais e técnicos estabelecidos pelos professores.
 
@@ -113,7 +113,7 @@ Responsável por:
 
 # 6. REQUISITOS FUNCIONAIS OBRIGATÓRIOS
 
-O MONSTROBOLSO deverá possuir as seguintes telas:
+O PokeBagual deverá possuir as seguintes telas:
 
 ## 6.1. LOGIN
 
@@ -193,16 +193,10 @@ Os demais atributos devem complementar a mecânica de batalha.
 
 ## TIPOS DE POKÉMON
 
-Os Pokémon devem utilizar Traits para representar seus tipos, como:
-
-- Água;
-- Fogo;
-- Terra;
-- Elétrico;
-- Grama;
-- Outros tipos necessários.
-
-A implementação deve utilizar corretamente o recurso de Traits do PHP, permitindo reutilização de comportamentos e características.
+- Traits não são mais um requisito obrigatório do trabalho.
+- Os Pokémon da jornada usam a tipagem da Geração I definida para o projeto. Não aplicar tipos introduzidos posteriormente às espécies; por exemplo, Magnemite continua Elétrico e Mr. Mime continua Psíquico.
+- Os tipos devem ser representados como dados do Pokémon e podem ser relacionados pela tabela `pokemon_tipos`.
+- Comportamentos compartilhados podem ser implementados com Traits quando fizerem sentido, mas não é necessário criar uma Trait por tipo. A efetividade dos tipos deve seguir uma regra centralizada e consistente.
 
 # 8. PROGRAMAÇÃO ORIENTADA A OBJETOS
 
@@ -215,9 +209,10 @@ O projeto precisa demonstrar a utilização dos seguintes conceitos:
 - Agregação;
 - Associação;
 - Sobrecargas de métodos;
-- Traits;
 - Classes e objetos;
 - Tratamento de exceções.
+
+Traits são um recurso opcional neste projeto, não um requisito obrigatório da avaliação.
 
 ## EXCEÇÕES
 
@@ -294,7 +289,7 @@ Regras:
 
 # 11. INTERFACE GRÁFICA
 
-A interface deve ser organizada, intuitiva e coerente com a proposta do MONSTROBOLSO.
+A interface deve ser organizada, intuitiva e coerente com a proposta do PokeBagual.
 
 O projeto deve apresentar uma identidade visual inspirada no universo Pokémon, respeitando a proposta definida pelos desenvolvedores.
 
@@ -416,7 +411,7 @@ Não declare que o projeto está pronto enquanto existirem requisitos obrigatór
 
 O agente não deve atuar apenas como um programador que executa tarefas. Deve atuar principalmente como um professor, mentor e orientador de programação.
 
-O objetivo do MONSTROBOLSO não é somente entregar um sistema funcional, mas garantir que Henrique e Isadora aprendam, compreendam e consigam explicar tudo o que foi implementado.
+O objetivo do PokeBagual não é somente entregar um sistema funcional, mas garantir que Henrique e Isadora aprendam, compreendam e consigam explicar tudo o que foi implementado.
 
 **Não basta fazer o código funcionar. Os dois desenvolvedores precisam saber como e por que ele funciona.**
 
@@ -486,7 +481,7 @@ Exemplos:
 
 **Associação:** explique como classes se relacionam.
 
-**Traits:** explique como reutilizar características e comportamentos no PHP.
+**Traits:** se forem usadas, explique como reutilizam comportamentos no PHP; elas são opcionais neste projeto.
 
 **PDO:** explique como o PHP se comunica com o banco de dados.
 
@@ -502,7 +497,7 @@ Não basta implementar esses conceitos: Henrique e Isadora precisam saber identi
 
 ## 17.5. PREPARAÇÃO PARA A BANCA DE AVALIAÇÃO
 
-Considere que os dois estudantes precisarão apresentar e defender tecnicamente o MONSTROBOLSO.
+Considere que os dois estudantes precisarão apresentar e defender tecnicamente o PokeBagual.
 
 Por isso, sempre que implementar algo relevante, apresente:
 
@@ -555,13 +550,13 @@ Ao finalizar qualquer implementação importante, os dois devem ter condições 
 2. Como ele funciona.
 3. Por que foi escrito daquela maneira.
 4. Quais conceitos foram aplicados.
-5. Como ele se integra ao restante do MONSTROBOLSO.
+5. Como ele se integra ao restante do PokeBagual.
 
 # 18. REGRA FINAL E PRIORIDADE ABSOLUTA
 
 O objetivo não é apenas entregar um site funcional.
 
-O MONSTROBOLSO precisa demonstrar, na prática, os conhecimentos desenvolvidos nas disciplinas de Programação Orientada a Objetos I, Linguagens para a Web II e Banco de Dados II.
+O PokeBagual precisa demonstrar, na prática, os conhecimentos desenvolvidos nas disciplinas de Programação Orientada a Objetos I, Linguagens para a Web II e Banco de Dados II.
 
 Toda implementação deve buscar três objetivos:
 
@@ -579,7 +574,7 @@ O agente deve sempre lembrar:
 - Nenhuma funcionalidade deve comprometer os requisitos já atendidos.
 - Nenhuma alteração deve colocar em risco o trabalho dos desenvolvedores.
 
-**PRIORIDADE MÁXIMA: desenvolver um MONSTROBOLSO funcional, tecnicamente correto, organizado e que cumpra integralmente os critérios de avaliação, garantindo que Henrique e Isadora compreendam tudo o que foi desenvolvido.**
+**PRIORIDADE MÁXIMA: desenvolver um PokeBagual funcional, tecnicamente correto, organizado e que cumpra integralmente os critérios de avaliação, garantindo que Henrique e Isadora compreendam tudo o que foi desenvolvido.**
 
 **NÃO SEJA APENAS UM PROGRAMADOR. SEJA TAMBÉM O PROFESSOR QUE NOS AJUDA A APRENDER A PROGRAMAR.**
 
@@ -661,7 +656,12 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 ## 19.5. Batalhas e eventos de exploração
 
-- As batalhas serão por turnos, inspiradas no estilo de Pokémon Emerald. O jogador escolhe ações durante a batalha, e o sistema resolve os turnos usando os atributos, HP e características dos Pokémon.
+- As batalhas serão por turnos, usando Pokémon FireRed/LeafGreen (Geração III) como referência para ordem de ação e efetividade de tipos. O sistema é uma adaptação acadêmica, não uma reprodução integral do jogo original.
+- A prioridade da ação determina primeiro a ordem do turno: uma ação com prioridade maior é executada antes, mesmo que o Pokémon que a escolheu tenha menos Velocidade.
+- Entre ações com a mesma prioridade, o Pokémon com maior Velocidade age primeiro. Se a Velocidade também empatar, a ordem é sorteada.
+- Efetividade de tipo altera o dano, não a ordem do turno. No gráfico da Geração III, um ataque super efetivo usa multiplicador 2; um ataque pouco efetivo usa 0,5; uma imunidade usa 0. Em Pokémon com dois tipos, os multiplicadores dos dois tipos defensores são multiplicados. Um movimento do mesmo tipo do Pokémon atacante recebe STAB de 1,5.
+- A referência de efetividade é o gráfico das Gerações II a V, usado em FireRed/LeafGreen: 17 tipos, sem Fada. A tipagem das espécies do projeto permanece conforme a Geração I, como aprovado pelos desenvolvedores; por isso não se deve aplicar Aço ou Fada a Magnemite ou Mr. Mime.
+- A ordem de ação e as regras de tipo acima são decisões aprovadas; a fórmula completa de dano e outras condições do combate continuam pendentes de definição.
 - Os treinadores dos níveis 1 a 4 possuem três Pokémon; os dos níveis 5 a 8 possuem quatro.
 - Após vencer um mesmo treinador, um Pokémon adversário fica disponível por vitória, seguindo a ordem do menor para o maior total de atributos base: nas equipes de três membros, isso ocorre nas três primeiras vitórias; nas equipes de quatro, nas quatro primeiras.
 - A ordem de liberação para captura é salva junto à equipe do treinador. O progresso e as capturas reivindicadas são individuais por usuário; vencer novamente não deve duplicar uma captura já reivindicada.
@@ -709,9 +709,15 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 Não invente nem fixe sem confirmação dos desenvolvedores:
 
-- os detalhes das ações, fórmulas e condições de término das batalhas por turno;
+- a fórmula completa de dano, as ações disponíveis, condições de término e eventual limite de turnos das batalhas;
 - como funciona a tentativa/confirmação de captura;
 - a lista, frequência e distribuição dos eventos aleatórios;
 - a lista, os preços e os efeitos dos itens de evolução.
 
 Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra.
+
+**Referências consultadas para as regras de batalha:**
+
+- [Pokémon Database — gráficos de tipos anteriores](https://pokemondb.net/type/old): identifica o gráfico das Gerações II a V como aplicável a FireRed/LeafGreen e mostra que não havia tipo Fada.
+- [Pokémon Database — Quick Attack](https://pokemondb.net/move/quick-attack): descreve que ações com prioridade maior agem antes e que a Velocidade decide entre ações de mesma prioridade.
+- [Serebii — cálculo de dano](https://www.serebii.net/games/damage.shtml): explica STAB, multiplicadores de efetividade e relação dos atributos com o dano.

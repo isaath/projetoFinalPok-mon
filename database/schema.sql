@@ -1,4 +1,4 @@
--- Esquema inicial do banco de dados do Pokebagual.
+-- Esquema inicial do banco de dados do PokeBagual.
 -- No DBeaver, abra este arquivo e execute o script com o servidor MySQL iniciado.
 
 CREATE DATABASE IF NOT EXISTS bancodedados_pokefish

@@ -15,8 +15,13 @@ class CarregadorImagensPokemon {
     }
 
     async carregarImagem(elementoImagem) {
-        const nome = elementoImagem.dataset.nome.toLowerCase();
+        const nome = elementoImagem.dataset.nome
+            .toLowerCase()
+            .replace(/['’]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
         const url = `https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(nome)}`;
+        const placeholder = elementoImagem.nextElementSibling;
 
         try {
             const resposta = await fetch(url);  //fethc(url) -> consulta a API e a pág não precisa ficar parada, pq é assíncrono
@@ -37,9 +42,15 @@ class CarregadorImagensPokemon {
             }
 
             elementoImagem.src = imagem;
+            if (placeholder instanceof HTMLElement) {
+                placeholder.hidden = true;
+            }
         } catch (erro) {
             console.error(`Não foi possível carregar a imagem de ${nome}:`, erro);
             elementoImagem.hidden = true;
+            if (placeholder instanceof HTMLElement) {
+                placeholder.hidden = false;
+            }
         }
     }
 }
