@@ -100,10 +100,10 @@ $email = $email ?? '';
             <div class="box-botoes">
                 <button type="submit" class="btn_pixel">
                     <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Registrar"
-                         style="width: 170px !important; height: auto;">
+                         style="width: 250px !important; height: auto;">
                 </button>
                 <a href="index.php?rota=login" class="btn_pixel">
-                    <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Voltar ao login"
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar ao login"
                          style="width: 170px !important; height: auto;">
                 </a>
             </div>

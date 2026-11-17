@@ -83,7 +83,7 @@
                     <input type="hidden" name="csrf_token"
                            value="<?= htmlspecialchars($_SESSION['csrf_centro'], ENT_QUOTES, 'UTF-8') ?>">
                     <button type="submit" class="btn_pixel">
-                        <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png" alt="Curar todos"
+                        <img src="/projetoFinalPok-mon/public/css/img/btn_curar.png" alt="Curar todos"
                              style="width: 170px !important; height: auto;">
                     </button>
                 </form>
