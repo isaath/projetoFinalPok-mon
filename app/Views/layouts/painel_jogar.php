@@ -53,7 +53,7 @@
 </div>
 
     <!-- Botão principal para iniciar o fluxo de batalha. -->
-    <a href="/projetoFinalPok-mon/public/index.php?rota=batalha" class="btn_pixel btn_jogar">
+    <a href="/projetoFinalPok-mon/public/index.php?rota=mapa" class="btn_pixel btn_jogar">
         <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png" alt="Jogar" style="width: 400px !important; height: auto;">
     </a>
 </body>

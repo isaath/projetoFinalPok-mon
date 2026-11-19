@@ -12,6 +12,7 @@ require_once __DIR__ . '/../app/Controllers/BolichoController.php';
 require_once __DIR__ . '/../app/Controllers/CentroController.php';
 require_once __DIR__ . '/../app/Controllers/TimeController.php';
 require_once __DIR__ . '/../app/Controllers/BatalhaController.php';
+require_once __DIR__ . '/../app/Controllers/MapaController.php';
 require_once __DIR__ . '/../app/Controllers/PaginaController.php';
 
 // Lê as rotas definidas em routes.php.
@@ -39,6 +40,7 @@ if (
     || $controllerClass === CentroController::class
     || $controllerClass === TimeController::class
     || $controllerClass === BatalhaController::class
+    || $controllerClass === MapaController::class
 ) {
     $controller = new $controllerClass(getConnection());
 } else {

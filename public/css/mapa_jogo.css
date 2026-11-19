@@ -1,0 +1,136 @@
+body {
+    min-height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 24px;
+    background-color: #18263c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mapa {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    object-fit: contain;
+}
+
+.btn_pixel img:hover {
+    transform: scale(1.05);
+}
+.btn_pixel img:active{
+    transform: scale(0.95);
+}
+
+.btn_pixel {
+    position: fixed; /* Fixa o botão na janela do navegador */
+    bottom: 20px;    /* Distância da borda inferior da tela */
+    right: 100px;     /* Distância da borda direita da tela */
+    z-index: 1000;   /* Garante que o botão fique por cima de outros elementos */
+    display: inline-block;
+    transition: transform 0.1s ease; /* Suaviza o efeito ao passar o mouse */
+}
+
+
+.mapa-container {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+.ponto-mapa {
+    position: absolute;
+    z-index: 2;
+    width: 14%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+/* Mantém os pontos liberados clicáveis e os bloqueados apenas informativos. */
+.ponto-mapa.liberado,
+.ponto-mapa.vencido {
+    cursor: pointer;
+}
+
+.ponto-mapa.bloqueado {
+    /* background: rgb(15 24 39 / 38%);
+    outline: 2px solid rgb(255 255 255 / 80%); */
+    background: transparent;
+    outline: transparent;
+    cursor: not-allowed;
+}
+
+/* Diferencia os níveis já vencidos, que continuam liberados para repetição. */
+.ponto-mapa.vencido {
+    /* background: rgb(35 101 79 / 28%);
+    outline: 2px solid #d8f3dc; */
+    background: transparent;
+    outline: 2px solid #d8f3dc;
+}
+
+/* Destaca os níveis clicáveis quando o mouse ou teclado os seleciona. */
+.ponto-mapa.liberado:hover,
+.ponto-mapa.liberado:focus-visible,
+.ponto-mapa.vencido:hover,
+.ponto-mapa.vencido:focus-visible {
+    background: rgb(255 215 0 / 35%);
+    outline: 3px solid #ffd700;
+    transform: translate(-50%, -50%) scale(1.12);
+}
+
+/* Coordenadas dos treinadores, relativas à imagem do mapa. */
+.brock {
+    left: 73%;
+    top: 89%;
+}
+
+.misty {
+    left: 33%;
+    top: 87%;
+}
+
+.lt_surge {
+    left: 69%;
+    top: 74%;
+}
+
+.erika {
+    left: 35%;
+    top: 60%;
+}
+
+.koga {
+    left: 67%;
+    top: 47%;
+}
+
+.sabrina {
+    left: 35%;
+    top: 35%;
+}
+
+.blaine {
+    left: 71%;
+    top: 21%;
+}
+
+.giovanni {
+    left: 50%;
+    top: 10%;
+}
+
+/* Mostra falhas ao carregar o progresso sem ocultá-las silenciosamente. */
+.erro-mapa {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 3;
+    padding: 8px;
+    background: #fff;
+    color: #8e2525;
+}
