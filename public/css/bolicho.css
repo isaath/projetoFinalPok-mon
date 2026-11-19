@@ -13,6 +13,12 @@ body {
     flex-direction: column;
 }
 
+.painel-pixel.bolicho {
+    width: min(1250px, calc(100% - 24px));
+    min-height: auto;
+    padding: 12px;
+}
+
     /* Conteúdo da loja sobre o fundo existente. */
 .bolicho {
     width: min(1100px, calc(100% - 32px));
@@ -23,6 +29,8 @@ body {
 
 /* Título e saldo ficam lado a lado. */
 .bolicho-cabecalho {
+    background: rgb(59, 123, 155);
+    background: linear-gradient(90deg, rgba(59, 123, 155, 1) 0%, rgba(72, 202, 228, 1) 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -33,35 +41,55 @@ body {
 /* Cria colunas responsivas para os produtos. */
 .grade-itens {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
 }
 
-/* Aparência de cada item. */
 .card-item {
-    padding: 18px;
-    border-radius: 14px;
-    background: white;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 6px;
     text-align: center;
 }
 
-/* Mantém imagens com tamanho uniforme sem distorcê-las. */
+.card-item h2 {
+    font-size: 0.55rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.card-item p {
+    font-size: 0.65rem;
+    line-height: 1.25;
+}
+
 .card-item img {
-    width: 120px;
-    height: 120px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
 }
 
-/* Deixa o botão ocupar a largura do card. */
 .card-item button {
+    box-sizing: border-box;
     width: 100%;
-    padding: 10px;
-    cursor: pointer;
+    padding: 5px 2px;
+    font-size: 0.42rem;
+}
+
+@media (max-width: 700px) {
+    .grade-itens {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 500px) {
-    .bolicho-cabecalho {
-        align-items: flex-start;
-        flex-direction: column;
+    .grade-itens {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 340px) {
+    .grade-itens {
+        grid-template-columns: 1fr;
     }
 }
