@@ -39,4 +39,7 @@ return [
 
     // Protótipo visual da batalha; as regras serão implementadas em etapas.
     'batalha' => [BatalhaController::class, 'index'],
+
+    // Mapa da jornada, exibido antes da seleção de uma fase.
+    'mapa' => [MapaController::class, 'index'],
 ];

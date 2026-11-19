@@ -48,7 +48,17 @@ class BatalhaController
             $nivelPrevia = 1;
         } else {
             try {
-                $dadosPrevia = (new Batalha($this->db))->carregarPrevia($idUsuario, $nivelPrevia);
+                // Cria o modelo para consultar o progresso e os dados da batalha.
+                $modeloBatalha = new Batalha($this->db);
+
+                // A URL também precisa respeitar os bloqueios do mapa.
+                if (!$modeloBatalha->nivelEstaLiberado($idUsuario, $nivelPrevia)) {
+                    http_response_code(403);
+                    $erroBatalha = 'Esse nível está bloqueado. Vença o nível anterior para liberá-lo.';
+                } else {
+                    // Carrega a prévia somente se o jogador tiver acesso ao nível.
+                    $dadosPrevia = $modeloBatalha->carregarPrevia($idUsuario, $nivelPrevia);
+                }
             } catch (PDOException | RuntimeException $exception) {
                 error_log('Erro ao carregar a prévia da batalha: ' . $exception->getMessage());
                 http_response_code(500);
