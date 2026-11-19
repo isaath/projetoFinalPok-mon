@@ -1,12 +1,16 @@
 body {
-    min-height: 100vh;
-    box-sizing: border-box;
+    /* Define a imagem de fundo da tela inicial. */
+    background-image: url("img/img_mapa/img_fundo_mapa.png");
+    background-attachment: fixed; /* Fixa a imagem no fundo da página. */
+    background-size: cover; /* Faz a imagem cobrir toda a área visível. */
+    background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
+    background-repeat: no-repeat; /* Evita repetição da imagem. */
     margin: 0;
-    padding: 24px;
-    background-color: #18263c;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 }
 
 .mapa {
