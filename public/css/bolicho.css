@@ -14,9 +14,9 @@ body {
 }
 
 .painel-pixel.bolicho {
-    width: min(1250px, calc(100% - 24px));
+    width: min(1000px, calc(100% - 32px));
     min-height: auto;
-    padding: 12px;
+    padding: 16px;
 }
 
     /* Conteúdo da loja sobre o fundo existente. */
@@ -28,21 +28,20 @@ body {
 }
 
 /* Título e saldo ficam lado a lado. */
-.bolicho-cabecalho {
-    background: rgb(59, 123, 155);
-    background: linear-gradient(90deg, rgba(59, 123, 155, 1) 0%, rgba(72, 202, 228, 1) 100%);
+.bolicho-cabecalho{
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     margin-bottom: 24px;
+    
 }
 
 /* Cria colunas responsivas para os produtos. */
 .grade-itens {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .card-item {
@@ -74,6 +73,15 @@ body {
     width: 100%;
     padding: 5px 2px;
     font-size: 0.42rem;
+}
+
+.btn_pixel {
+    position: fixed; /* Fixa o botão na janela do navegador */
+    bottom: 20px;    /* Distância da borda inferior da tela */
+    right: 100px;     /* Distância da borda direita da tela */
+    z-index: 1000;   /* Garante que o botão fique por cima de outros elementos */
+    display: inline-block;
+    transition: transform 0.1s ease; /* Suaviza o efeito ao passar o mouse */
 }
 
 @media (max-width: 700px) {

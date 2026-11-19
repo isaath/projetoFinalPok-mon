@@ -4,20 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeBagual | Bolicho</title>
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=3">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=4">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
     <script src="/projetoFinalPok-mon/public/js/pocoes_images.js" defer></script>
 </head>
 <body>
     <main class="painel-pixel bolicho">
-    <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
-        Voltar ao jogo
-    </a>
+    
 
     <header class="bolicho-cabecalho">
         <div>
             <h1>Bolicho</h1>
-            <p>Escolha os itens para ajudar seu time</p>
         </div>
 
         <p>Saldo: <strong>0</strong> Pokédollars</p>
@@ -179,10 +176,12 @@
             <p>Preço: 70 Pokédollars</p>
             <button type="button">Comprar</button>
         </article>
-
-
         
     </section>
+
+    <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
+        <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
+    </a>
 </main>
 </body>
 </html>
