@@ -498,6 +498,133 @@
     cursor: not-allowed;
 }
 
+.battle-live-label,
+.battle-result {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 2px solid #263b39;
+    background: #fffdf1;
+    color: #263b39;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.battle-result-win {
+    background: #d9eedb;
+    color: #174735;
+}
+
+.battle-result-loss {
+    background: #f4d8d2;
+    color: #8e2525;
+}
+
+.battle-log ol {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 22px;
+}
+
+.battle-log li {
+    line-height: 1.45;
+}
+
+.move-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    border: 3px solid #263b39;
+    background: #f6f2d8;
+}
+
+.move-list legend {
+    padding: 0 6px;
+    font-weight: 800;
+}
+
+.move-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 8px;
+    align-items: center;
+    min-height: 58px;
+    padding: 8px;
+    border: 2px solid #687768;
+    background: #fffdf1;
+    cursor: pointer;
+}
+
+.move-option:has(input:checked) {
+    border-color: #174735;
+    box-shadow: inset 0 0 0 2px #8ecbb2;
+}
+
+.move-option input {
+    grid-row: span 2;
+    accent-color: #23654f;
+}
+
+.move-name {
+    font-weight: 800;
+}
+
+.move-details {
+    color: #596a83;
+    font-size: 0.75rem;
+}
+
+.battle-submit {
+    display: inline-flex;
+    grid-column: 1 / -1;
+    justify-content: center;
+    align-items: center;
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 3px solid #263b39;
+    background: #f5d761;
+    color: #17243b;
+    font-weight: 900;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.battle-submit:hover,
+.battle-submit:focus-visible {
+    background: #f8e38a;
+}
+
+.battle-finish {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 14px;
+    border: 3px solid #263b39;
+    background: #fffdf1;
+}
+
+.battle-finish h2,
+.battle-finish p {
+    margin: 0;
+}
+
+.trainer-team li.team-active {
+    border-color: #23654f;
+    background: #d9eedb;
+}
+
+.trainer-team li small {
+    display: block;
+    margin: 5px 0 0 25px;
+    color: #596a83;
+    font-weight: 400;
+}
+
 @media (max-width: 760px) {
     .battle-layout {
         grid-template-columns: 1fr;
@@ -555,6 +682,10 @@
     }
 
     .battle-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .move-list {
         grid-template-columns: 1fr;
     }
 }

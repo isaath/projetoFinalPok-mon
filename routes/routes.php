@@ -37,7 +37,7 @@ return [
     // Pokecenter: consulta e restaura os Pokémon associados aos times do usuário.
     'centro' => [CentroController::class, 'index'],
 
-    // Protótipo visual da batalha; as regras serão implementadas em etapas.
+    // Batalha por turnos: valida e processa movimentos no servidor.
     'batalha' => [BatalhaController::class, 'index'],
 
     // Mapa da jornada, exibido antes da seleção de uma fase.
