@@ -225,8 +225,10 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                                 <h2>Você venceu!</h2>
                                 <p>Recompensa: <strong><?= (int) $dadosBatalha['recompensa'] ?> Pokédollars</strong></p>
                                 <p>
-                                    Pokémon liberados para uma futura captura:
-                                    <strong><?= (int) $dadosBatalha['capturas_liberadas'] ?></strong>
+                                    Tentativas de captura liberadas por este líder:
+                                    <strong><?= (int) $dadosBatalha['capturas_liberadas'] ?>
+                                        de <?= count($equipeAdversario) ?></strong>
+                                        de <?= count($equipeAdversario) ?></strong>
                                 </p>
                                 <p class="log-note">
                                     A captura ainda será implementada em uma etapa própria; por enquanto,
