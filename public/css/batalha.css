@@ -1,12 +1,11 @@
-.battle-page {
-    min-height: 100vh;
-    margin: 0;
-    padding: 28px 18px 48px;
-    background:
-        linear-gradient(90deg, rgb(27 49 67 / 7%) 1px, transparent 1px),
-        linear-gradient(rgb(27 49 67 / 7%) 1px, transparent 1px),
-        linear-gradient(145deg, #8ecbb2, #c7dfad 54%, #f0d891);
-    background-size: 8px 8px, 8px 8px, auto;
+body {
+    /* Define a imagem de fundo da tela inicial. */
+    background-image: url("img/tela_batalha.png");
+    background-attachment: fixed; /* Fixa a imagem no fundo da página. */
+    background-size: cover; /* Faz a imagem cobrir toda a área visível. */
+    background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
+    background-repeat: no-repeat; /* Evita repetição da imagem. */
+    
 }
 
 .battle-shell {
@@ -32,11 +31,34 @@
     text-decoration: none;
 }
 
-.battle-header .eyebrow,
-.trainer-card .eyebrow {
-    margin: 8px 0;
-    color: #4b5c77;
-    font-size: 0.62rem;
+.lado-a-lado {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.info_meio {
+    order: 1; /* Deixa na esquerda/centro */
+    flex: 1;  /* Ocupa o espaço ao lado da info_direita */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.info_direita {
+    order: 2;       /* Deixa na direita */
+    width: 240px;   /* Largura da coluna da direita (ajuste se quiser maior/menor) */
+    flex-shrink: 0; /* Impede o card de ser esmagado */
+}   
+
+.textos_cabecalho{
+    text-align: center;
+    color: rgb(201, 201, 246)
 }
 
 .battle-header h1 {
@@ -73,11 +95,12 @@
     letter-spacing: 0.04em;
 }
 
-.battle-layout {
+
+    .battle-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 20px;
-    align-items: start;
+    gap: 16px;
+    align-items: left;
+    width: 30%;
 }
 
 .battle-main,
@@ -85,6 +108,7 @@
     border: 4px solid #17243b;
     background: rgb(229 235 245 / 97%);
     box-shadow: 5px 5px 0 #34445d;
+    justify-content: left;
 }
 
 .battle-main {
@@ -245,10 +269,11 @@
 }
 
 .battle-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 18px;
+    display: flex;              /* Deixa lado a lado (ou use "grid" para 2 colunas) */
+    justify-content: center;    /* Centraliza na tela */
+    flex-wrap: wrap;            /* Quebra linha se faltar espaço */
+    gap: 12px;                  /* Espaço entre os botões */
+    margin-top: 18px;           /* Distância da arena acima */
 }
 
 .battle-actions button {
@@ -257,23 +282,17 @@
 }
 
 .trainer-card {
-    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
     text-align: center;
+    font-size: 0.85rem;
 }
 
 .trainer-avatar {
-    display: grid;
-    place-items: center;
-    width: min(112px, 100%);
-    height: 136px;
-    margin: 12px auto;
-    overflow: hidden;
-    border: 4px solid #17243b;
-    background: #d3deef;
-    box-shadow: inset 4px 4px 0 #fff;
-    color: #17243b;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.9rem;
+    width: 80px;  /* Era 112px */
+    height: 96px; /* Era 136px */
+    margin: 8px auto;
 }
 
 .trainer-image {
@@ -486,16 +505,156 @@
     background: #fffdf1;
 }
 
+/*BOTOES DO JOGO*/
+
+/* Remove borda, fundo e transparência de todos os botões da batalha */
+.battle-main button,
 .battle-actions button {
-    border: 3px solid #263b39;
-    background: #fffdf1;
-    color: #263b39;
-    font-weight: 800;
+    padding: 0;
+    min-height: auto;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    cursor: pointer;
 }
 
+/* Mantém 100% opaco mesmo quando o botão estiver com "disabled" */
+.battle-main button:disabled,
 .battle-actions button:disabled {
-    opacity: 0.65;
+    opacity: 1 !important;
     cursor: not-allowed;
+}
+
+.battle-main button img,
+.battle-actions button img {
+    display: block;
+}
+
+
+
+.btn_pixel img:hover {
+    /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn_pixel img:active {
+    /* Simula o botão sendo pressionado. */
+    transform: scale(0.95);
+}
+
+/* === AJUSTES DE TAMANHO E POSIÇÃO (HP PARA FORA, POKÉMON PARA DENTRO) === */
+
+/* === POKÉMON LADO A LADO E CAIXAS DE HP MAIS PRÓXIMAS === */
+
+/* 1. Coloca os dois Pokémon lado a lado no centro da tela */
+.battle-shell {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;         /* <-- Distância ENTRE o Bellsprout e o Geodude */
+    margin-top: 50px;  /* <-- Sobe ou desce a dupla no gramado */
+}
+
+.battle-message {
+    width: 100%;
+}
+
+/* 2. Alinha cada Pokémon com a sua própria caixa de HP */
+.combatant {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0px !important;
+    width: fit-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.combatant-player {
+    flex-direction: row-reverse !important; /* HP na esquerda, seu Pokémon na direita */
+}
+
+.combatant-opponent {
+    flex-direction: row !important;         /* Pokémon adversário na esquerda, HP na direita */
+}
+
+/* Destrava o tamanho do container da imagem */
+.combatant-portrait {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+}/* === POKÉMON LADO A LADO E CAIXAS DE HP PRÓXIMAS === */
+
+.info_meio {
+    min-width: 0;
+}
+
+/* 1. Força os dois Pokémon a ficarem lado a lado na mesma linha */
+.battle-shell {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* Impede de cair para a linha de baixo */
+    justify-content: center;
+    align-items: center;
+    gap: 16px;         /* <-- Distância ENTRE o Bellsprout e o Geodude */
+    width: 100% !important;
+    margin-top: 60px;  /* <-- Sobe ou desce a dupla no gramado */
+}
+
+/* 2. Alinha cada Pokémon com a sua própria caixa de HP */
+.combatant {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0px !important;
+    width: fit-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.combatant-player {
+    flex-direction: row-reverse !important; /* HP na esquerda, seu Pokémon na direita */
+}
+
+.combatant-opponent {
+    flex-direction: row !important;         /* Pokémon adversário na esquerda, HP na direita */
+}
+
+.combatant-portrait {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.combatant-player .combatant-image {
+    transform: scaleX(-1);
+}
+
+/* 3. Ajusta a caixa de HP e impede o nome do Pokémon de quebrar linha */
+.combatant-copy {
+    align-self: center !important;
+    width: 205px !important; /* Largura suficiente para caber "Bellsprout" inteiro */
+    padding: 8px 10px !important;
+    z-index: 5;
+}
+
+.combatant-copy h2 {
+    font-size: 0.85rem !important;
+    white-space: nowrap; /* Não deixa quebrar o nome no meio */
+}
+
+/* Puxa os HPs para bem perto dos Pokémon */
+.combatant-player .combatant-copy {
+    margin-right: -18px;
+}
+
+.combatant-opponent .combatant-copy {
+    margin-left: -18px;
 }
 
 @media (max-width: 760px) {
