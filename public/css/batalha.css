@@ -716,4 +716,8 @@ body {
     .battle-actions {
         grid-template-columns: 1fr;
     }
+
+    .move-list {
+        grid-template-columns: 1fr;
+    }
 }

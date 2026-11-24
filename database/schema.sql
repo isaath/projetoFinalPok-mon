@@ -71,6 +71,44 @@ CREATE TABLE IF NOT EXISTS pokemon_tipos (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+-- Catálogo de movimentos usados no combate. A categoria física/especial segue
+-- a divisão por tipo usada em FireRed/LeafGreen (Geração III).
+CREATE TABLE IF NOT EXISTS movimentos (
+    id_movimento INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(60) NOT NULL,
+    id_tipo INT UNSIGNED NOT NULL,
+    categoria VARCHAR(20) NOT NULL,
+    potencia SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    precisao TINYINT UNSIGNED NOT NULL DEFAULT 100,
+    prioridade TINYINT NOT NULL DEFAULT 0,
+    efeito VARCHAR(30) NOT NULL DEFAULT 'nenhum',
+    chance_efeito TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (id_movimento),
+    UNIQUE KEY uq_movimentos_nome (nome),
+    KEY idx_movimentos_tipo (id_tipo),
+    CONSTRAINT fk_movimentos_tipo
+        FOREIGN KEY (id_tipo) REFERENCES tipos (id_tipo)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Cada espécie tem até quatro movimentos, apresentados na ordem da lista.
+CREATE TABLE IF NOT EXISTS pokemon_movimentos (
+    id_pokemon INT UNSIGNED NOT NULL,
+    ordem TINYINT UNSIGNED NOT NULL,
+    id_movimento INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_pokemon, ordem),
+    UNIQUE KEY uq_pokemon_movimento (id_pokemon, id_movimento),
+    CONSTRAINT fk_pokemon_movimentos_pokemon
+        FOREIGN KEY (id_pokemon) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_pokemon_movimentos_movimento
+        FOREIGN KEY (id_movimento) REFERENCES movimentos (id_movimento)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 -- Times criados pelos usuários.
 CREATE TABLE IF NOT EXISTS times (
     id_time INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -257,6 +295,91 @@ INSERT IGNORE INTO tipos (nome)
 VALUES
     ('Agua'), ('Fogo'), ('Planta'), ('Eletrico'), ('Pedra'), ('Terra'),
     ('Veneno'), ('Psiquico'), ('Voador'), ('Inseto'), ('Normal');
+
+-- Tipos adicionais necessários para representar o gráfico de FireRed/LeafGreen.
+INSERT IGNORE INTO tipos (nome)
+VALUES ('Lutador'), ('Gelo'), ('Fantasma'), ('Dragao'), ('Aco'), ('Sombrio');
+
+-- Movimentos e efeitos simplificados para o combate acadêmico.
+INSERT INTO movimentos
+    (nome, id_tipo, categoria, potencia, precisao, prioridade, efeito, chance_efeito)
+SELECT catalogo.nome, tipo.id_tipo, catalogo.categoria, catalogo.potencia,
+       catalogo.precisao, catalogo.prioridade, catalogo.efeito, catalogo.chance_efeito
+FROM (
+    SELECT 'Tackle' AS nome, 'Normal' AS tipo, 'fisico' AS categoria, 35 AS potencia, 95 AS precisao, 0 AS prioridade, 'nenhum' AS efeito, 0 AS chance_efeito
+    UNION ALL SELECT 'Vine Whip', 'Planta', 'especial', 35, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Wrap', 'Normal', 'fisico', 15, 90, 0, 'nenhum', 0
+    UNION ALL SELECT 'Scratch', 'Normal', 'fisico', 40, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Ember', 'Fogo', 'especial', 40, 100, 0, 'queimadura', 10
+    UNION ALL SELECT 'Rock Throw', 'Pedra', 'fisico', 50, 90, 0, 'nenhum', 0
+    UNION ALL SELECT 'Bite', 'Sombrio', 'especial', 60, 100, 0, 'flinch', 30
+    UNION ALL SELECT 'Smog', 'Veneno', 'fisico', 20, 70, 0, 'veneno', 40
+    UNION ALL SELECT 'Thunder Shock', 'Eletrico', 'especial', 40, 100, 0, 'paralisia', 10
+    UNION ALL SELECT 'Thunder Wave', 'Eletrico', 'status', 0, 100, 0, 'paralisia', 100
+    UNION ALL SELECT 'Stomp', 'Normal', 'fisico', 65, 100, 0, 'flinch', 30
+    UNION ALL SELECT 'Water Pulse', 'Agua', 'especial', 60, 100, 0, 'confusao', 20
+    UNION ALL SELECT 'Bubble Beam', 'Agua', 'especial', 65, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Confusion', 'Psiquico', 'especial', 50, 100, 0, 'confusao', 10
+    UNION ALL SELECT 'Horn Attack', 'Normal', 'fisico', 65, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Rock Blast', 'Pedra', 'fisico', 50, 80, 0, 'nenhum', 0
+    UNION ALL SELECT 'Water Gun', 'Agua', 'especial', 40, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Poison Sting', 'Veneno', 'fisico', 15, 100, 0, 'veneno', 30
+    UNION ALL SELECT 'Spark', 'Eletrico', 'especial', 65, 100, 0, 'paralisia', 30
+    UNION ALL SELECT 'Screech', 'Normal', 'status', 0, 85, 0, 'defesa_down', 100
+    UNION ALL SELECT 'Metal Claw', 'Aco', 'fisico', 50, 95, 0, 'ataque_up', 10
+    UNION ALL SELECT 'Smokescreen', 'Normal', 'status', 0, 100, 0, 'precisao_down', 100
+    UNION ALL SELECT 'Petal Dance', 'Planta', 'especial', 70, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Acid', 'Veneno', 'fisico', 40, 100, 0, 'defesa_down', 10
+    UNION ALL SELECT 'Sleep Powder', 'Planta', 'status', 0, 75, 0, 'sono', 100
+    UNION ALL SELECT 'Wing Attack', 'Voador', 'fisico', 60, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Poison Fang', 'Veneno', 'fisico', 50, 100, 0, 'veneno', 30
+    UNION ALL SELECT 'Razor Leaf', 'Planta', 'especial', 55, 95, 0, 'nenhum', 0
+    UNION ALL SELECT 'Psybeam', 'Psiquico', 'especial', 65, 100, 0, 'confusao', 10
+    UNION ALL SELECT 'Recover', 'Normal', 'status', 0, 100, 0, 'curar', 100
+    UNION ALL SELECT 'Magical Leaf', 'Planta', 'especial', 60, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Barrier', 'Psiquico', 'status', 0, 100, 0, 'defesa_up', 100
+    UNION ALL SELECT 'Dig', 'Terra', 'fisico', 60, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Mega Drain', 'Planta', 'especial', 40, 100, 0, 'cura_dano', 100
+    UNION ALL SELECT 'Giga Drain', 'Planta', 'especial', 60, 100, 0, 'cura_dano', 100
+    UNION ALL SELECT 'Leech Life', 'Inseto', 'fisico', 20, 100, 0, 'cura_dano', 100
+    UNION ALL SELECT 'Bind', 'Normal', 'fisico', 15, 75, 0, 'nenhum', 0
+    UNION ALL SELECT 'Protect', 'Normal', 'status', 0, 100, 4, 'proteger', 100
+    UNION ALL SELECT 'Psychic', 'Psiquico', 'especial', 90, 100, 0, 'defesa_especial_down', 10
+    UNION ALL SELECT 'Flamethrower', 'Fogo', 'especial', 95, 100, 0, 'queimadura', 10
+    UNION ALL SELECT 'Extreme Speed', 'Normal', 'fisico', 80, 100, 1, 'nenhum', 0
+    UNION ALL SELECT 'Quick Attack', 'Normal', 'fisico', 40, 100, 1, 'nenhum', 0
+    UNION ALL SELECT 'Surf', 'Agua', 'especial', 95, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Ice Beam', 'Gelo', 'especial', 95, 100, 0, 'congelamento', 10
+    UNION ALL SELECT 'Slash', 'Normal', 'fisico', 70, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Rapid Spin', 'Normal', 'fisico', 20, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Thunderbolt', 'Eletrico', 'especial', 95, 100, 0, 'paralisia', 10
+    UNION ALL SELECT 'Swift', 'Normal', 'fisico', 60, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Light Screen', 'Psiquico', 'status', 0, 100, 0, 'defesa_especial_up', 100
+    UNION ALL SELECT 'Earthquake', 'Terra', 'fisico', 100, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Strength', 'Normal', 'fisico', 80, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Defense Curl', 'Normal', 'status', 0, 100, 0, 'defesa_up', 100
+    UNION ALL SELECT 'Headbutt', 'Normal', 'fisico', 70, 100, 0, 'flinch', 30
+    UNION ALL SELECT 'Hypnosis', 'Psiquico', 'status', 0, 60, 0, 'sono', 100
+    UNION ALL SELECT 'Sludge Bomb', 'Veneno', 'fisico', 90, 100, 0, 'veneno', 30
+    UNION ALL SELECT 'Body Slam', 'Normal', 'fisico', 85, 100, 0, 'paralisia', 30
+    UNION ALL SELECT 'Acid Armor', 'Veneno', 'status', 0, 100, 0, 'defesa_up', 100
+    UNION ALL SELECT 'Double Kick', 'Lutador', 'fisico', 60, 100, 0, 'nenhum', 0
+    UNION ALL SELECT 'Toxic', 'Veneno', 'status', 0, 85, 0, 'toxico', 100
+    UNION ALL SELECT 'Confuse Ray', 'Fantasma', 'status', 0, 100, 0, 'confusao', 100
+    UNION ALL SELECT 'Fire Spin', 'Fogo', 'especial', 15, 70, 0, 'nenhum', 0
+    UNION ALL SELECT 'Stun Spore', 'Planta', 'status', 0, 75, 0, 'paralisia', 100
+    UNION ALL SELECT 'Swords Dance', 'Normal', 'status', 0, 100, 0, 'ataque_up', 100
+    UNION ALL SELECT 'Bounce', 'Voador', 'fisico', 85, 85, 0, 'paralisia', 30
+    UNION ALL SELECT 'Agility', 'Psiquico', 'status', 0, 100, 0, 'velocidade_up', 100
+    UNION ALL SELECT 'Synthesis', 'Planta', 'status', 0, 100, 0, 'curar', 100
+    UNION ALL SELECT 'Scary Face', 'Normal', 'status', 0, 100, 0, 'velocidade_down', 100
+    UNION ALL SELECT 'Twister', 'Dragao', 'especial', 40, 100, 0, 'flinch', 20
+) AS catalogo
+INNER JOIN tipos AS tipo
+    ON tipo.nome = catalogo.tipo
+WHERE NOT EXISTS (
+    SELECT 1 FROM movimentos AS existente WHERE existente.nome = catalogo.nome
+);
 
 -- Cinco opções iniciais aprovadas: são os menores totais de atributos base entre os nove nomes do PokeApiService.
 INSERT INTO pokemons
@@ -460,6 +583,142 @@ INNER JOIN pokemons AS pokemon
     ON LOWER(pokemon.nome) = LOWER(tipos_secundarios.nome_pokemon)
 INNER JOIN tipos AS tipo
     ON tipo.nome = tipos_secundarios.nome_tipo;
+
+-- Atribui os movimentos acordados para cada espécie, na ordem exibida durante a luta.
+INSERT IGNORE INTO pokemon_movimentos (id_pokemon, ordem, id_movimento)
+SELECT pokemon.id_pokemon, catalogo.ordem, movimento.id_movimento
+FROM (
+    SELECT 'Bellsprout' AS nome_pokemon, 1 AS ordem, 'Vine Whip' AS nome_movimento
+    UNION ALL SELECT 'Bellsprout', 2, 'Wrap'
+    UNION ALL SELECT 'Bulbasaur', 1, 'Tackle'
+    UNION ALL SELECT 'Bulbasaur', 2, 'Vine Whip'
+    UNION ALL SELECT 'Charmander', 1, 'Scratch'
+    UNION ALL SELECT 'Charmander', 2, 'Ember'
+    UNION ALL SELECT 'Geodude', 1, 'Rock Throw'
+    UNION ALL SELECT 'Geodude', 2, 'Tackle'
+    UNION ALL SELECT 'Growlithe', 1, 'Ember'
+    UNION ALL SELECT 'Growlithe', 2, 'Bite'
+    UNION ALL SELECT 'Koffing', 1, 'Smog'
+    UNION ALL SELECT 'Koffing', 2, 'Tackle'
+    UNION ALL SELECT 'Magnemite', 1, 'Thunder Shock'
+    UNION ALL SELECT 'Magnemite', 2, 'Thunder Wave'
+    UNION ALL SELECT 'Ponyta', 1, 'Ember'
+    UNION ALL SELECT 'Ponyta', 2, 'Stomp'
+    UNION ALL SELECT 'Psyduck', 1, 'Water Pulse'
+    UNION ALL SELECT 'Psyduck', 2, 'Confusion'
+    UNION ALL SELECT 'Rhyhorn', 1, 'Horn Attack'
+    UNION ALL SELECT 'Rhyhorn', 2, 'Rock Blast'
+    UNION ALL SELECT 'Squirtle', 1, 'Tackle'
+    UNION ALL SELECT 'Squirtle', 2, 'Water Gun'
+    UNION ALL SELECT 'Tentacool', 1, 'Bubble Beam'
+    UNION ALL SELECT 'Tentacool', 2, 'Poison Sting'
+    UNION ALL SELECT 'Voltorb', 1, 'Spark'
+    UNION ALL SELECT 'Voltorb', 2, 'Screech'
+    UNION ALL SELECT 'Vulpix', 1, 'Ember'
+    UNION ALL SELECT 'Vulpix', 2, 'Quick Attack'
+    UNION ALL SELECT 'Charmeleon', 1, 'Ember'
+    UNION ALL SELECT 'Charmeleon', 2, 'Metal Claw'
+    UNION ALL SELECT 'Charmeleon', 3, 'Smokescreen'
+    UNION ALL SELECT 'Gloom', 1, 'Petal Dance'
+    UNION ALL SELECT 'Gloom', 2, 'Acid'
+    UNION ALL SELECT 'Gloom', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Golbat', 1, 'Wing Attack'
+    UNION ALL SELECT 'Golbat', 2, 'Bite'
+    UNION ALL SELECT 'Golbat', 3, 'Poison Fang'
+    UNION ALL SELECT 'Ivysaur', 1, 'Vine Whip'
+    UNION ALL SELECT 'Ivysaur', 2, 'Razor Leaf'
+    UNION ALL SELECT 'Ivysaur', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Kadabra', 1, 'Confusion'
+    UNION ALL SELECT 'Kadabra', 2, 'Psybeam'
+    UNION ALL SELECT 'Kadabra', 3, 'Recover'
+    UNION ALL SELECT 'Mr. Mime', 1, 'Confusion'
+    UNION ALL SELECT 'Mr. Mime', 2, 'Magical Leaf'
+    UNION ALL SELECT 'Mr. Mime', 3, 'Barrier'
+    UNION ALL SELECT 'Onix', 1, 'Rock Throw'
+    UNION ALL SELECT 'Onix', 2, 'Dig'
+    UNION ALL SELECT 'Onix', 3, 'Screech'
+    UNION ALL SELECT 'Tangela', 1, 'Mega Drain'
+    UNION ALL SELECT 'Tangela', 2, 'Bind'
+    UNION ALL SELECT 'Tangela', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Wartortle', 1, 'Water Gun'
+    UNION ALL SELECT 'Wartortle', 2, 'Bite'
+    UNION ALL SELECT 'Wartortle', 3, 'Protect'
+    UNION ALL SELECT 'Weepinbell', 1, 'Razor Leaf'
+    UNION ALL SELECT 'Weepinbell', 2, 'Acid'
+    UNION ALL SELECT 'Weepinbell', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Alakazam', 1, 'Psychic'
+    UNION ALL SELECT 'Alakazam', 2, 'Psybeam'
+    UNION ALL SELECT 'Alakazam', 3, 'Recover'
+    UNION ALL SELECT 'Alakazam', 4, 'Thunder Wave'
+    UNION ALL SELECT 'Arcanine', 1, 'Flamethrower'
+    UNION ALL SELECT 'Arcanine', 2, 'Extreme Speed'
+    UNION ALL SELECT 'Arcanine', 3, 'Dig'
+    UNION ALL SELECT 'Arcanine', 4, 'Bite'
+    UNION ALL SELECT 'Blastoise', 1, 'Surf'
+    UNION ALL SELECT 'Blastoise', 2, 'Ice Beam'
+    UNION ALL SELECT 'Blastoise', 3, 'Bite'
+    UNION ALL SELECT 'Blastoise', 4, 'Rapid Spin'
+    UNION ALL SELECT 'Charizard', 1, 'Flamethrower'
+    UNION ALL SELECT 'Charizard', 2, 'Wing Attack'
+    UNION ALL SELECT 'Charizard', 3, 'Slash'
+    UNION ALL SELECT 'Charizard', 4, 'Dig'
+    UNION ALL SELECT 'Electrode', 1, 'Thunderbolt'
+    UNION ALL SELECT 'Electrode', 2, 'Swift'
+    UNION ALL SELECT 'Electrode', 3, 'Light Screen'
+    UNION ALL SELECT 'Electrode', 4, 'Screech'
+    UNION ALL SELECT 'Golem', 1, 'Earthquake'
+    UNION ALL SELECT 'Golem', 2, 'Rock Blast'
+    UNION ALL SELECT 'Golem', 3, 'Strength'
+    UNION ALL SELECT 'Golem', 4, 'Defense Curl'
+    UNION ALL SELECT 'Hypno', 1, 'Confusion'
+    UNION ALL SELECT 'Hypno', 2, 'Headbutt'
+    UNION ALL SELECT 'Hypno', 3, 'Hypnosis'
+    UNION ALL SELECT 'Hypno', 4, 'Psychic'
+    UNION ALL SELECT 'Muk', 1, 'Sludge Bomb'
+    UNION ALL SELECT 'Muk', 2, 'Body Slam'
+    UNION ALL SELECT 'Muk', 3, 'Acid Armor'
+    UNION ALL SELECT 'Muk', 4, 'Thunderbolt'
+    UNION ALL SELECT 'Nidoking', 1, 'Earthquake'
+    UNION ALL SELECT 'Nidoking', 2, 'Double Kick'
+    UNION ALL SELECT 'Nidoking', 3, 'Ice Beam'
+    UNION ALL SELECT 'Nidoking', 4, 'Toxic'
+    UNION ALL SELECT 'Ninetales', 1, 'Flamethrower'
+    UNION ALL SELECT 'Ninetales', 2, 'Confuse Ray'
+    UNION ALL SELECT 'Ninetales', 3, 'Fire Spin'
+    UNION ALL SELECT 'Ninetales', 4, 'Dig'
+    UNION ALL SELECT 'Parasect', 1, 'Slash'
+    UNION ALL SELECT 'Parasect', 2, 'Giga Drain'
+    UNION ALL SELECT 'Parasect', 3, 'Stun Spore'
+    UNION ALL SELECT 'Parasect', 4, 'Leech Life'
+    UNION ALL SELECT 'Rapidash', 1, 'Flamethrower'
+    UNION ALL SELECT 'Rapidash', 2, 'Bounce'
+    UNION ALL SELECT 'Rapidash', 3, 'Stomp'
+    UNION ALL SELECT 'Rapidash', 4, 'Agility'
+    UNION ALL SELECT 'Rhydon', 1, 'Earthquake'
+    UNION ALL SELECT 'Rhydon', 2, 'Rock Blast'
+    UNION ALL SELECT 'Rhydon', 3, 'Horn Attack'
+    UNION ALL SELECT 'Rhydon', 4, 'Scary Face'
+    UNION ALL SELECT 'Seadra', 1, 'Water Gun'
+    UNION ALL SELECT 'Seadra', 2, 'Twister'
+    UNION ALL SELECT 'Seadra', 3, 'Ice Beam'
+    UNION ALL SELECT 'Seadra', 4, 'Agility'
+    UNION ALL SELECT 'Venusaur', 1, 'Razor Leaf'
+    UNION ALL SELECT 'Venusaur', 2, 'Sludge Bomb'
+    UNION ALL SELECT 'Venusaur', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Venusaur', 4, 'Synthesis'
+    UNION ALL SELECT 'Victreebel', 1, 'Razor Leaf'
+    UNION ALL SELECT 'Victreebel', 2, 'Sludge Bomb'
+    UNION ALL SELECT 'Victreebel', 3, 'Sleep Powder'
+    UNION ALL SELECT 'Victreebel', 4, 'Swords Dance'
+    UNION ALL SELECT 'Weezing', 1, 'Sludge Bomb'
+    UNION ALL SELECT 'Weezing', 2, 'Flamethrower'
+    UNION ALL SELECT 'Weezing', 3, 'Smokescreen'
+    UNION ALL SELECT 'Weezing', 4, 'Toxic'
+) AS catalogo
+INNER JOIN pokemons AS pokemon
+    ON LOWER(pokemon.nome) = LOWER(catalogo.nome_pokemon)
+INNER JOIN movimentos AS movimento
+    ON movimento.nome = catalogo.nome_movimento;
 
 -- Líderes, ginásios e insígnias. O progresso de vitória é individual por usuário
 -- e fica em treinadores_progresso, não nesta tabela de cadastro.

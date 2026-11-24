@@ -1,0 +1,680 @@
+<?php
+
+namespace App\Services;
+
+use InvalidArgumentException;
+use RuntimeException;
+
+final class BatalhaEngine
+{
+    private const FRAQUEZAS = [
+        'normal' => ['lutador'],
+        'fogo' => ['agua', 'terra', 'pedra'],
+        'agua' => ['eletrico', 'planta'],
+        'eletrico' => ['terra'],
+        'planta' => ['fogo', 'gelo', 'veneno', 'voador', 'inseto'],
+        'gelo' => ['fogo', 'lutador', 'pedra', 'aco'],
+        'lutador' => ['voador', 'psiquico'],
+        'veneno' => ['terra', 'psiquico'],
+        'terra' => ['agua', 'planta', 'gelo'],
+        'voador' => ['eletrico', 'gelo', 'pedra'],
+        'psiquico' => ['inseto', 'fantasma', 'sombrio'],
+        'inseto' => ['fogo', 'voador', 'pedra'],
+        'pedra' => ['agua', 'planta', 'lutador', 'terra', 'aco'],
+        'fantasma' => ['fantasma', 'sombrio'],
+        'dragao' => ['gelo', 'dragao'],
+        'sombrio' => ['lutador', 'inseto'],
+        'aco' => ['fogo', 'lutador', 'terra'],
+    ];
+
+    private const RESISTENCIAS = [
+        'normal' => [],
+        'fogo' => ['fogo', 'planta', 'gelo', 'inseto', 'aco'],
+        'agua' => ['fogo', 'agua', 'gelo', 'aco'],
+        'eletrico' => ['eletrico', 'voador', 'aco'],
+        'planta' => ['agua', 'eletrico', 'planta', 'terra'],
+        'gelo' => ['gelo'],
+        'lutador' => ['inseto', 'pedra', 'sombrio'],
+        'veneno' => ['lutador', 'veneno', 'inseto', 'planta'],
+        'terra' => ['veneno', 'pedra'],
+        'voador' => ['planta', 'lutador', 'inseto'],
+        'psiquico' => ['lutador', 'psiquico'],
+        'inseto' => ['planta', 'lutador', 'terra'],
+        'pedra' => ['normal', 'fogo', 'veneno', 'voador'],
+        'fantasma' => ['veneno', 'inseto'],
+        'dragao' => ['fogo', 'agua', 'eletrico', 'planta'],
+        'sombrio' => ['fantasma', 'sombrio'],
+        'aco' => [
+            'normal', 'planta', 'gelo', 'voador', 'psiquico', 'inseto',
+            'pedra', 'fantasma', 'dragao', 'sombrio', 'aco',
+        ],
+    ];
+
+    private const IMUNIDADES = [
+        'normal' => ['fantasma'],
+        'eletrico' => [],
+        'voador' => ['terra'],
+        'terra' => ['eletrico'],
+        'fantasma' => ['normal', 'lutador'],
+        'sombrio' => ['psiquico'],
+        'aco' => ['veneno'],
+    ];
+
+    public static function resolverTurno(array $batalha, int $idMovimentoJogador): array
+    {
+        if (!empty($batalha['finalizada'])) {
+            throw new RuntimeException('Esta batalha já foi encerrada.');
+        }
+
+        $jogador = self::pokemonAtivo($batalha, 'jogador');
+        $adversario = self::pokemonAtivo($batalha, 'adversario');
+        if ($jogador === null || $adversario === null) {
+            throw new RuntimeException('Não há Pokémon ativo para continuar a batalha.');
+        }
+
+        $movimentoJogador = self::buscarMovimento($jogador, $idMovimentoJogador);
+        $movimentoAdversario = self::escolherMovimentoComputador($adversario, $jogador);
+        $indiceJogador = (int) $batalha['jogador']['ativo'];
+        $indiceAdversario = (int) $batalha['adversario']['ativo'];
+
+        foreach (['jogador', 'adversario'] as $lado) {
+            $indice = (int) $batalha[$lado]['ativo'];
+            $batalha[$lado]['equipe'][$indice]['protegido'] = false;
+            $batalha[$lado]['equipe'][$indice]['recuo'] = false;
+        }
+
+        $acoes = [
+            [
+                'lado' => 'jogador',
+                'indice' => $indiceJogador,
+                'movimento' => $movimentoJogador,
+                'velocidade' => self::velocidadeEfetiva($jogador),
+            ],
+            [
+                'lado' => 'adversario',
+                'indice' => $indiceAdversario,
+                'movimento' => $movimentoAdversario,
+                'velocidade' => self::velocidadeEfetiva($adversario),
+            ],
+        ];
+
+        $primeiraAcao = $acoes[0];
+        $segundaAcao = $acoes[1];
+        if (
+            $segundaAcao['movimento']['prioridade'] > $primeiraAcao['movimento']['prioridade']
+            || (
+                $segundaAcao['movimento']['prioridade'] === $primeiraAcao['movimento']['prioridade']
+                && $segundaAcao['velocidade'] > $primeiraAcao['velocidade']
+            )
+            || (
+                $segundaAcao['movimento']['prioridade'] === $primeiraAcao['movimento']['prioridade']
+                && $segundaAcao['velocidade'] === $primeiraAcao['velocidade']
+                && random_int(0, 1) === 1
+            )
+        ) {
+            $acoes = [$segundaAcao, $primeiraAcao];
+        }
+
+        $mensagens = ['Turno ' . ((int) $batalha['turnos'] + 1) . '.'];
+        foreach ($acoes as $acao) {
+            if (
+                (int) $batalha[$acao['lado']]['ativo'] !== $acao['indice']
+                || !empty($batalha['finalizada'])
+            ) {
+                continue;
+            }
+
+            self::executarAcao($batalha, $acao['lado'], $acao['movimento'], $mensagens);
+            self::avancarPokemonsDesmaiados($batalha, $mensagens);
+            self::definirResultadoSeAcabou($batalha, $mensagens);
+        }
+
+        if (empty($batalha['finalizada'])) {
+            foreach (['jogador', 'adversario'] as $lado) {
+                self::aplicarDanoResidual($batalha, $lado, $mensagens);
+                self::avancarPokemonsDesmaiados($batalha, $mensagens);
+                self::definirResultadoSeAcabou($batalha, $mensagens);
+                if (!empty($batalha['finalizada'])) {
+                    break;
+                }
+            }
+        }
+
+        $batalha['turnos'] = (int) $batalha['turnos'] + 1;
+        $batalha['mensagens'] = array_slice(
+            array_merge($batalha['mensagens'] ?? [], $mensagens),
+            -12
+        );
+
+        return $batalha;
+    }
+
+    public static function calcularEfetividade(string $tipoAtaque, array $tiposDefensor): float
+    {
+        $ataque = strtolower($tipoAtaque);
+        $multiplicador = 1.0;
+
+        foreach ($tiposDefensor as $tipoDefensor) {
+            $defesa = strtolower((string) $tipoDefensor);
+            if (in_array($ataque, self::IMUNIDADES[$defesa] ?? [], true)) {
+                return 0.0;
+            }
+            if (in_array($ataque, self::FRAQUEZAS[$defesa] ?? [], true)) {
+                $multiplicador *= 2.0;
+            } elseif (in_array($ataque, self::RESISTENCIAS[$defesa] ?? [], true)) {
+                $multiplicador *= 0.5;
+            }
+        }
+
+        return $multiplicador;
+    }
+
+    public static function calcularDano(array $atacante, array $alvo, array $movimento): int
+    {
+        $efetividade = self::calcularEfetividade(
+            (string) $movimento['tipo'],
+            $alvo['tipos']
+        );
+        if ($efetividade === 0.0) {
+            return 0;
+        }
+
+        $fisico = $movimento['categoria'] === 'fisico';
+        $nomeAtaque = $fisico ? 'forca_ataque' : 'ataque_especial';
+        $nomeDefesa = $fisico ? 'defesa' : 'defesa_especial';
+        $estagioAtaque = $fisico ? 'ataque' : 'ataque_especial';
+        $estagioDefesa = $fisico ? 'defesa' : 'defesa_especial';
+
+        $ataque = max(
+            1.0,
+            (float) $atacante[$nomeAtaque]
+                * self::multiplicadorEstagio((int) $atacante['estagios'][$estagioAtaque])
+        );
+        if ($fisico && $atacante['status'] === 'queimadura') {
+            $ataque *= 0.5;
+        }
+        $defesa = max(
+            1.0,
+            (float) $alvo[$nomeDefesa]
+                * self::multiplicadorEstagio((int) $alvo['estagios'][$estagioDefesa])
+        );
+        $stab = in_array(
+            strtolower((string) $movimento['tipo']),
+            array_map('strtolower', $atacante['tipos']),
+            true
+        ) ? 1.5 : 1.0;
+
+        $dano = (int) round(
+            (int) $movimento['potencia']
+            * $ataque
+            / (4 * $defesa)
+            * $stab
+            * $efetividade
+        );
+        $limite = max(1, (int) floor((int) $alvo['hp_maximo'] / 2));
+
+        return min($limite, max(1, $dano));
+    }
+
+    private static function executarAcao(
+        array &$batalha,
+        string $lado,
+        array $movimento,
+        array &$mensagens
+    ): void {
+        $outroLado = $lado === 'jogador' ? 'adversario' : 'jogador';
+        $indiceAtivo = (int) $batalha[$lado]['ativo'];
+        $indiceAlvo = (int) $batalha[$outroLado]['ativo'];
+        $ator =& $batalha[$lado]['equipe'][$indiceAtivo];
+        $alvo =& $batalha[$outroLado]['equipe'][$indiceAlvo];
+
+        if ((int) $ator['hp'] <= 0 || (int) $alvo['hp'] <= 0) {
+            return;
+        }
+
+        if (!self::podeAgir($ator, $mensagens)) {
+            return;
+        }
+
+        $nomeMovimento = (string) $movimento['nome'];
+        $mensagens[] = $ator['nome'] . ' usou ' . $nomeMovimento . '.';
+
+        if (!self::acertou($ator, $movimento)) {
+            $mensagens[] = $nomeMovimento . ' errou o alvo.';
+            return;
+        }
+
+        if ($movimento['efeito'] === 'proteger') {
+            if ($ator['protecao_usada']) {
+                $mensagens[] = $ator['nome'] . ' já usou sua proteção nesta batalha.';
+                return;
+            }
+            $ator['protegido'] = true;
+            $ator['protecao_usada'] = true;
+            $mensagens[] = $ator['nome'] . ' se protegeu neste turno.';
+            return;
+        }
+
+        if ($alvo['protegido']) {
+            $mensagens[] = $alvo['nome'] . ' bloqueou o movimento.';
+            return;
+        }
+
+        if ((int) $movimento['potencia'] > 0) {
+            $dano = self::calcularDano($ator, $alvo, $movimento);
+            if ($dano === 0) {
+                $mensagens[] = $alvo['nome'] . ' é imune ao tipo ' . $movimento['tipo'] . '.';
+                return;
+            }
+
+            $efetividade = self::calcularEfetividade(
+                (string) $movimento['tipo'],
+                $alvo['tipos']
+            );
+            $alvo['hp'] = max(0, (int) $alvo['hp'] - $dano);
+            $mensagens[] = $alvo['nome'] . ' recebeu ' . $dano . ' de dano.';
+            if ($efetividade > 1.0) {
+                $mensagens[] = 'Foi super efetivo!';
+            } elseif ($efetividade < 1.0) {
+                $mensagens[] = 'Não foi muito efetivo.';
+            }
+
+            if ($movimento['efeito'] === 'cura_dano') {
+                $cura = max(1, (int) floor($dano / 2));
+                $hpAnterior = (int) $ator['hp'];
+                $ator['hp'] = min(
+                    (int) $ator['hp_maximo'],
+                    $hpAnterior + $cura
+                );
+                $mensagens[] = $ator['nome'] . ' recuperou '
+                    . ((int) $ator['hp'] - $hpAnterior) . ' HP.';
+            }
+
+            if ((int) $alvo['hp'] > 0) {
+                self::aplicarEfeito($ator, $alvo, $movimento, $mensagens);
+            }
+            return;
+        }
+
+        self::aplicarEfeito($ator, $alvo, $movimento, $mensagens);
+    }
+
+    private static function aplicarEfeito(
+        array &$ator,
+        array &$alvo,
+        array $movimento,
+        array &$mensagens
+    ): void {
+        $efeito = (string) $movimento['efeito'];
+        if ($efeito === 'nenhum' || $efeito === 'cura_dano' || $efeito === 'proteger') {
+            return;
+        }
+
+        if (
+            (int) $movimento['chance_efeito'] < 100
+            && random_int(1, 100) > (int) $movimento['chance_efeito']
+        ) {
+            return;
+        }
+
+        $efeitosDeStatus = [
+            'queimadura' => 'queimadura',
+            'veneno' => 'veneno',
+            'toxico' => 'toxico',
+            'paralisia' => 'paralisia',
+            'sono' => 'sono',
+            'congelamento' => 'congelamento',
+            'confusao' => 'confusao',
+        ];
+        if (isset($efeitosDeStatus[$efeito])) {
+            self::aplicarStatus($alvo, $efeitosDeStatus[$efeito], $mensagens);
+            return;
+        }
+
+        if ($efeito === 'flinch') {
+            $alvo['recuo'] = true;
+            $mensagens[] = $alvo['nome'] . ' hesitou e pode perder sua ação.';
+            return;
+        }
+
+        if ($efeito === 'curar') {
+            if ($ator['cura_usada']) {
+                $mensagens[] = $ator['nome'] . ' já usou sua recuperação nesta batalha.';
+                return;
+            }
+            $cura = max(1, (int) ceil((int) $ator['hp_maximo'] / 2));
+            $hpAnterior = (int) $ator['hp'];
+            $ator['hp'] = min((int) $ator['hp_maximo'], $hpAnterior + $cura);
+            if ((int) $ator['hp'] > $hpAnterior) {
+                $ator['cura_usada'] = true;
+                $mensagens[] = $ator['nome'] . ' recuperou '
+                    . ((int) $ator['hp'] - $hpAnterior) . ' HP.';
+            } else {
+                $mensagens[] = $ator['nome'] . ' já está com HP completo.';
+            }
+            return;
+        }
+
+        if ($efeito === 'ataque_up') {
+            self::alterarEstagio($ator, 'ataque', 1, $mensagens);
+        } elseif ($efeito === 'defesa_up') {
+            self::alterarEstagio($ator, 'defesa', 1, $mensagens);
+        } elseif ($efeito === 'defesa_especial_up') {
+            self::alterarEstagio($ator, 'defesa_especial', 1, $mensagens);
+        } elseif ($efeito === 'velocidade_up') {
+            self::alterarEstagio($ator, 'velocidade', 1, $mensagens);
+        } elseif ($efeito === 'defesa_down') {
+            self::alterarEstagio($alvo, 'defesa', -1, $mensagens);
+        } elseif ($efeito === 'defesa_especial_down') {
+            self::alterarEstagio($alvo, 'defesa_especial', -1, $mensagens);
+        } elseif ($efeito === 'precisao_down') {
+            self::alterarEstagio($alvo, 'precisao', -1, $mensagens);
+        } elseif ($efeito === 'velocidade_down') {
+            self::alterarEstagio($alvo, 'velocidade', -1, $mensagens);
+        }
+    }
+
+    private static function aplicarStatus(array &$alvo, string $status, array &$mensagens): void
+    {
+        if ($alvo['status'] !== null) {
+            $mensagens[] = $alvo['nome'] . ' já está sob uma condição de status.';
+            return;
+        }
+
+        if (
+            ($status === 'queimadura' && in_array('fogo', array_map('strtolower', $alvo['tipos']), true))
+            || (
+                in_array($status, ['veneno', 'toxico'], true)
+                && (
+                    in_array('veneno', array_map('strtolower', $alvo['tipos']), true)
+                    || in_array('aco', array_map('strtolower', $alvo['tipos']), true)
+                )
+            )
+            || (
+                $status === 'congelamento'
+                && in_array('gelo', array_map('strtolower', $alvo['tipos']), true)
+            )
+        ) {
+            $mensagens[] = $alvo['nome'] . ' não pode receber essa condição.';
+            return;
+        }
+
+        $alvo['status'] = $status;
+        $alvo['status_turnos'] = $status === 'sono'
+            ? random_int(1, 2)
+            : ($status === 'confusao' ? 2 : 0);
+        $alvo['toxico_contagem'] = $status === 'toxico' ? 1 : 0;
+        $mensagens[] = $alvo['nome'] . ' recebeu a condição: '
+            . self::nomeStatus($status) . '.';
+    }
+
+    private static function podeAgir(array &$pokemon, array &$mensagens): bool
+    {
+        if ($pokemon['recuo']) {
+            $pokemon['recuo'] = false;
+            $mensagens[] = $pokemon['nome'] . ' perdeu a ação por hesitar.';
+            return false;
+        }
+
+        if ($pokemon['status'] === 'sono') {
+            $pokemon['status_turnos']--;
+            $mensagens[] = $pokemon['nome'] . ' está dormindo e não agiu.';
+            if ($pokemon['status_turnos'] <= 0) {
+                $pokemon['status'] = null;
+                $mensagens[] = $pokemon['nome'] . ' acordou.';
+            }
+            return false;
+        }
+
+        if ($pokemon['status'] === 'congelamento') {
+            if (random_int(1, 100) <= 20) {
+                $pokemon['status'] = null;
+                $mensagens[] = $pokemon['nome'] . ' descongelou.';
+            } else {
+                $mensagens[] = $pokemon['nome'] . ' continua congelado.';
+                return false;
+            }
+        }
+
+        if (
+            $pokemon['status'] === 'paralisia'
+            && random_int(1, 100) <= 25
+        ) {
+            $mensagens[] = $pokemon['nome'] . ' está paralisado e perdeu a ação.';
+            return false;
+        }
+
+        if ($pokemon['status'] === 'confusao') {
+            $pokemon['status_turnos']--;
+            $perdeuAcao = random_int(1, 100) <= 50;
+            if ($perdeuAcao) {
+                $dano = max(1, (int) ceil((int) $pokemon['hp_maximo'] / 8));
+                $pokemon['hp'] = max(0, (int) $pokemon['hp'] - $dano);
+                $mensagens[] = $pokemon['nome'] . ' se machucou na confusão e perdeu a ação.';
+            } else {
+                $mensagens[] = $pokemon['nome'] . ' conseguiu agir apesar da confusão.';
+            }
+            if ($pokemon['status_turnos'] <= 0) {
+                $pokemon['status'] = null;
+                $mensagens[] = $pokemon['nome'] . ' saiu da confusão.';
+            }
+            return (int) $pokemon['hp'] > 0 && !$perdeuAcao;
+        }
+
+        return true;
+    }
+
+    private static function acertou(array $atacante, array $movimento): bool
+    {
+        $precisao = (int) $movimento['precisao']
+            * self::multiplicadorEstagio((int) $atacante['estagios']['precisao']);
+        $precisao = max(1, min(100, (int) round($precisao)));
+
+        return random_int(1, 100) <= $precisao;
+    }
+
+    private static function escolherMovimentoComputador(array $atacante, array $alvo): array
+    {
+        if ($atacante['movimentos'] === []) {
+            throw new RuntimeException('O Pokémon adversário não possui movimentos cadastrados.');
+        }
+
+        $melhorMovimento = $atacante['movimentos'][0];
+        $melhorPontuacao = -1;
+        foreach ($atacante['movimentos'] as $movimento) {
+            if ((int) $movimento['potencia'] > 0) {
+                $pontuacao = self::calcularDano($atacante, $alvo, $movimento);
+            } elseif (
+                $movimento['efeito'] === 'curar'
+                && empty($atacante['cura_usada'])
+                && (int) $atacante['hp'] <= (int) $atacante['hp_maximo'] / 2
+            ) {
+                $pontuacao = 30;
+            } elseif (
+                in_array(
+                    $movimento['efeito'],
+                    ['sono', 'paralisia', 'confusao', 'toxico'],
+                    true
+                )
+                && $alvo['status'] === null
+            ) {
+                $pontuacao = 8 + ((int) $movimento['chance_efeito'] / 100);
+            } elseif (
+                in_array(
+                    $movimento['efeito'],
+                    ['ataque_up', 'defesa_up', 'defesa_especial_up', 'velocidade_up'],
+                    true
+                )
+                && (int) $atacante['estagios'][
+                    [
+                        'ataque_up' => 'ataque',
+                        'defesa_up' => 'defesa',
+                        'defesa_especial_up' => 'defesa_especial',
+                        'velocidade_up' => 'velocidade',
+                    ][$movimento['efeito']]
+                ] < 2
+            ) {
+                $pontuacao = 5;
+            } else {
+                $pontuacao = 0;
+            }
+
+            if ($pontuacao > $melhorPontuacao) {
+                $melhorMovimento = $movimento;
+                $melhorPontuacao = $pontuacao;
+            }
+        }
+
+        return $melhorMovimento;
+    }
+
+    private static function buscarMovimento(array $pokemon, int $idMovimento): array
+    {
+        foreach ($pokemon['movimentos'] as $movimento) {
+            if ((int) $movimento['id_movimento'] === $idMovimento) {
+                return $movimento;
+            }
+        }
+
+        throw new InvalidArgumentException('O movimento escolhido não pertence ao Pokémon ativo.');
+    }
+
+    private static function aplicarDanoResidual(
+        array &$batalha,
+        string $lado,
+        array &$mensagens
+    ): void {
+        $pokemon =& $batalha[$lado]['equipe'][(int) $batalha[$lado]['ativo']];
+        if (!in_array($pokemon['status'], ['queimadura', 'veneno', 'toxico'], true)) {
+            return;
+        }
+
+        if ($pokemon['status'] === 'toxico') {
+            $contador = max(1, (int) $pokemon['toxico_contagem']);
+            $dano = max(
+                1,
+                (int) ceil((int) $pokemon['hp_maximo'] * $contador / 8)
+            );
+            $pokemon['toxico_contagem'] = $contador + 1;
+        } else {
+            $dano = max(1, (int) ceil((int) $pokemon['hp_maximo'] / 8));
+        }
+
+        $pokemon['hp'] = max(0, (int) $pokemon['hp'] - $dano);
+        $mensagens[] = $pokemon['nome'] . ' perdeu ' . $dano
+            . ' HP pela condição de ' . self::nomeStatus($pokemon['status']) . '.';
+    }
+
+    private static function alterarEstagio(
+        array &$pokemon,
+        string $atributo,
+        int $alteracao,
+        array &$mensagens
+    ): void {
+        $antes = (int) $pokemon['estagios'][$atributo];
+        $pokemon['estagios'][$atributo] = max(-2, min(2, $antes + $alteracao));
+        if ($pokemon['estagios'][$atributo] === $antes) {
+            $mensagens[] = 'O atributo de ' . $pokemon['nome'] . ' não pode mudar mais.';
+            return;
+        }
+
+        $mensagens[] = 'O atributo ' . self::nomeEstagio($atributo)
+            . ' de ' . $pokemon['nome']
+            . ($alteracao > 0 ? ' aumentou.' : ' diminuiu.');
+    }
+
+    private static function velocidadeEfetiva(array $pokemon): float
+    {
+        $multiplicador = self::multiplicadorEstagio(
+            (int) $pokemon['estagios']['velocidade']
+        );
+        if ($pokemon['status'] === 'paralisia') {
+            $multiplicador *= 0.5;
+        }
+
+        return (int) $pokemon['velocidade'] * $multiplicador;
+    }
+
+    private static function multiplicadorEstagio(int $estagio): float
+    {
+        if ($estagio >= 0) {
+            return 1.0 + (0.25 * $estagio);
+        }
+
+        return 1.0 / (1.0 + (0.25 * abs($estagio)));
+    }
+
+    private static function pokemonAtivo(array $batalha, string $lado): ?array
+    {
+        $indice = (int) ($batalha[$lado]['ativo'] ?? -1);
+        return $batalha[$lado]['equipe'][$indice] ?? null;
+    }
+
+    private static function avancarPokemonsDesmaiados(array &$batalha, array &$mensagens): void
+    {
+        foreach (['jogador', 'adversario'] as $lado) {
+            $indice = (int) $batalha[$lado]['ativo'];
+            $equipe = $batalha[$lado]['equipe'];
+            if (isset($equipe[$indice]) && (int) $equipe[$indice]['hp'] <= 0) {
+                $mensagens[] = $equipe[$indice]['nome'] . ' desmaiou.';
+                $indice++;
+                while (
+                    isset($equipe[$indice])
+                    && (int) $equipe[$indice]['hp'] <= 0
+                ) {
+                    $indice++;
+                }
+                $batalha[$lado]['ativo'] = $indice;
+
+                if (isset($equipe[$indice])) {
+                    $mensagens[] = $equipe[$indice]['nome'] . ' entrou na batalha.';
+                }
+            }
+        }
+    }
+
+    private static function definirResultadoSeAcabou(array &$batalha, array &$mensagens): void
+    {
+        $jogadorAcabou = (int) $batalha['jogador']['ativo']
+            >= count($batalha['jogador']['equipe']);
+        $adversarioAcabou = (int) $batalha['adversario']['ativo']
+            >= count($batalha['adversario']['equipe']);
+
+        if ($jogadorAcabou || $adversarioAcabou) {
+            $batalha['finalizada'] = true;
+            $batalha['resultado'] = $jogadorAcabou ? 'derrota' : 'vitoria';
+            $mensagens[] = $jogadorAcabou
+                ? 'Todos os seus Pokémon desmaiaram. Você perdeu a batalha.'
+                : 'A equipe do líder foi derrotada. Você venceu a batalha!';
+        }
+    }
+
+    private static function nomeStatus(string $status): string
+    {
+        $nomes = [
+            'queimadura' => 'queimadura',
+            'veneno' => 'envenenamento',
+            'toxico' => 'envenenamento grave',
+            'paralisia' => 'paralisia',
+            'sono' => 'sono',
+            'congelamento' => 'congelamento',
+            'confusao' => 'confusão',
+        ];
+
+        return $nomes[$status] ?? $status;
+    }
+
+    private static function nomeEstagio(string $atributo): string
+    {
+        $nomes = [
+            'ataque' => 'Ataque',
+            'defesa' => 'Defesa',
+            'ataque_especial' => 'Ataque Especial',
+            'defesa_especial' => 'Defesa Especial',
+            'velocidade' => 'Velocidade',
+            'precisao' => 'Precisão',
+        ];
+
+        return $nomes[$atributo] ?? $atributo;
+    }
+}

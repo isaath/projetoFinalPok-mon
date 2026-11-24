@@ -607,7 +607,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 - O mapa contém 8 locais de batalha, correspondentes a 8 níveis em ordem crescente de dificuldade.
 - O nível 1 inicia desbloqueado. Cada próximo nível só pode ser acessado após vencer o nível anterior.
-- Ao clicar em “Jogar”, o fluxo futuro deve abrir o mapa; o jogador escolhe um local desbloqueado para iniciar a batalha. O mapa ainda não está implementado.
+- Ao clicar em “Jogar”, o mapa permite escolher um local desbloqueado para iniciar a batalha.
 - Os oito adversários são líderes de ginásio da região de Kanto, com equipes formadas por espécies da Geração I:
 
 | Nível | Líder | Especialidade | Insígnia | Equipe |
@@ -624,7 +624,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 - Os níveis 1 a 4 possuem três Pokémon por treinador; do nível 5 ao 8, cada treinador possui quatro.
 - A ordem de batalha também define a sequência de capturas: nos níveis 1 a 4, uma captura é liberada em cada uma das três primeiras vitórias; nos níveis 5 a 8, em cada uma das quatro primeiras vitórias.
 - A ordem de entrada de cada equipe começa pelo Pokémon com menor total de atributos base e termina pelo mais forte.
-- No início do combate, o Pokémon da posição 1 do jogador enfrenta o Pokémon de ordem 1 do treinador; cada lado avança para o próximo da sua ordem quando o ativo desmaia.
+- No início do combate, o primeiro Pokémon ativo com HP é enviado contra o primeiro Pokémon do treinador; quando um Pokémon desmaia, o próximo da equipe entra automaticamente.
 - A configuração prevê os tipos da Geração I; não aplicar tipos introduzidos posteriormente, como Aço ou Fada, a Magnemite ou Mr. Mime.
 - A especialidade e a insígnia pertencem ao treinador. O histórico de vitória e o progresso da jornada são individuais por usuário.
 - Cada nível concede sua insígnia na primeira vitória daquele usuário contra o líder.
@@ -661,7 +661,13 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 - Entre ações com a mesma prioridade, o Pokémon com maior Velocidade age primeiro. Se a Velocidade também empatar, a ordem é sorteada.
 - Efetividade de tipo altera o dano, não a ordem do turno. No gráfico da Geração III, um ataque super efetivo usa multiplicador 2; um ataque pouco efetivo usa 0,5; uma imunidade usa 0. Em Pokémon com dois tipos, os multiplicadores dos dois tipos defensores são multiplicados. Um movimento do mesmo tipo do Pokémon atacante recebe STAB de 1,5.
 - A referência de efetividade é o gráfico das Gerações II a V, usado em FireRed/LeafGreen: 17 tipos, sem Fada. A tipagem das espécies do projeto permanece conforme a Geração I, como aprovado pelos desenvolvedores; por isso não se deve aplicar Aço ou Fada a Magnemite ou Mr. Mime.
-- A ordem de ação e as regras de tipo acima são decisões aprovadas; a fórmula completa de dano e outras condições do combate continuam pendentes de definição.
+- A ordem de ação e os multiplicadores de tipo acima estão aprovados. Status são temporários e removidos ao final da batalha: queimadura reduz dano físico pela metade e causa 1/8 do HP máximo ao fim do turno; veneno causa 1/8; Toxic aumenta esse dano em 1/8 por turno; paralisia reduz Velocidade pela metade e dá 25% de chance de perder a ação; sono impede de agir por 1 ou 2 turnos; congelamento impede de agir até descongelar (20% de chance por ação); confusão dura 2 ações, com 50% de chance de causar 1/8 do HP máximo ao próprio Pokémon e perder a ação. Um Pokémon só pode ter uma dessas condições principais por vez.
+- A quantidade de movimentos disponíveis para cada Pokémon acompanha sua evolução: dois no estágio inicial, três no segundo estágio e quatro no estágio final. Espécies sem evolução ou com menos estágios devem ser avaliadas individualmente, usando movimentos de FireRed/LeafGreen como referência e ajustando a seleção para manter o combate balanceado.
+- Os movimentos estão cadastrados em `movimentos` e associados às espécies por `pokemon_movimentos`. A categoria física/especial segue a divisão de tipos da Geração III; os movimentos status não causam dano direto. Precisão e chance de efeito são verificadas no servidor.
+- A fórmula adaptada de dano é `potência × ataque ÷ (4 × defesa) × STAB × efetividade`, arredondada ao inteiro mais próximo, com mínimo de 1 e limite de metade do HP máximo do alvo por golpe. Golpes imunes causam 0. A categoria do golpe define quais atributos de ataque e defesa são usados.
+- Status de stat usam estágios limitados a -2 e +2; cada estágio positivo multiplica o atributo por 1,25 e cada estágio negativo divide por `1 + 0,25 × |estágio|`. Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha; Protect também só pode ser usado uma vez por Pokémon por batalha, já que o projeto não controla PP.
+- A batalha recebe apenas a escolha do movimento pelo formulário. O servidor valida o movimento, escolhe a ação adversária e processa o turno; o estado temporário fica na sessão PHP. Ao terminar, o HP do jogador, o log, as vitórias, as capturas liberadas e a recompensa são gravados no banco em transação. O HP global dos Pokémon adversários nunca é alterado.
+- A tela atual permite escolher movimentos e jogar até uma equipe ser derrotada; troca manual, itens durante a batalha e tentativa de captura não fazem parte desta etapa.
 - Os treinadores dos níveis 1 a 4 possuem três Pokémon; os dos níveis 5 a 8 possuem quatro.
 - Após vencer um mesmo treinador, um Pokémon adversário fica disponível por vitória, seguindo a ordem do menor para o maior total de atributos base: nas equipes de três membros, isso ocorre nas três primeiras vitórias; nas equipes de quatro, nas quatro primeiras.
 - A ordem de liberação para captura é salva junto à equipe do treinador. O progresso e as capturas reivindicadas são individuais por usuário; vencer novamente não deve duplicar uma captura já reivindicada.
@@ -670,7 +676,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 - Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
 - O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
 - O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
-- A tela de batalha atual é somente uma prévia visual temporária; não representa uma batalha funcional.
+- O sistema de turnos, dano, condições temporárias, troca automática, HP do jogador, registro, progresso e recompensas está implementado. A tentativa de captura ainda não foi definida/implementada.
 
 ## 19.6. Pokecenter e loja
 
@@ -709,12 +715,11 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 Não invente nem fixe sem confirmação dos desenvolvedores:
 
-- a fórmula completa de dano, as ações disponíveis, condições de término e eventual limite de turnos das batalhas;
 - como funciona a tentativa/confirmação de captura;
 - a lista, frequência e distribuição dos eventos aleatórios;
 - a lista, os preços e os efeitos dos itens de evolução.
 
-Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra.
+Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra. O equilíbrio dos oito níveis ainda deve ser acompanhado em testes de jogo, especialmente após implementar captura e evolução.
 
 **Referências consultadas para as regras de batalha:**
 

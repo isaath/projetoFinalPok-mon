@@ -10,7 +10,7 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 
 * **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
-* **Sistema de batalhas:** há uma prévia visual; o combate por turnos ainda será implementado.
+* **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro.
 * **Tipos de Pokémon:** as regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens de espécies da Geração I.
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
 * **Inventário:** gerenciamento dos itens adquiridos pelo jogador.
@@ -22,7 +22,7 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 
 ## Regras de batalha aprovadas
 
-O combate ainda não está implementado: a tela atual é uma prévia. Quando for desenvolvido, usará Pokémon FireRed/LeafGreen (Geração III) como referência para prioridade e efetividade de tipos, sem tentar reproduzir todos os sistemas do jogo original.
+O combate é uma adaptação acadêmica de FireRed/LeafGreen (Geração III), sem tentar reproduzir todos os sistemas do jogo original. A equipe do líder é controlada pelo servidor; o jogador escolhe um movimento em cada turno.
 
 ### Ordem das ações
 
@@ -36,7 +36,25 @@ A efetividade altera o dano, não a ordem de ação. Será usado o gráfico de t
 
 As espécies do projeto mantêm as tipagens da Geração I, por decisão dos desenvolvedores. Por exemplo, Magnemite permanece Elétrico e Mr. Mime permanece Psíquico; não se aplicam os tipos Aço ou Fada adicionados posteriormente.
 
-Essas regras de ordem e tipo estão aprovadas. A fórmula completa de dano, as ações disponíveis e as condições/limite de término ainda precisam ser definidos antes do combate funcional.
+As espécies mantêm os tipos da Geração I. Os golpes usam a categoria física/especial da Geração III e movimentos, potência, precisão e efeitos ficam cadastrados no banco.
+
+### Fórmula de dano e status
+
+O cálculo é intencionalmente curto para ser explicado na apresentação:
+
+`dano = potência × ataque ÷ (4 × defesa) × STAB × efetividade`
+
+O servidor arredonda o resultado, aplica mínimo de 1 e limita cada golpe a metade do HP máximo do alvo; uma imunidade continua causando 0. STAB vale 1,5, fraqueza 2, resistência 0,5 e tipos duplos multiplicam os fatores. Golpes físicos usam Ataque/Defesa; especiais usam Ataque Especial/Defesa Especial.
+
+Queimadura reduz pela metade o dano físico e, assim como veneno, causa 1/8 do HP máximo ao final do turno. Toxic aumenta esse dano em 1/8 por turno. Paralisia reduz Velocidade à metade e tem 25% de chance de impedir a ação; sono bloqueia 1 ou 2 ações; congelamento tem 20% de chance de terminar em cada ação; confusão dura 2 ações e tem 50% de chance de causar 1/8 do HP máximo ao próprio Pokémon e impedir a ação. Os status terminam com a batalha. Buffs e reduções de atributos têm limite de dois estágios em cada direção.
+
+Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha. Protect também pode ser usado uma vez por Pokémon por batalha; o projeto não controla PP dos movimentos.
+
+O estado dos turnos fica na sessão PHP. No fim, o servidor salva o HP dos Pokémon do jogador, o log, as vitórias, as capturas liberadas e a recompensa em uma transação. Não salva dano no cadastro global das espécies adversárias. A captura já pode ser liberada por vitória, mas a tentativa de captura ainda não foi definida ou implementada. Também não há troca manual nem uso de itens durante os turnos.
+
+### Movimentos por estágio de evolução
+
+Cada Pokémon terá dois movimentos no estágio inicial, três no segundo estágio e quatro no estágio final. Para espécies sem evolução ou com menos estágios, a quantidade e a seleção serão decididas caso a caso. Os movimentos disponíveis em FireRed/LeafGreen servirão como referência, mas a seleção poderá ser ajustada para manter a jornada desafiadora e equilibrada.
 
 Referências: [gráfico de tipos Gerações II–V e jogos aplicáveis](https://pokemondb.net/type/old), [prioridade de movimentos](https://pokemondb.net/move/quick-attack) e [cálculo de dano e STAB](https://www.serebii.net/games/damage.shtml).
 
@@ -109,7 +127,7 @@ A primeira campanha completa rende 960 Pokédollars em recompensas de primeira v
 
 **Jornada de ginásios:** os níveis seguem Brock (Rocha), Misty (Cascata), Lt. Surge (Trovão), Erika (Arco-íris), Koga (Alma), Sabrina (Pântano), Blaine (Vulcão) e Giovanni (Terra). Os quatro primeiros líderes têm três Pokémon; de Koga em diante, cada líder tem quatro Pokémon da Geração I. As espécies adversárias são cadastradas separadamente do time inicial do jogador. As equipes começam com o membro mais fraco e terminam com o mais forte; insígnias e vitórias são registradas por usuário. A PokeAPI fornece os sprites dos Pokémon, mas não possui retratos de treinadores.
 
-O fluxo planejado do botão **Jogar** é abrir o mapa dos oito ginásios e permitir que o usuário escolha um nível desbloqueado. O mapa ainda está pendente; por enquanto, a rota de prévia mostra o primeiro confronto do nível 1. Para consultar uma prévia de outro nível, use o parâmetro `nivel` na rota da batalha, de 1 a 8.
+O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível desbloqueado e a batalha carrega a equipe correspondente. Inicia o primeiro Pokémon ativo da equipe que ainda tenha HP, respeitando a ordem das posições, contra o primeiro Pokémon do líder.
 
 **Capturas dos líderes:** contra equipes de quatro Pokémon, cada uma das quatro primeiras vitórias libera um Pokémon para captura, do mais fraco ao mais forte. O sistema mantém o progresso por usuário e registra capturas reivindicadas para impedir duplicação. A tentativa e as condições da captura ainda serão implementadas em uma etapa posterior.
 
@@ -134,7 +152,7 @@ O fluxo planejado do botão **Jogar** é abrir o mapa dos oito ginásios e permi
 
 Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
 
-**Ainda pendente de decisão:** fórmula completa de dano, ações disponíveis e condições/limite de término das batalhas; como a tentativa de captura será feita; eventos aleatórios; e lista/preço/efeitos dos itens de evolução. A ordem de ação, efetividade de tipos e disponibilidade progressiva de capturas por vitória já foram definidas acima.
+**Ainda pendente:** definir e implementar como a captura liberada será tentada/concluída; eventos aleatórios; itens, preços e efeitos de evolução; loja funcional; e testar o equilíbrio da jornada com capturas e evoluções funcionando. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e a liberação progressiva de capturas já estão implementados conforme as regras acima.
 
 ## Objetivos Acadêmicos
 
