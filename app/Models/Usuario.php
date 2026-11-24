@@ -93,7 +93,7 @@ class Usuario
             'INSERT INTO usuarios
                 (nome, email, senha, dinheiro, data_cadastro, foto, tipo_foto)
              VALUES
-                (:nome, :email, :senha, 0, CURRENT_TIMESTAMP, :foto, :tipo_foto)'
+                (:nome, :email, :senha, 120, CURRENT_TIMESTAMP, :foto, :tipo_foto)'
         );
         $insercao->bindValue(':nome', $nome);
         $insercao->bindValue(':email', $email);

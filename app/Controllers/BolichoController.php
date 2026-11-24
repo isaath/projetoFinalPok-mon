@@ -17,6 +17,19 @@ class BolichoController{
             exit;
         }
 
+        $idUsuario = filter_var(
+            $_SESSION['usuario']['id_usuario'],
+            FILTER_VALIDATE_INT
+        );
+        $saldo = 0;
+        if ($idUsuario !== false && $idUsuario >= 1) {
+            $consulta = $this->db->prepare(
+                'SELECT dinheiro FROM usuarios WHERE id_usuario = :id_usuario'
+            );
+            $consulta->execute(['id_usuario' => $idUsuario]);
+            $saldo = (int) $consulta->fetchColumn();
+        }
+
         require __DIR__ . '/../Views/bolicho/bolicho.php';
     }
 }

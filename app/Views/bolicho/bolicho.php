@@ -17,7 +17,7 @@
             <h1>Bolicho</h1>
         </div>
 
-        <p>Saldo: <strong>0</strong> Pokédollars</p>
+        <p>Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> Pokédollars</p>
     </header>
 
     <section class="grade-itens" aria-label="Itens disponíveis">

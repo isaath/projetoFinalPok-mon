@@ -141,12 +141,146 @@ final class BatalhaEngine
         }
 
         $batalha['turnos'] = (int) $batalha['turnos'] + 1;
-        $batalha['mensagens'] = array_slice(
-            array_merge($batalha['mensagens'] ?? [], $mensagens),
-            -12
+        $batalha['mensagens'] = array_merge(
+            $batalha['mensagens'] ?? [],
+            $mensagens
         );
 
         return $batalha;
+    }
+
+    public static function resolverTroca(array $batalha, int $indiceTroca): array
+    {
+        if (!empty($batalha['finalizada'])) {
+            throw new RuntimeException('Esta batalha já foi encerrada.');
+        }
+        if (!isset($batalha['jogador']['equipe'][$indiceTroca])) {
+            throw new InvalidArgumentException('O Pokémon escolhido não existe no time.');
+        }
+        $pokemonTroca = $batalha['jogador']['equipe'][$indiceTroca];
+        if ((int) $pokemonTroca['hp'] <= 0) {
+            throw new InvalidArgumentException('Não é possível trocar para um Pokémon desmaiado.');
+        }
+
+        $indiceAtual = (int) $batalha['jogador']['ativo'];
+        if ($indiceAtual === $indiceTroca) {
+            throw new InvalidArgumentException('Esse Pokémon já está ativo.');
+        }
+
+        $batalha['jogador']['ativo'] = $indiceTroca;
+        $mensagens = [
+            'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
+            $pokemonTroca['nome'] . ' entrou no lugar de '
+                . $batalha['jogador']['equipe'][$indiceAtual]['nome'] . '.',
+        ];
+        self::executarAcaoComputador($batalha, $mensagens);
+        $batalha['turnos'] = (int) $batalha['turnos'] + 1;
+        $batalha['mensagens'] = array_merge($batalha['mensagens'] ?? [], $mensagens);
+        return $batalha;
+    }
+
+    public static function resolverUsoItem(array $batalha, array $item): array
+    {
+        if (!empty($batalha['finalizada'])) {
+            throw new RuntimeException('Esta batalha já foi encerrada.');
+        }
+        $indice = (int) $batalha['jogador']['ativo'];
+        $pokemon =& $batalha['jogador']['equipe'][$indice];
+        $tipo = (string) $item['tipo'];
+
+        if ($tipo === 'revive') {
+            if ((int) $pokemon['hp'] > 0) {
+                throw new InvalidArgumentException('Revive só pode ser usado em um Pokémon desmaiado.');
+            }
+            $pokemon['hp'] = (int) round((int) $pokemon['hp_maximo'] * 0.5);
+            $mensagens = [
+                'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
+                $pokemon['nome'] . ' foi revivido com metade do HP.',
+            ];
+        } elseif (str_starts_with($tipo, 'cura_') || $tipo === 'cura_status') {
+            if ((int) $pokemon['hp'] <= 0) {
+                throw new InvalidArgumentException('Use Revive antes de curar este Pokémon.');
+            }
+
+            if ($tipo === 'cura_status') {
+                $nomeItem = strtolower((string) $item['nome']);
+                $statusPermitido = [
+                    'antidote' => 'veneno',
+                    'burn heal' => 'queimadura',
+                    'ice heal' => 'congelamento',
+                    'awakening' => 'sono',
+                    'paralyze heal' => 'paralisia',
+                ];
+                $statusDesejado = $statusPermitido[$nomeItem] ?? null;
+                if (
+                    $statusDesejado !== null
+                    && $pokemon['status'] !== $statusDesejado
+                ) {
+                    throw new InvalidArgumentException(
+                        $item['nome'] . ' não cura a condição atual de ' . $pokemon['nome'] . '.'
+                    );
+                }
+                $pokemon['status'] = null;
+                $pokemon['status_turnos'] = 0;
+                $mensagens = [
+                    'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
+                    $item['nome'] . ' removeu a condição de ' . $pokemon['nome'] . '.',
+                ];
+            } else {
+                $hpAnterior = (int) $pokemon['hp'];
+                $valor = (int) $item['valor_efeito'];
+                $nomeItem = strtolower((string) $item['nome']);
+                if ($tipo === 'cura_hp_status' || $nomeItem === 'max potion') {
+                    $pokemon['hp'] = (int) $pokemon['hp_maximo'];
+                } else {
+                    $pokemon['hp'] = min((int) $pokemon['hp_maximo'], $hpAnterior + $valor);
+                }
+                if ($tipo === 'cura_hp_status') {
+                    $pokemon['status'] = null;
+                    $pokemon['status_turnos'] = 0;
+                }
+                $mensagens = [
+                    'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
+                    $item['nome'] . ' recuperou '
+                        . ((int) $pokemon['hp'] - $hpAnterior) . ' HP de '
+                        . $pokemon['nome'] . '.',
+                ];
+            }
+        } else {
+            throw new InvalidArgumentException('Este item não pode ser usado durante a batalha.');
+        }
+
+        self::executarAcaoComputador($batalha, $mensagens);
+        $batalha['turnos'] = (int) $batalha['turnos'] + 1;
+        $batalha['mensagens'] = array_merge($batalha['mensagens'] ?? [], $mensagens);
+        return $batalha;
+    }
+
+    public static function resolverFuga(array $batalha): array
+    {
+        if (!empty($batalha['finalizada'])) {
+            throw new RuntimeException('Esta batalha já foi encerrada.');
+        }
+        $batalha['finalizada'] = true;
+        $batalha['resultado'] = 'derrota';
+        $batalha['mensagens'] = array_merge(
+            $batalha['mensagens'] ?? [],
+            ['Você fugiu da batalha.']
+        );
+        return $batalha;
+    }
+
+    private static function executarAcaoComputador(array &$batalha, array &$mensagens): void
+    {
+        $jogador = self::pokemonAtivo($batalha, 'jogador');
+        $adversario = self::pokemonAtivo($batalha, 'adversario');
+        if ($jogador === null || $adversario === null) {
+            return;
+        }
+        $movimento = self::escolherMovimentoComputador($adversario, $jogador);
+        self::executarAcao($batalha, 'adversario', $movimento, $mensagens);
+        self::avancarPokemonsDesmaiados($batalha, $mensagens);
+        self::definirResultadoSeAcabou($batalha, $mensagens);
     }
 
     public static function calcularEfetividade(string $tipoAtaque, array $tiposDefensor): float

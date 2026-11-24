@@ -161,6 +161,9 @@ class BatalhaController
             ? null
             : $this->pokemonAtivo($dadosBatalha, 'adversario');
         $csrfBatalha = $_SESSION['csrf_batalha'];
+        $inventario = $dadosBatalha === null
+            ? []
+            : $this->carregarInventario($idUsuario);
 
         define('POKEBAGUAL_BATALHA_VIEW', true);
         require __DIR__ . '/../Views/batalha/index.php';
@@ -242,15 +245,44 @@ class BatalhaController
             );
         }
 
-        $idMovimento = filter_var(
-            $_POST['id_movimento'] ?? null,
-            FILTER_VALIDATE_INT
-        );
-        if ($idMovimento === false || $idMovimento === null || $idMovimento < 1) {
-            throw new InvalidArgumentException('Escolha um movimento válido.');
+        $acao = (string) ($_POST['acao'] ?? '');
+        if ($acao === 'trocar_pokemon') {
+            $indiceTroca = filter_var(
+                $_POST['indice_troca'] ?? null,
+                FILTER_VALIDATE_INT
+            );
+            if ($indiceTroca === false || $indiceTroca === null) {
+                throw new InvalidArgumentException('Escolha um Pokémon válido para trocar.');
+            }
+            $estado = BatalhaEngine::resolverTroca($estado, $indiceTroca);
+        } elseif ($acao === 'usar_item') {
+            $idItem = filter_var(
+                $_POST['id_item'] ?? null,
+                FILTER_VALIDATE_INT
+            );
+            if ($idItem === false || $idItem === null) {
+                throw new InvalidArgumentException('Escolha um item válido.');
+            }
+            $item = $this->buscarItemInventario($idUsuario, $idItem);
+            if ($item === null) {
+                throw new InvalidArgumentException('Você não possui esse item no inventário.');
+            }
+            $estado = BatalhaEngine::resolverUsoItem($estado, $item);
+            $this->consumirItem($idUsuario, $idItem);
+        } elseif ($acao === 'fugir') {
+            $estado = BatalhaEngine::resolverFuga($estado);
+        } elseif ($acao === '' || $acao === 'atacar') {
+            $idMovimento = filter_var(
+                $_POST['id_movimento'] ?? null,
+                FILTER_VALIDATE_INT
+            );
+            if ($idMovimento === false || $idMovimento === null || $idMovimento < 1) {
+                throw new InvalidArgumentException('Escolha um movimento válido.');
+            }
+            $estado = BatalhaEngine::resolverTurno($estado, $idMovimento);
+        } else {
+            throw new InvalidArgumentException('A ação escolhida não é válida.');
         }
-
-        $estado = BatalhaEngine::resolverTurno($estado, $idMovimento);
         $_SESSION['batalha'] = $estado;
         if (!empty($estado['finalizada'])) {
             $resultado = $modeloBatalha->registrarResultado($idUsuario, $estado);
@@ -266,5 +298,65 @@ class BatalhaController
     {
         $indice = (int) ($batalha[$lado]['ativo'] ?? -1);
         return $batalha[$lado]['equipe'][$indice] ?? null;
+    }
+
+    private function carregarInventario(int $idUsuario): array
+    {
+        $consulta = $this->db->prepare(
+            'SELECT item.id_item, item.nome, item.tipo,
+                    item.valor_efeito, inventario.quantidade
+             FROM inventario AS inventario
+             INNER JOIN itens_loja AS item
+                ON item.id_item = inventario.id_item
+             WHERE inventario.id_usuario = :id_usuario
+               AND inventario.quantidade > 0
+             ORDER BY item.nome'
+        );
+        $consulta->execute(['id_usuario' => $idUsuario]);
+        $itens = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($itens as &$item) {
+            $item['id_item'] = (int) $item['id_item'];
+            $item['valor_efeito'] = (int) $item['valor_efeito'];
+            $item['quantidade'] = (int) $item['quantidade'];
+        }
+        unset($item);
+        return $itens;
+    }
+
+    private function buscarItemInventario(int $idUsuario, int $idItem): ?array
+    {
+        foreach ($this->carregarInventario($idUsuario) as $item) {
+            if ($item['id_item'] === $idItem) {
+                return $item;
+            }
+        }
+        return null;
+    }
+
+    private function consumirItem(int $idUsuario, int $idItem): void
+    {
+        $this->db->beginTransaction();
+        try {
+            $consulta = $this->db->prepare(
+                'UPDATE inventario
+                 SET quantidade = quantidade - 1
+                 WHERE id_usuario = :id_usuario
+                   AND id_item = :id_item
+                   AND quantidade > 0'
+            );
+            $consulta->execute([
+                'id_usuario' => $idUsuario,
+                'id_item' => $idItem,
+            ]);
+            if ($consulta->rowCount() !== 1) {
+                throw new InvalidArgumentException('Não foi possível consumir o item.');
+            }
+            $this->db->commit();
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
     }
 }

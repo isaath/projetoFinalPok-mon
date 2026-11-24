@@ -1,75 +1,104 @@
-body {
-    /* Define a imagem de fundo da tela inicial. */
-    background-image: url("img/tela_batalha.png");
-    background-attachment: fixed; /* Fixa a imagem no fundo da página. */
-    background-size: cover; /* Faz a imagem cobrir toda a área visível. */
-    background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
-    background-repeat: no-repeat; /* Evita repetição da imagem. */
+body.battle-page {
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    background:
+        linear-gradient(rgb(255 255 255 / 8%), rgb(255 255 255 / 8%)),
+        url("img/tela_batalha.png") center 0 / cover fixed no-repeat;
 }
 
-.battle-shell {
-    width: min(1120px, 100%);
-    margin: 0 auto;
-}
-
-.battle-header {
-    margin-bottom: 22px;
-    padding: 18px 22px;
-    border: 4px solid #17243b;
-    background: #e5ebf5;
-    box-shadow: 5px 5px 0 #34445d;
+.textos_cabecalho {
+    min-height: 86px;
+    padding: 8px 250px 4px 20px;
+    box-sizing: border-box;
     text-align: center;
+    color: #dfeaff;
+    text-shadow: 3px 3px 0 #17243b;
 }
 
-.battle-back {
-    display: block;
-    width: fit-content;
-    margin-bottom: 12px;
-    color: #174735;
-    font-weight: 700;
-    text-decoration: none;
+.textos_cabecalho .eyebrow,
+.textos_cabecalho h1,
+.battle-lead {
+    margin: 4px 0;
+}
+
+.battle-lead {
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+.battle-score {
+    position: absolute;
+    top: 158px;
+    left: 10px;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: min(480px, 48vw);
+    min-height: 52px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    border: 3px solid #17243b;
+    background: rgb(255 255 255 / 96%);
+    box-shadow: 4px 4px 0 rgb(52 68 93 / 70%);
+    font-size: 0.72rem;
+}
+
+.battle-score span:not(.score-divider) {
+    display: grid;
+    gap: 4px;
+}
+
+.score-divider {
+    color: #8e2525;
+    font-family: 'Press Start 2P', monospace;
 }
 
 .lado-a-lado {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: start;
     width: 100%;
-    padding: 0 20px;
+    min-height: 475px;
+    padding: 170px 8px 0 20px;
     box-sizing: border-box;
 }
 
 .info_meio {
-    order: 1; /* Deixa na esquerda/centro */
-    flex: 1;  /* Ocupa o espaço ao lado da info_direita */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    min-width: 0;
+    padding-top: 175px;
 }
 
 .info_direita {
-    order: 2;       /* Deixa na direita */
-    width: 240px;   /* Largura da coluna da direita (ajuste se quiser maior/menor) */
-    flex-shrink: 0; /* Impede o card de ser esmagado */
+    grid-column: 2;
+    grid-row: 1;
+    width: 248px;
 }
 
-.textos_cabecalho{
-    text-align: center;
-    color: rgb(201, 201, 246)
-}
-
-.battle-header h1 {
-    margin: 8px 0;
+.battle-shell {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
 }
 
 .battle-message {
-    margin: 0 0 16px;
-    padding: 12px;
+    position: absolute;
+    z-index: 30;
+    top: 132px;
+    left: 50%;
+    width: min(620px, 50vw);
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 8px 12px;
     border: 3px solid #17243b;
     background: #fff;
-    box-shadow: 4px 4px 0 #34445d;
     text-align: center;
 }
 
@@ -78,106 +107,88 @@ body {
     color: #8e2525;
 }
 
-.battle-lead {
-    margin: 4px 0 14px;
-    font-weight: 700;
-}
-
-.preview-label {
-    display: inline-block;
-    padding: 7px 10px;
-    border: 2px solid #8e2525;
-    background: #fff0d6;
-    color: #8e2525;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-}
-
-
-    .battle-layout {
-    display: grid;
-    gap: 16px;
-    align-items: left;
-    width: 30%;
-}
-
-.battle-main,
-.trainer-card {
-    border: 4px solid #17243b;
-    background: rgb(229 235 245 / 97%);
-    box-shadow: 5px 5px 0 #34445d;
-    justify-content: left;
-}
-
-.battle-main {
-    padding: 20px;
-}
-
-.battle-score {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-    padding: 10px 12px;
-    border: 2px solid #17243b;
-    background: #d3deef;
-    font-size: 0.72rem;
-    font-weight: 800;
-}
-
-.battle-score span:not(.score-divider) {
-    display: grid;
-    gap: 5px;
-}
-
-.battle-score strong {
-    font-size: 0.9rem;
-}
-
-.score-divider {
-    color: #8e2525;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.8rem;
-}
-
-.arena {
-    display: grid;
-    gap: 12px;
-}
-
 .combatant {
-    display: grid;
-    grid-template-columns: minmax(90px, 124px) minmax(0, 1fr);
-    gap: 16px;
+    display: flex;
     align-items: center;
-    min-height: 160px;
-    padding: 18px;
-    border: 3px solid #17243b;
+    width: min(43%, 390px);
+    min-height: 190px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
 }
 
 .combatant-player {
-    background: #d9eedb;
+    flex-direction: row-reverse;
 }
 
 .combatant-opponent {
-    background: #f2dfc9;
+    flex-direction: row;
 }
 
 .combatant-portrait {
+    flex: 0 0 auto;
     display: grid;
     place-items: center;
-    min-width: 0;
+    width: 180px;
+    height: 180px;
 }
 
 .combatant-image {
-    display: block;
-    width: 120px;
-    height: 120px;
+    width: 180px;
+    height: 180px;
     object-fit: contain;
     image-rendering: pixelated;
-    filter: drop-shadow(3px 4px 0 rgb(23 36 59 / 28%));
+    filter: drop-shadow(4px 5px 0 rgb(23 36 59 / 25%));
+}
+
+.combatant-player .combatant-image {
+    transform: scaleX(-1);
+}
+
+.combatant-copy {
+    width: 205px;
+    margin: 0 -20px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border: 3px solid #17243b;
+    background: #fff;
+    box-shadow: 4px 4px 0 rgb(52 68 93 / 55%);
+    z-index: 5;
+}
+
+.combatant-copy h2 {
+    margin: 4px 0;
+    font-size: 0.82rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.combatant-copy p,
+.combatant-copy small {
+    margin: 4px 0;
+    font-size: 0.76rem;
+}
+
+.combatant-label {
+    color: #34445d;
+    font-size: 0.48rem !important;
+    font-weight: 800;
+}
+
+.hp-track {
+    height: 13px;
+    margin-top: 8px;
+    overflow: hidden;
+    border: 2px solid #34453a;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.hp-track span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #55bd53, #8bd25c);
 }
 
 .combatant-symbol,
@@ -189,153 +200,55 @@ body {
     border: 4px solid #17243b;
     background: #f5d761;
     box-shadow: inset 4px 4px 0 #fff;
-    color: #17243b;
-    font-family: 'Press Start 2P', monospace;
-}
-
-.combatant-symbol {
-    font-size: 1.1rem;
-}
-
-.combatant-copy h2 {
-    margin: 2px 0 6px;
-    overflow-wrap: anywhere;
-}
-
-.combatant-copy p {
-    margin: 4px 0;
-    font-size: 0.9rem;
-}
-
-.combatant-label {
-    color: #4b5c77;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.52rem !important;
-}
-
-.hp-placeholder {
-    height: 12px;
-    margin-top: 12px;
-    border: 2px solid #17243b;
-    background: #fff;
-}
-
-.hp-placeholder span {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(90deg, #d6dbe3 0 8px, #fff 8px 10px);
-}
-
-.combatant-copy small {
-    display: block;
-    margin-top: 5px;
-    color: #4b5c77;
-}
-
-.arena-vs {
-    justify-self: center;
-    padding: 4px 12px;
-    border: 2px solid #17243b;
-    background: #fff;
-    color: #8e2525;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.65rem;
-}
-
-.battle-log {
-    min-height: 105px;
-    margin-top: 18px;
-    padding: 14px;
-    border: 3px solid #17243b;
-    background: #fff;
-}
-
-.battle-log h2,
-.trainer-card h3 {
-    margin: 0 0 10px;
-    font-size: 0.72rem;
-}
-
-.battle-log p {
-    margin: 6px 0;
-}
-
-.log-note,
-.capture-preview small {
-    color: #5b6170;
-    font-size: 0.82rem;
-}
-
-.battle-actions {
-    display: flex;              /* Deixa lado a lado (ou use "grid" para 2 colunas) */
-    justify-content: center;    /* Centraliza na tela */
-    flex-wrap: wrap;            /* Quebra linha se faltar espaço */
-    gap: 12px;                  /* Espaço entre os botões */
-    margin-top: 18px;           /* Distância da arena acima */
-}
-
-.battle-actions button {
-    min-height: 54px;
-    padding: 8px;
 }
 
 .trainer-card {
-    width: 100%;
-    box-sizing: border-box;
+    width: 248px;
     padding: 12px;
+    box-sizing: border-box;
+    border: 4px solid #17243b;
+    background: rgb(229 235 245 / 97%);
+    box-shadow: 5px 5px 0 #34445d;
     text-align: center;
-    font-size: 0.85rem;
+}
+
+.trainer-card .eyebrow,
+.trainer-card h2,
+.trainer-card h3 {
+    margin: 6px 0;
 }
 
 .trainer-avatar {
-    width: 80px;  /* Era 112px */
-    height: 96px; /* Era 136px */
+    width: 80px;
+    height: 96px;
     margin: 8px auto;
 }
 
 .trainer-image {
-    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    image-rendering: pixelated;
 }
 
-.trainer-image-note {
-    margin: 16px 0 0;
-    color: #34445d;
-    font-size: 0.8rem;
-    text-align: center;
-}
-
-.trainer-image-note code {
-    overflow-wrap: anywhere;
-}
-
-.trainer-card h2 {
+.trainer-specialty,
+.badge-preview {
     margin: 8px 0;
-}
-
-.trainer-specialty {
-    margin: 4px 0 14px;
 }
 
 .badge-preview {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 9px;
-    margin: 12px 0 20px;
-    padding: 10px 6px;
+    gap: 8px;
+    padding: 8px;
     border: 2px solid #17243b;
     background: #fff;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .badge-stone {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border: 3px solid #17243b;
     background: #9da9b6;
     transform: rotate(45deg);
@@ -343,7 +256,7 @@ body {
 
 .trainer-team {
     display: grid;
-    gap: 8px;
+    gap: 6px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -351,368 +264,229 @@ body {
 }
 
 .trainer-team li {
-    padding: 9px;
+    padding: 7px;
     border: 2px solid #17243b;
     background: #fff;
-    font-weight: 700;
-}
-
-.trainer-team li span {
-    display: inline-block;
-    margin-right: 8px;
-    color: #596a83;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.55rem;
-}
-
-.capture-preview {
-    margin-top: 20px;
-    padding: 12px 10px;
-    border: 2px dashed #23654f;
-    background: #e7f2e7;
-    text-align: left;
-}
-
-.capture-preview h3 {
-    text-align: center;
-}
-
-.capture-preview p {
-    margin: 7px 0;
-    font-size: 0.84rem;
-}
-
-/* Arena retrô: posições opostas para dar a leitura de um combate Pokémon. */
-.battle-main {
-    padding: 14px;
-    background: #dce8d4;
-}
-
-.arena {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: minmax(175px, 1fr) minmax(175px, 1fr);
-    grid-template-areas:
-        "opponent opponent"
-        "player player";
-    gap: 0;
-    min-height: 430px;
-    overflow: hidden;
-    padding: 18px;
-    border: 4px solid #263b39;
-    background:
-        radial-gradient(ellipse at 76% 30%, #80d66f 0 19%, transparent 19.5%),
-        radial-gradient(ellipse at 24% 76%, #80d66f 0 21%, transparent 21.5%),
-        repeating-linear-gradient(0deg, #d8f2bd 0 7px, #d0edb4 7px 14px);
-    box-shadow: inset 0 0 0 4px #f4f0d5;
-}
-
-.combatant {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-}
-
-.combatant-player {
-    grid-area: player;
-    align-self: end;
-    justify-self: start;
-    flex-direction: row;
-    width: min(78%, 460px);
-    padding-bottom: 4px;
-}
-
-.combatant-opponent {
-    grid-area: opponent;
-    align-self: start;
-    justify-self: end;
-    flex-direction: row-reverse;
-    width: min(78%, 460px);
-    padding-top: 4px;
-}
-
-.combatant-portrait {
-    flex: 0 0 42%;
-    align-self: end;
-}
-
-.combatant-player .combatant-image {
-    width: clamp(110px, 18vw, 190px);
-    height: clamp(110px, 18vw, 190px);
-    transform: scaleX(-1);
-}
-
-.combatant-opponent .combatant-image {
-    width: clamp(100px, 16vw, 170px);
-    height: clamp(100px, 16vw, 170px);
-}
-
-.combatant-copy {
-    align-self: start;
-    width: 100%;
-    padding: 12px 14px;
-    border: 3px solid #273633;
-    border-radius: 12px 4px 12px 4px;
-    background: #f6f2d8;
-    box-shadow: 4px 4px 0 rgb(39 54 51 / 35%);
-}
-
-.combatant-copy h2 {
-    font-size: clamp(0.9rem, 2vw, 1.2rem);
-}
-
-.combatant-label {
-    font-family: inherit;
-    font-size: 0.65rem !important;
     font-weight: 800;
 }
 
-.hp-track {
-    height: 13px;
-    margin-top: 10px;
-    overflow: hidden;
-    border: 2px solid #34453a;
-    border-radius: 8px;
+.trainer-team li span {
+    margin-right: 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.52rem;
+}
+
+.battle-actions {
+    position: relative;
+    z-index: 40;
+    bottom: auto;
+    left: auto;
+    display: flex;
+    order: 3;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transform: none;
+}
+
+.battle-actions button:not(.opcao-ataque) {
+    padding: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.battle-actions button img {
+    width: 175px;
+    max-height: 62px;
+    object-fit: contain;
+}
+
+.battle-moves,
+.battle-options,
+.battle-option-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.battle-moves {
+    flex-direction: column;
+}
+
+.btn-atacar-principal {
+    padding: 0;
+}
+
+.opcoes-ataques {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: min(560px, 70vw);
+}
+
+.opcoes-ataques[hidden] {
+    display: none;
+}
+
+.opcao-ataque {
+    display: grid;
+    gap: 4px;
+    min-width: 150px;
+    min-height: 58px;
+    padding: 9px 14px;
+    border: 2px solid #17243b;
+    border-radius: 0;
+    background-color: var(--attack-type-color, #a8a878) !important;
+    color: var(--attack-text-color, #17243b);
+    box-shadow: none;
+    text-align: center;
+}
+
+.opcao-ataque.tipo-normal { --attack-type-color: #a8a878; }
+.opcao-ataque.tipo-fogo { --attack-type-color: #f08030; --attack-text-color: #fff; }
+.opcao-ataque.tipo-agua { --attack-type-color: #6890f0; --attack-text-color: #fff; }
+.opcao-ataque.tipo-eletrico { --attack-type-color: #f8d030; }
+.opcao-ataque.tipo-planta { --attack-type-color: #78c850; }
+.opcao-ataque.tipo-inseto { --attack-type-color: #a8b820; }
+.opcao-ataque.tipo-veneno { --attack-type-color: #a040a0; --attack-text-color: #fff; }
+.opcao-ataque.tipo-pedra { --attack-type-color: #b8a038; --attack-text-color: #fff; }
+.opcao-ataque.tipo-terra { --attack-type-color: #e0c068; }
+.opcao-ataque.tipo-lutador { --attack-type-color: #c03028; --attack-text-color: #fff; }
+.opcao-ataque.tipo-psiquico { --attack-type-color: #f85888; --attack-text-color: #fff; }
+.opcao-ataque.tipo-fantasma { --attack-type-color: #705898; --attack-text-color: #fff; }
+.opcao-ataque.tipo-gelo { --attack-type-color: #98d8d8; }
+.opcao-ataque.tipo-dragao { --attack-type-color: #7038f8; --attack-text-color: #fff; }
+.opcao-ataque.tipo-sombrio { --attack-type-color: #705848; --attack-text-color: #fff; }
+.opcao-ataque.tipo-aco { --attack-type-color: #b8b8d0; }
+.opcao-ataque.tipo-voador { --attack-type-color: #a890f0; }
+
+.opcao-ataque strong {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.opcao-ataque small {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.battle-options {
+    flex-wrap: wrap;
+}
+
+.battle-option-control {
+    flex-direction: column;
+}
+
+.battle-option-control select {
+    min-width: 175px;
+    min-height: 32px;
+    border: 2px solid #17243b;
     background: #fff;
-}
-
-.hp-track span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, #55bd53, #8bd25c);
-    transition: width 350ms ease;
-}
-
-.arena-vs {
-    position: absolute;
-    z-index: 2;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 5px 9px;
-    border: 2px solid #263b39;
-    background: #f6f2d8;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .battle-log {
-    border-radius: 4px;
-    background: #fffdf1;
-}
-
-/*BOTOES DO JOGO*/
-
-/* Remove borda, fundo e transparência de todos os botões da batalha */
-.battle-main button,
-.battle-actions button {
-    padding: 0;
-    min-height: auto;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    opacity: 1 !important;
-    cursor: pointer;
-}
-
-/* Mantém 100% opaco mesmo quando o botão estiver com "disabled" */
-.battle-main button:disabled,
-.battle-actions button:disabled {
-    opacity: 1 !important;
-    cursor: not-allowed;
-}
-
-.battle-main button img,
-.battle-actions button img {
-    display: block;
-}
-
-
-
-.btn_pixel img:hover {
-    /* Indica que a imagem do botão está interativa ao passar o ponteiro. */
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-.btn_pixel img:active {
-    /* Simula o botão sendo pressionado. */
-    transform: scale(0.95);
-}
-
-/* === AJUSTES DE TAMANHO E POSIÇÃO (HP PARA FORA, POKÉMON PARA DENTRO) === */
-
-/* === POKÉMON LADO A LADO E CAIXAS DE HP MAIS PRÓXIMAS === */
-
-/* 1. Coloca os dois Pokémon lado a lado no centro da tela */
-.battle-shell {
-    display: flex !important;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;         /* <-- Distância ENTRE o Bellsprout e o Geodude */
-    margin-top: 50px;  /* <-- Sobe ou desce a dupla no gramado */
-}
-
-.battle-message {
+    position: relative;
+    z-index: 25;
+    bottom: auto;
+    left: auto;
+    order: 4;
     width: 100%;
+    min-height: 112px;
+    max-height: 220px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    border: 3px solid #17243b;
+    background: rgb(255 255 255 / 96%);
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
-/* 2. Alinha cada Pokémon com a sua própria caixa de HP */
-.combatant {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0px !important;
-    width: fit-content !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
+.battle-log h2 {
+    margin: 0 0 6px;
+    font-size: 0.72rem;
 }
 
-.combatant-player {
-    flex-direction: row-reverse !important; /* HP na esquerda, seu Pokémon na direita */
+.battle-log ol,
+.battle-log p {
+    margin: 5px 0;
 }
 
-.combatant-opponent {
-    flex-direction: row !important;         /* Pokémon adversário na esquerda, HP na direita */
+.battle-finish {
+    position: absolute;
+    z-index: 50;
+    right: 270px;
+    bottom: 84px;
+    padding: 12px;
+    border: 3px solid #17243b;
+    background: #fff;
 }
 
-/* Destrava o tamanho do container da imagem */
-.combatant-portrait {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    height: auto !important;
-}/* === POKÉMON LADO A LADO E CAIXAS DE HP PRÓXIMAS === */
-
-.info_meio {
-    min-width: 0;
+.battle-page > .btn_pixel {
+    position: fixed;
+    z-index: 60;
+    right: 8px;
+    bottom: 8px;
 }
 
-/* 1. Força os dois Pokémon a ficarem lado a lado na mesma linha */
-.battle-shell {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important; /* Impede de cair para a linha de baixo */
-    justify-content: center;
-    align-items: center;
-    gap: 16px;         /* <-- Distância ENTRE o Bellsprout e o Geodude */
-    width: 100% !important;
-    margin-top: 60px;  /* <-- Sobe ou desce a dupla no gramado */
+.battle-page > .btn_pixel img {
+    width: 200px;
 }
 
-/* 2. Alinha cada Pokémon com a sua própria caixa de HP */
-.combatant {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0px !important;
-    width: fit-content !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-}
+@media (max-width: 980px) {
+    .textos_cabecalho {
+        padding-right: 20px;
+    }
 
-.combatant-player {
-    flex-direction: row-reverse !important; /* HP na esquerda, seu Pokémon na direita */
-}
+    .battle-score {
+        position: static;
+        width: calc(100% - 20px);
+        margin: 8px 10px;
+    }
 
-.combatant-opponent {
-    flex-direction: row !important;         /* Pokémon adversário na esquerda, HP na direita */
-}
-
-.combatant-portrait {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    height: auto !important;
-}
-
-.combatant-player .combatant-image {
-    transform: scaleX(-1);
-}
-
-/* 3. Ajusta a caixa de HP e impede o nome do Pokémon de quebrar linha */
-.combatant-copy {
-    align-self: center !important;
-    width: 205px !important; /* Largura suficiente para caber "Bellsprout" inteiro */
-    padding: 8px 10px !important;
-    z-index: 5;
-}
-
-.combatant-copy h2 {
-    font-size: 0.85rem !important;
-    white-space: nowrap; /* Não deixa quebrar o nome no meio */
-}
-
-/* Puxa os HPs para bem perto dos Pokémon */
-.combatant-player .combatant-copy {
-    margin-right: -18px;
-}
-
-.combatant-opponent .combatant-copy {
-    margin-left: -18px;
-}
-
-@media (max-width: 760px) {
-    .battle-layout {
+    .lado-a-lado {
         grid-template-columns: 1fr;
+        padding: 20px 10px 280px;
+    }
+
+    .info_direita {
+        grid-column: 1;
+        width: 100%;
     }
 
     .trainer-card {
-        order: -1;
-    }
-}
-
-@media (max-width: 480px) {
-    .battle-page {
-        padding: 14px 10px 28px;
+        width: 100%;
     }
 
-    .battle-main,
-    .trainer-card {
-        padding: 14px;
+    .info_meio {
+        padding-top: 30px;
+    }
+
+    .battle-shell {
+        flex-wrap: wrap;
     }
 
     .combatant {
-        gap: 8px;
+        width: 48%;
     }
 
-    .combatant-image {
-        max-width: 100%;
-    }
-
-    .arena {
-        grid-template-rows: minmax(155px, 1fr) minmax(155px, 1fr);
-        min-height: 370px;
-        padding: 10px;
-    }
-
-    .combatant-player,
-    .combatant-opponent {
-        width: 94%;
-    }
-
-    .combatant-copy {
-        padding: 8px;
-    }
-
-    .combatant-copy p {
-        font-size: 0.75rem;
-    }
-
+    .combatant-image,
     .combatant-portrait {
-        flex-basis: 36%;
+        width: 130px;
+        height: 130px;
     }
 
-    .combatant-symbol {
-        width: 60px;
-        height: 60px;
+    .battle-log {
+        bottom: auto;
     }
 
     .battle-actions {
-        grid-template-columns: 1fr;
+        bottom: auto;
     }
 }

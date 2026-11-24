@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     senha VARCHAR(255) NOT NULL,
     foto MEDIUMBLOB NULL,
     tipo_foto VARCHAR(20) NULL,
-    dinheiro INT UNSIGNED NOT NULL DEFAULT 0,
+    dinheiro INT UNSIGNED NOT NULL DEFAULT 120,
     data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_usuario),
     UNIQUE KEY uq_usuarios_email (email)
