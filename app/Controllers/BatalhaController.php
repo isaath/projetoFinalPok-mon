@@ -69,7 +69,17 @@ class BatalhaController
 
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $this->processarAcao($idUsuario, $nivel, $modeloBatalha);
-                        header('Location: index.php?rota=batalha&nivel=' . $nivel);
+                        $estadoAtual = $_SESSION['batalha'] ?? null;
+                        if (
+                            is_array($estadoAtual)
+                            && !empty($estadoAtual['finalizada'])
+                            && ($estadoAtual['resultado'] ?? null) === 'vitoria'
+                            && !empty($estadoAtual['resultado_salvo'])
+                        ) {
+                            header('Location: index.php?rota=captura');
+                        } else {
+                            header('Location: index.php?rota=batalha&nivel=' . $nivel);
+                        }
                         exit;
                     }
 
@@ -90,18 +100,32 @@ class BatalhaController
                         $resultado = $modeloBatalha->registrarResultado($idUsuario, $estadoSessao);
                         $estadoSessao['recompensa'] = $resultado['recompensa'];
                         $estadoSessao['capturas_liberadas'] = $resultado['capturas_liberadas'];
+                        $estadoSessao['captura'] = $resultado['captura'];
                         $estadoSessao['resultado_salvo'] = true;
                         $_SESSION['batalha'] = $estadoSessao;
+                    }
+
+                    if (
+                        !empty($estadoSessao['finalizada'])
+                        && ($estadoSessao['resultado'] ?? null) === 'vitoria'
+                        && !empty($estadoSessao['resultado_salvo'])
+                    ) {
+                        header('Location: index.php?rota=captura');
+                        exit;
                     }
 
                     $dadosBatalha = $estadoSessao;
                     $pokemonJogador = $this->pokemonAtivo($estadoSessao, 'jogador');
                     $pokemonAdversario = $this->pokemonAtivo($estadoSessao, 'adversario');
-                    if ($pokemonJogador !== null && $pokemonAdversario !== null) {
+                    if ($pokemonJogador !== null || $pokemonAdversario !== null) {
                         try {
                             $servico = new PokeApiService();
-                            $imagemJogador = $servico->obterImagem($pokemonJogador['nome']);
-                            $imagemAdversario = $servico->obterImagem($pokemonAdversario['nome']);
+                            if ($pokemonJogador !== null) {
+                                $imagemJogador = $servico->obterImagem($pokemonJogador['nome']);
+                            }
+                            if ($pokemonAdversario !== null) {
+                                $imagemAdversario = $servico->obterImagem($pokemonAdversario['nome']);
+                            }
                         } catch (RuntimeException | JsonException $exception) {
                             error_log('Erro ao carregar imagens da batalha: ' . $exception->getMessage());
                             $erroImagem = 'Não foi possível carregar as imagens pela PokeAPI agora.';
@@ -140,6 +164,42 @@ class BatalhaController
 
         define('POKEBAGUAL_BATALHA_VIEW', true);
         require __DIR__ . '/../Views/batalha/index.php';
+    }
+
+    public function captura(): void
+    {
+        $idUsuario = filter_var(
+            $_SESSION['usuario']['id_usuario'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+        if ($idUsuario === false || $idUsuario === null || $idUsuario < 1) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $batalha = $_SESSION['batalha'] ?? null;
+        if (
+            !is_array($batalha)
+            || (int) ($batalha['id_usuario'] ?? 0) !== $idUsuario
+            || empty($batalha['finalizada'])
+            || ($batalha['resultado'] ?? null) !== 'vitoria'
+            || empty($batalha['resultado_salvo'])
+        ) {
+            header('Location: index.php?rota=mapa');
+            exit;
+        }
+
+        $captura = is_array($batalha['captura'] ?? null)
+            ? $batalha['captura']
+            : null;
+        $csrfBatalha = $_SESSION['csrf_batalha'] ?? null;
+        if (!is_string($csrfBatalha) || $csrfBatalha === '') {
+            $csrfBatalha = bin2hex(random_bytes(32));
+            $_SESSION['csrf_batalha'] = $csrfBatalha;
+        }
+
+        define('POKEBAGUAL_CAPTURA_VIEW', true);
+        require __DIR__ . '/../Views/batalha/captura.php';
     }
 
     private function processarAcao(int $idUsuario, int $nivel, Batalha $modeloBatalha): void
@@ -196,6 +256,7 @@ class BatalhaController
             $resultado = $modeloBatalha->registrarResultado($idUsuario, $estado);
             $estado['recompensa'] = $resultado['recompensa'];
             $estado['capturas_liberadas'] = $resultado['capturas_liberadas'];
+            $estado['captura'] = $resultado['captura'];
             $estado['resultado_salvo'] = true;
             $_SESSION['batalha'] = $estado;
         }

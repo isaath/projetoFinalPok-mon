@@ -39,6 +39,7 @@ return [
 
     // Batalha por turnos: valida e processa movimentos no servidor.
     'batalha' => [BatalhaController::class, 'index'],
+    'captura' => [BatalhaController::class, 'captura'],
 
     // Mapa da jornada, exibido antes da seleção de uma fase.
     'mapa' => [MapaController::class, 'index'],

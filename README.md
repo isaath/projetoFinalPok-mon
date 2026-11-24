@@ -10,7 +10,7 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 
 * **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
-* **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro.
+* **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro. Após uma vitória há uma tentativa de captura com chance inicial de 30%, que aumenta 20 pontos percentuais após cada falha até 90%; espécies já possuídas são puladas, e uma captura bem-sucedida adiciona o Pokémon à reserva sem removê-lo da equipe do líder.
 * **Tipos de Pokémon:** as regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens de espécies da Geração I.
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
 * **Inventário:** gerenciamento dos itens adquiridos pelo jogador.
@@ -50,7 +50,7 @@ Queimadura reduz pela metade o dano físico e, assim como veneno, causa 1/8 do H
 
 Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha. Protect também pode ser usado uma vez por Pokémon por batalha; o projeto não controla PP dos movimentos.
 
-O estado dos turnos fica na sessão PHP. No fim, o servidor salva o HP dos Pokémon do jogador, o log, as vitórias, as capturas liberadas e a recompensa em uma transação. Não salva dano no cadastro global das espécies adversárias. A captura já pode ser liberada por vitória, mas a tentativa de captura ainda não foi definida ou implementada. Também não há troca manual nem uso de itens durante os turnos.
+O estado dos turnos fica na sessão PHP. No fim, o servidor salva o HP dos Pokémon do jogador, o log, as vitórias e a recompensa em uma transação. Após uma vitória, uma tentativa de captura é sorteada e exibida em uma tela pós-batalha. A chance começa em 30%, aumenta 20 pontos percentuais após cada falha e para em 90%; vencer novamente tenta o mesmo Pokémon até o sucesso. A sequência avança apenas depois de uma captura bem-sucedida, e a chance reinicia para o próximo Pokémon. Um token único por batalha e o registro persistente da tentativa impedem duplicar a recompensa ou sortear de novo ao recarregar a tela. No sucesso, uma cópia entra na reserva com HP completo; o Pokémon do treinador permanece na equipe adversária. Não se salva dano no cadastro global das espécies. Também não há troca manual nem uso de itens durante os turnos.
 
 ### Movimentos por estágio de evolução
 
@@ -129,7 +129,7 @@ A primeira campanha completa rende 960 Pokédollars em recompensas de primeira v
 
 O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível desbloqueado e a batalha carrega a equipe correspondente. Inicia o primeiro Pokémon ativo da equipe que ainda tenha HP, respeitando a ordem das posições, contra o primeiro Pokémon do líder.
 
-**Capturas dos líderes:** contra equipes de quatro Pokémon, cada uma das quatro primeiras vitórias libera um Pokémon para captura, do mais fraco ao mais forte. O sistema mantém o progresso por usuário e registra capturas reivindicadas para impedir duplicação. A tentativa e as condições da captura ainda serão implementadas em uma etapa posterior.
+**Capturas dos líderes:** após cada vitória, o jogador tenta capturar o próximo Pokémon da ordem do líder, do mais fraco ao mais forte. A chance começa em 30%, sobe 20 pontos após cada falha e tem limite de 90%. Uma falha repete a tentativa contra o mesmo Pokémon na próxima vitória; só após o sucesso a sequência avança. A chance reinicia em 30% para cada novo Pokémon. O sorteio aparece em uma tela própria depois da batalha. No sucesso, uma cópia vai para a reserva e o Pokémon do líder continua disponível em sua equipe.
 
 **Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 Pokédollars uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
 
@@ -152,7 +152,7 @@ O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível d
 
 Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
 
-**Ainda pendente:** definir e implementar como a captura liberada será tentada/concluída; eventos aleatórios; itens, preços e efeitos de evolução; loja funcional; e testar o equilíbrio da jornada com capturas e evoluções funcionando. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e a liberação progressiva de capturas já estão implementados conforme as regras acima.
+**Ainda pendente:** eventos aleatórios; itens, preços e efeitos de evolução; loja funcional; e testar o equilíbrio da jornada com as capturas aleatórias e evoluções funcionando. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e as tentativas de captura pós-batalha estão implementados conforme as regras acima.
 
 ## Objetivos Acadêmicos
 

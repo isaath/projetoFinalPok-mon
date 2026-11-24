@@ -33,7 +33,7 @@ body {
     position: fixed; /* Fixa o botão na janela do navegador */
     bottom: 20px;    /* Distância da borda inferior da tela */
     right: 100px;     /* Distância da borda direita da tela */
-    z-index: 1000;   /* Garante que o botão fique por cima de outros elementos */
+    z-index: 1;
     display: inline-block;
     transition: transform 0.1s ease; /* Suaviza o efeito ao passar o mouse */
 }

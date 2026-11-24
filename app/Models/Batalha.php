@@ -217,6 +217,7 @@ class Batalha
             'id_usuario' => $idUsuario,
             'nivel' => $nivel,
             'id_treinador' => (int) $previa['treinador']['id_treinador'],
+            'token_execucao' => bin2hex(random_bytes(16)),
             'treinador' => $previa['treinador'],
             'jogador' => [
                 'equipe' => $equipeJogador,
@@ -248,6 +249,8 @@ class Batalha
             empty($batalha['finalizada'])
             || !in_array($batalha['resultado'] ?? null, ['vitoria', 'derrota'], true)
             || (int) ($batalha['id_usuario'] ?? 0) !== $idUsuario
+            || !is_string($batalha['token_execucao'] ?? null)
+            || preg_match('/\A[a-f0-9]{32}\z/', $batalha['token_execucao']) !== 1
         ) {
             throw new RuntimeException('O resultado da batalha não é válido para registro.');
         }
@@ -264,6 +267,55 @@ class Batalha
             $bloquearUsuario->execute(['id_usuario' => $idUsuario]);
             if ($bloquearUsuario->fetchColumn() === false) {
                 throw new RuntimeException('O jogador da batalha não foi encontrado.');
+            }
+
+            $finalizacaoExistente = $this->db->prepare(
+                'SELECT finalizacao.recompensa,
+                        finalizacao.capturas_liberadas,
+                        batalha.resultado,
+                        batalha_treinador.id_treinador,
+                        tentativa.resultado AS resultado_captura,
+                        tentativa.chance,
+                        tentativa.numero_tentativa,
+                        pokemon_tentativa.nome AS pokemon_capturado,
+                        captura.id_time_pokemon
+                 FROM batalhas_finalizacoes AS finalizacao
+                 INNER JOIN batalhas AS batalha
+                    ON batalha.id_batalha = finalizacao.id_batalha
+                 INNER JOIN batalha_treinadores AS batalha_treinador
+                    ON batalha_treinador.id_batalha = batalha.id_batalha
+                 LEFT JOIN batalhas_capturas AS tentativa
+                    ON tentativa.id_batalha = batalha.id_batalha
+                 LEFT JOIN capturas_treinadores AS captura
+                    ON captura.id_captura = tentativa.id_captura
+                 LEFT JOIN pokemons AS pokemon_tentativa
+                    ON pokemon_tentativa.id_pokemon = tentativa.id_pokemon
+                 WHERE finalizacao.token_execucao = :token_execucao
+                   AND finalizacao.id_usuario = :id_usuario
+                 FOR UPDATE'
+            );
+            $finalizacaoExistente->execute([
+                'token_execucao' => $batalha['token_execucao'],
+                'id_usuario' => $idUsuario,
+            ]);
+            $resultadoExistente = $finalizacaoExistente->fetch(PDO::FETCH_ASSOC);
+            if ($resultadoExistente !== false) {
+                if (
+                    $resultadoExistente['resultado'] !== $batalha['resultado']
+                    || (int) $resultadoExistente['id_treinador'] !== (int) $batalha['id_treinador']
+                ) {
+                    throw new RuntimeException(
+                        'A chave de finalização já pertence a outro resultado de batalha.'
+                    );
+                }
+
+                $this->db->commit();
+
+                return [
+                    'recompensa' => (int) $resultadoExistente['recompensa'],
+                    'capturas_liberadas' => (int) $resultadoExistente['capturas_liberadas'],
+                    'captura' => $this->formatarCaptura($resultadoExistente),
+                ];
             }
 
             $treinador = $this->db->prepare(
@@ -365,6 +417,15 @@ class Batalha
                 'id_treinador' => (int) $batalha['id_treinador'],
             ]);
 
+            $captura = $vitoria
+                ? $this->registrarCapturaDaVitoria(
+                    $idUsuario,
+                    (int) $batalha['id_treinador'],
+                    $capturasLiberadas,
+                    $idBatalha
+                )
+                : null;
+
             $registrarPokemon = $this->db->prepare(
                 'INSERT INTO batalha_pokemons
                     (hp_final, desmaiou, id_usuario, id_batalha, id_pokemon)
@@ -381,11 +442,26 @@ class Batalha
                 ]);
             }
 
+            $registrarFinalizacao = $this->db->prepare(
+                'INSERT INTO batalhas_finalizacoes
+                    (token_execucao, id_batalha, id_usuario, recompensa, capturas_liberadas)
+                 VALUES
+                    (:token_execucao, :id_batalha, :id_usuario, :recompensa, :capturas_liberadas)'
+            );
+            $registrarFinalizacao->execute([
+                'token_execucao' => $batalha['token_execucao'],
+                'id_batalha' => $idBatalha,
+                'id_usuario' => $idUsuario,
+                'recompensa' => $recompensa,
+                'capturas_liberadas' => $capturasLiberadas,
+            ]);
+
             $this->db->commit();
 
             return [
                 'recompensa' => $recompensa,
                 'capturas_liberadas' => $capturasLiberadas,
+                'captura' => $captura,
             ];
         } catch (Throwable $exception) {
             if ($this->db->inTransaction()) {
@@ -394,6 +470,230 @@ class Batalha
 
             throw $exception;
         }
+    }
+
+    private function registrarCapturaDaVitoria(
+        int $idUsuario,
+        int $idTreinador,
+        int $capturasLiberadas,
+        int $idBatalha
+    ): ?array {
+        if ($capturasLiberadas < 1) {
+            return null;
+        }
+
+        $buscarCaptura = $this->db->prepare(
+            'SELECT treinador_pokemon.id_pokemon,
+                    treinador_pokemon.ordem_captura,
+                    pokemon.nome,
+                    pokemon.hp_maximo,
+                    captura.id_captura,
+                    EXISTS (
+                        SELECT 1
+                        FROM time_pokemons AS pokemon_usuario
+                        INNER JOIN times AS time_usuario
+                            ON time_usuario.id_time = pokemon_usuario.id_time
+                        WHERE time_usuario.id_usuario = :id_usuario_dono
+                          AND pokemon_usuario.id_pokemon = treinador_pokemon.id_pokemon
+                    ) AS ja_possui
+             FROM treinador_pokemons AS treinador_pokemon
+             INNER JOIN pokemons AS pokemon
+                ON pokemon.id_pokemon = treinador_pokemon.id_pokemon
+             LEFT JOIN capturas_treinadores AS captura
+                ON captura.id_usuario = :id_usuario
+               AND captura.id_treinador = treinador_pokemon.id_treinador
+               AND captura.ordem_captura = treinador_pokemon.ordem_captura
+             WHERE treinador_pokemon.id_treinador = :id_treinador
+             ORDER BY treinador_pokemon.ordem_captura
+             FOR UPDATE'
+        );
+        $buscarCaptura->execute([
+            'id_usuario' => $idUsuario,
+            'id_treinador' => $idTreinador,
+            'id_usuario_dono' => $idUsuario,
+        ]);
+        $ordemMaximaLiberada = $capturasLiberadas;
+        $pokemonCapturado = false;
+        while (($pokemonDaSequencia = $buscarCaptura->fetch(PDO::FETCH_ASSOC)) !== false) {
+            $ordemCaptura = (int) $pokemonDaSequencia['ordem_captura'];
+            if ($ordemCaptura > $ordemMaximaLiberada) {
+                break;
+            }
+
+            if ($pokemonDaSequencia['id_captura'] !== null) {
+                continue;
+            }
+
+            if ((int) $pokemonDaSequencia['ja_possui'] === 1) {
+                $ordemMaximaLiberada++;
+                continue;
+            }
+
+            $pokemonCapturado = $pokemonDaSequencia;
+            break;
+        }
+
+        if ($pokemonCapturado === false) {
+            return null;
+        }
+
+        $buscarTentativas = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM batalhas_capturas
+             WHERE id_usuario = :id_usuario
+               AND id_treinador = :id_treinador
+               AND ordem_captura = :ordem_captura'
+        );
+        $buscarTentativas->execute([
+            'id_usuario' => $idUsuario,
+            'id_treinador' => $idTreinador,
+            'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+        ]);
+        $numeroTentativa = (int) $buscarTentativas->fetchColumn() + 1;
+        $chance = min(30 + (($numeroTentativa - 1) * 20), 90);
+        $sucesso = random_int(1, 100) <= $chance;
+        $resultado = 'falhou';
+        $idCaptura = null;
+        $idTimePokemon = null;
+
+        if ($sucesso) {
+            $buscarTime = $this->db->prepare(
+                'SELECT id_time
+                 FROM times
+                 WHERE id_usuario = :id_usuario
+                 ORDER BY id_time
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $buscarTime->execute(['id_usuario' => $idUsuario]);
+            $idTime = $buscarTime->fetchColumn();
+            if ($idTime === false) {
+                throw new RuntimeException(
+                    'Não foi encontrado o time do jogador para guardar a captura.'
+                );
+            }
+            $idTime = (int) $idTime;
+
+            $buscarExistente = $this->db->prepare(
+                'SELECT id_time_pokemon
+                 FROM time_pokemons
+                 WHERE id_time = :id_time
+                   AND id_pokemon = :id_pokemon
+                 FOR UPDATE'
+            );
+            $buscarExistente->execute([
+                'id_time' => $idTime,
+                'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+            ]);
+            $idTimePokemon = $buscarExistente->fetchColumn();
+
+            if ($idTimePokemon === false) {
+                $buscarUltimaPosicao = $this->db->prepare(
+                    'SELECT COALESCE(MAX(posicao), 3)
+                     FROM time_pokemons
+                     WHERE id_time = :id_time'
+                );
+                $buscarUltimaPosicao->execute(['id_time' => $idTime]);
+                $posicao = max(3, (int) $buscarUltimaPosicao->fetchColumn()) + 1;
+                if ($posicao > 255) {
+                    throw new RuntimeException(
+                        'Não há mais posições disponíveis na reserva do time.'
+                    );
+                }
+
+                $adicionarPokemon = $this->db->prepare(
+                    'INSERT INTO time_pokemons (posicao, id_time, id_pokemon)
+                     VALUES (:posicao, :id_time, :id_pokemon)'
+                );
+                $adicionarPokemon->execute([
+                    'posicao' => $posicao,
+                    'id_time' => $idTime,
+                    'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+                ]);
+                $idTimePokemon = (int) $this->db->lastInsertId();
+
+                $salvarHp = $this->db->prepare(
+                    'INSERT INTO time_pokemons_estado (id_time_pokemon, hp_atual)
+                     VALUES (:id_time_pokemon, :hp_atual)'
+                );
+                $salvarHp->execute([
+                    'id_time_pokemon' => $idTimePokemon,
+                    'hp_atual' => (int) $pokemonCapturado['hp_maximo'],
+                ]);
+                $resultado = 'capturado';
+            } else {
+                $idTimePokemon = null;
+                $resultado = 'ja_possuia';
+            }
+
+            $registrarCaptura = $this->db->prepare(
+                'INSERT INTO capturas_treinadores
+                    (id_usuario, id_treinador, id_pokemon, id_time_pokemon, ordem_captura)
+                 VALUES
+                    (:id_usuario, :id_treinador, :id_pokemon, :id_time_pokemon, :ordem_captura)'
+            );
+            $registrarCaptura->execute([
+                'id_usuario' => $idUsuario,
+                'id_treinador' => $idTreinador,
+                'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+                'id_time_pokemon' => $idTimePokemon,
+                'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+            ]);
+            $idCaptura = (int) $this->db->lastInsertId();
+        }
+
+        $registrarTentativa = $this->db->prepare(
+            'INSERT INTO batalhas_capturas
+                (
+                    id_batalha, id_usuario, id_treinador, id_pokemon, ordem_captura,
+                    numero_tentativa, chance, resultado, id_captura
+                )
+             VALUES
+                (
+                    :id_batalha, :id_usuario, :id_treinador, :id_pokemon, :ordem_captura,
+                    :numero_tentativa, :chance, :resultado, :id_captura
+                )'
+        );
+        $registrarTentativa->execute([
+            'id_batalha' => $idBatalha,
+            'id_usuario' => $idUsuario,
+            'id_treinador' => $idTreinador,
+            'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+            'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+            'numero_tentativa' => $numeroTentativa,
+            'chance' => $chance,
+            'resultado' => $resultado,
+            'id_captura' => $idCaptura,
+        ]);
+
+        return [
+            'nome' => (string) $pokemonCapturado['nome'],
+            'resultado' => $resultado,
+            'chance' => $chance,
+            'numero_tentativa' => $numeroTentativa,
+            'proxima_chance' => min($chance + 20, 90),
+            'nova' => $resultado === 'capturado',
+        ];
+    }
+
+    private function formatarCaptura(array $resultado): ?array
+    {
+        if (
+            !is_string($resultado['pokemon_capturado'] ?? null)
+            || !is_string($resultado['resultado_captura'] ?? null)
+        ) {
+            return null;
+        }
+
+        return [
+            'nome' => $resultado['pokemon_capturado'],
+            'resultado' => $resultado['resultado_captura'],
+            'chance' => (int) $resultado['chance'],
+            'numero_tentativa' => (int) $resultado['numero_tentativa'],
+            'proxima_chance' => min((int) $resultado['chance'] + 20, 90),
+            'nova' => $resultado['resultado_captura'] === 'capturado'
+                && $resultado['id_time_pokemon'] !== null,
+        ];
     }
 
     private function carregarEquipeJogador(int $idUsuario): array

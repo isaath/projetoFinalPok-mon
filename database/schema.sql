@@ -263,6 +263,26 @@ CREATE TABLE IF NOT EXISTS batalhas (
     PRIMARY KEY (id_batalha)
 ) ENGINE=InnoDB;
 
+-- Garante que a finalização da mesma batalha não credite recompensa duas vezes.
+CREATE TABLE IF NOT EXISTS batalhas_finalizacoes (
+    token_execucao CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    id_batalha INT UNSIGNED NOT NULL,
+    id_usuario INT UNSIGNED NOT NULL,
+    recompensa INT UNSIGNED NOT NULL DEFAULT 0,
+    capturas_liberadas TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (token_execucao),
+    UNIQUE KEY uq_batalhas_finalizacoes_batalha (id_batalha),
+    KEY idx_batalhas_finalizacoes_usuario (id_usuario),
+    CONSTRAINT fk_batalhas_finalizacoes_batalha
+        FOREIGN KEY (id_batalha) REFERENCES batalhas (id_batalha)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_batalhas_finalizacoes_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 -- Pokémon que participaram de uma batalha e o resultado individual de cada um.
 -- Cada linha pertence a um usuário, uma batalha e um Pokémon.
 CREATE TABLE IF NOT EXISTS batalha_pokemons (
@@ -496,7 +516,6 @@ FROM tipos
 WHERE tipos.nome = 'Fogo'
   AND NOT EXISTS (SELECT 1 FROM pokemons WHERE LOWER(nome) = 'ninetales')
 LIMIT 1;
-
 -- Pokémon da Geração I usados pelos oito líderes de ginásio.
 -- Os atributos são os valores base consultados na PokeAPI; espécies/tipos foram
 -- ajustados para a tipagem existente na Geração I (por exemplo, sem Aço ou Fada).
@@ -784,8 +803,8 @@ CREATE TABLE IF NOT EXISTS treinadores_progresso (
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Histórico de Pokémon liberados e efetivamente capturados por usuário.
--- A restrição única impede reivindicar duas vezes a mesma recompensa.
+-- Histórico de capturas concedidas. A chave única evita repetir uma liberação.
+-- id_time_pokemon fica NULL se o jogador já possuía a espécie.
 CREATE TABLE IF NOT EXISTS capturas_treinadores (
     id_captura INT UNSIGNED NOT NULL AUTO_INCREMENT,
     id_usuario INT UNSIGNED NOT NULL,
@@ -811,6 +830,43 @@ CREATE TABLE IF NOT EXISTS capturas_treinadores (
         ON DELETE RESTRICT,
     CONSTRAINT fk_capturas_treinadores_time_pokemon
         FOREIGN KEY (id_time_pokemon) REFERENCES time_pokemons (id_time_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Guarda a tentativa aleatória feita após cada vitória, inclusive as falhas.
+-- O histórico permite aumentar a chance sem sortear novamente ao recarregar a tela.
+CREATE TABLE IF NOT EXISTS batalhas_capturas (
+    id_batalha INT UNSIGNED NOT NULL,
+    id_usuario INT UNSIGNED NOT NULL,
+    id_treinador INT UNSIGNED NOT NULL,
+    id_pokemon INT UNSIGNED NOT NULL,
+    ordem_captura TINYINT UNSIGNED NOT NULL,
+    numero_tentativa SMALLINT UNSIGNED NOT NULL,
+    chance TINYINT UNSIGNED NOT NULL,
+    resultado ENUM('falhou', 'capturado', 'ja_possuia') NOT NULL,
+    id_captura INT UNSIGNED NULL,
+    PRIMARY KEY (id_batalha),
+    KEY idx_batalhas_capturas_ordem (id_usuario, id_treinador, ordem_captura),
+    UNIQUE KEY uq_batalhas_capturas_captura (id_captura),
+    CONSTRAINT fk_batalhas_capturas_batalha
+        FOREIGN KEY (id_batalha) REFERENCES batalhas (id_batalha)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_batalhas_capturas_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_batalhas_capturas_treinador
+        FOREIGN KEY (id_treinador) REFERENCES treinadores (id_treinador)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_batalhas_capturas_pokemon
+        FOREIGN KEY (id_pokemon) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_batalhas_capturas_captura
+        FOREIGN KEY (id_captura) REFERENCES capturas_treinadores (id_captura)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 ) ENGINE=InnoDB;

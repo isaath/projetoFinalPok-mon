@@ -666,17 +666,20 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 - Os movimentos estão cadastrados em `movimentos` e associados às espécies por `pokemon_movimentos`. A categoria física/especial segue a divisão de tipos da Geração III; os movimentos status não causam dano direto. Precisão e chance de efeito são verificadas no servidor.
 - A fórmula adaptada de dano é `potência × ataque ÷ (4 × defesa) × STAB × efetividade`, arredondada ao inteiro mais próximo, com mínimo de 1 e limite de metade do HP máximo do alvo por golpe. Golpes imunes causam 0. A categoria do golpe define quais atributos de ataque e defesa são usados.
 - Status de stat usam estágios limitados a -2 e +2; cada estágio positivo multiplica o atributo por 1,25 e cada estágio negativo divide por `1 + 0,25 × |estágio|`. Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha; Protect também só pode ser usado uma vez por Pokémon por batalha, já que o projeto não controla PP.
-- A batalha recebe apenas a escolha do movimento pelo formulário. O servidor valida o movimento, escolhe a ação adversária e processa o turno; o estado temporário fica na sessão PHP. Ao terminar, o HP do jogador, o log, as vitórias, as capturas liberadas e a recompensa são gravados no banco em transação. O HP global dos Pokémon adversários nunca é alterado.
-- A tela atual permite escolher movimentos e jogar até uma equipe ser derrotada; troca manual, itens durante a batalha e tentativa de captura não fazem parte desta etapa.
+- A batalha recebe apenas a escolha do movimento pelo formulário. O servidor valida o movimento, escolhe a ação adversária e processa o turno; o estado temporário fica na sessão PHP. Ao terminar, o HP do jogador, o log, as vitórias, as capturas liberadas e a recompensa são gravados no banco em transação. Um token único por batalha impede que uma repetição da finalização gere outro log ou credite a recompensa novamente. O HP global dos Pokémon adversários nunca é alterado.
+- Durante a batalha, o jogador escolhe movimentos até uma equipe ser derrotada; não há troca manual, uso de itens ou tentativa de captura durante o combate. A captura acontece separadamente, na tela pós-vitória.
 - Os treinadores dos níveis 1 a 4 possuem três Pokémon; os dos níveis 5 a 8 possuem quatro.
-- Após vencer um mesmo treinador, um Pokémon adversário fica disponível por vitória, seguindo a ordem do menor para o maior total de atributos base: nas equipes de três membros, isso ocorre nas três primeiras vitórias; nas equipes de quatro, nas quatro primeiras.
-- A ordem de liberação para captura é salva junto à equipe do treinador. O progresso e as capturas reivindicadas são individuais por usuário; vencer novamente não deve duplicar uma captura já reivindicada.
-- A disponibilidade por vitórias está definida; a forma de tentar/concluir a captura dentro da batalha ainda precisa ser definida antes de implementar essa ação.
+- Cada vitória libera uma nova posição da sequência de captura, cadastrada do menor para o maior total de atributos base. A tela tenta o primeiro Pokémon liberado que o jogador ainda não possui; espécies já possuídas são puladas sem sorteio, permitindo tentar a próxima. Os níveis 1 a 4 têm três Pokémon e os níveis 5 a 8 têm quatro.
+- A primeira tentativa para cada Pokémon tem 30% de chance. Cada falha aumenta a chance em 20 pontos percentuais, até o limite de 90%; após capturar um Pokémon, a sequência avança e a chance reinicia em 30% para o próximo.
+- Uma falha não avança a sequência: o jogador precisa vencer novamente o mesmo líder para tentar capturar o mesmo Pokémon. Se já possuir a espécie, ela é pulada sem novo sorteio e o próximo Pokémon liberado pode ser tentado.
+- Após vencer a batalha, uma tela apresenta o resultado do sorteio. O resultado e o número da tentativa são persistidos para que recarregar a página não faça outro sorteio.
+- Em caso de sucesso, uma cópia da espécie é adicionada à reserva do jogador com HP completo; o Pokémon do treinador permanece na equipe adversária. Se o jogador já possuir todos os Pokémon liberados daquele treinador, a tela informa que todos já foram capturados e oferece a opção de continuar.
+- O progresso, as tentativas e as capturas são individuais por usuário. Resultado da batalha, recompensa, HP e tentativa/captura são gravados na mesma transação.
 - Além dos 8 locais de batalha, o mapa terá locais de interação entre níveis.
 - Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
 - O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
 - O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
-- O sistema de turnos, dano, condições temporárias, troca automática, HP do jogador, registro, progresso e recompensas está implementado. A tentativa de captura ainda não foi definida/implementada.
+- O sistema de turnos, dano, condições temporárias, troca automática, HP do jogador, registro, progresso, recompensas e tentativas aleatórias de captura pós-batalha está implementado.
 
 ## 19.6. Pokecenter e loja
 
