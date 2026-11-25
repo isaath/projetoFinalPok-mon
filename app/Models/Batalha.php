@@ -35,21 +35,13 @@ class Batalha
      */
     public function carregarProgressoNiveis(int $idUsuario): array
     {
-        // Busca os oito líderes e junta as vitórias somente deste jogador.
+        // A View fornece a linha de cada ginásio para este jogador, mesmo sem vitórias.
         $consulta = $this->db->prepare(
-            'SELECT treinador.nivel_jornada,
-                    treinador.nome AS nome_treinador,
-                    treinador.nome_insignia,
-                    tipo.nome AS especialidade,
-                    COALESCE(progresso.vitorias, 0) AS vitorias
-             FROM treinadores AS treinador
-             INNER JOIN tipos AS tipo
-                ON tipo.id_tipo = treinador.id_tipo_especialidade
-             LEFT JOIN treinadores_progresso AS progresso
-                ON progresso.id_treinador = treinador.id_treinador
-               AND progresso.id_usuario = :id_usuario
-             WHERE treinador.nivel_jornada BETWEEN 1 AND 8
-             ORDER BY treinador.nivel_jornada'
+            'SELECT nivel_jornada, nome_treinador, nome_insignia, especialidade, vitorias
+             FROM vw_progresso_ginasios
+             WHERE id_usuario = :id_usuario
+               AND nivel_jornada BETWEEN 1 AND 8
+             ORDER BY nivel_jornada'
         );
         $consulta->execute(['id_usuario' => $idUsuario]);
         $linhas = $consulta->fetchAll(PDO::FETCH_ASSOC);

@@ -5,6 +5,7 @@ namespace App\Models;
 use PDO;
 use RuntimeException;
 use Throwable;
+use UnexpectedValueException;
 
 /** Consulta e reorganiza os Pokémon que pertencem aos times do jogador. */
 class TimePokemon
@@ -21,19 +22,241 @@ class TimePokemon
     public function listarDoUsuario(int $idUsuario): array
     {
         $consulta = $this->db->prepare(
-            'SELECT tp.id_time_pokemon, tp.posicao, p.nome, tipos.nome AS tipo,
-                    COALESCE(e.hp_atual, p.hp) AS hp_atual, p.hp_maximo
-             FROM times t
-             INNER JOIN time_pokemons tp ON tp.id_time = t.id_time
-             INNER JOIN pokemons p ON p.id_pokemon = tp.id_pokemon
-             LEFT JOIN tipos ON tipos.id_tipo = p.id_tipo
-             LEFT JOIN time_pokemons_estado e ON e.id_time_pokemon = tp.id_time_pokemon
-             WHERE t.id_usuario = :id_usuario
-             ORDER BY t.id_time, tp.posicao'
+            'SELECT membro.id_time_pokemon, membro.id_time, membro.id_pokemon,
+                    membro.posicao, membro.nome, membro.tipo,
+                    membro.hp_atual, membro.hp_maximo,
+                    destino.nome AS nome_evolucao,
+                    COALESCE(inventario.quantidade, 0) AS quantidade_item_evolutivo,
+                    EXISTS (
+                        SELECT 1
+                        FROM time_pokemons AS existente
+                        WHERE existente.id_time = membro.id_time
+                          AND existente.id_pokemon = destino.id_pokemon
+                          AND existente.id_time_pokemon <> membro.id_time_pokemon
+                    ) AS evolucao_ja_possuida
+             FROM vw_time_pokemons AS membro
+             LEFT JOIN pokemon_evolucoes AS evolucao
+                ON evolucao.id_pokemon_origem = membro.id_pokemon
+             LEFT JOIN pokemons AS destino
+                ON destino.id_pokemon = evolucao.id_pokemon_destino
+             LEFT JOIN itens_loja AS item
+                ON item.nome = :nome_item
+               AND item.tipo = :tipo_item
+             LEFT JOIN inventario
+                ON inventario.id_item = item.id_item
+               AND inventario.id_usuario = membro.id_usuario
+             WHERE membro.id_usuario = :id_usuario
+             ORDER BY membro.id_time, membro.posicao'
         );
-        $consulta->execute(['id_usuario' => $idUsuario]);
+        $consulta->execute([
+            'nome_item' => 'Item Evolutivo',
+            'tipo_item' => 'evolucao',
+            'id_usuario' => $idUsuario,
+        ]);
 
-        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+        $pokemons = $consulta->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($pokemons as &$pokemon) {
+            foreach ([
+                'id_time_pokemon',
+                'id_time',
+                'id_pokemon',
+                'posicao',
+                'hp_atual',
+                'hp_maximo',
+                'quantidade_item_evolutivo',
+                'evolucao_ja_possuida',
+            ] as $campo) {
+                $pokemon[$campo] = (int) $pokemon[$campo];
+            }
+        }
+        unset($pokemon);
+
+        return $pokemons;
+    }
+
+    /**
+     * Confirma que o jogador possui o Pokémon, um item e um próximo estágio cadastrado.
+     *
+     * @return array{status:string, nome_evolucao?:string}
+     */
+    public function prepararEvolucao(int $idUsuario, int $idTimePokemon): array
+    {
+        if ($idUsuario < 1 || $idTimePokemon < 1) {
+            return ['status' => 'dados_invalidos'];
+        }
+
+        $pokemon = $this->buscarPokemonDoUsuario($idUsuario, $idTimePokemon);
+        if ($pokemon === false) {
+            return ['status' => 'pokemon_nao_encontrado'];
+        }
+
+        $destino = $this->buscarProximaEvolucao((int) $pokemon['id_pokemon']);
+        if ($destino === false) {
+            return ['status' => 'nao_elegivel'];
+        }
+
+        $consultaItem = $this->db->prepare(
+            'SELECT inventario.quantidade
+             FROM inventario
+             INNER JOIN itens_loja AS item
+                ON item.id_item = inventario.id_item
+             WHERE inventario.id_usuario = :id_usuario
+               AND item.nome = :nome_item
+               AND item.tipo = :tipo_item
+               AND inventario.quantidade > 0
+             LIMIT 1'
+        );
+        $consultaItem->execute([
+            'id_usuario' => $idUsuario,
+            'nome_item' => 'Item Evolutivo',
+            'tipo_item' => 'evolucao',
+        ]);
+
+        if ($consultaItem->fetchColumn() === false) {
+            return ['status' => 'sem_item_evolutivo'];
+        }
+
+        return [
+            'status' => 'pronto',
+            'nome_evolucao' => (string) $destino['nome'],
+        ];
+    }
+
+    /**
+     * Atualiza atributos da espécie com a PokeAPI, evolui o membro e consome um item.
+     */
+    public function evoluirComItem(
+        int $idUsuario,
+        int $idTimePokemon,
+        array $dadosApi
+    ): string {
+        $this->validarAtributosApi($dadosApi);
+
+        if ($idUsuario < 1 || $idTimePokemon < 1) {
+            return 'dados_invalidos';
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            if (!$this->bloquearUsuario($idUsuario)) {
+                $this->db->commit();
+                return 'usuario_nao_encontrado';
+            }
+
+            $pokemon = $this->buscarPokemonDoUsuario($idUsuario, $idTimePokemon);
+            if ($pokemon === false) {
+                $this->db->commit();
+                return 'pokemon_nao_encontrado';
+            }
+
+            $destino = $this->buscarProximaEvolucao((int) $pokemon['id_pokemon']);
+            if ($destino === false) {
+                $this->db->commit();
+                return 'nao_elegivel';
+            }
+
+            if (strtolower((string) $destino['nome']) !== strtolower($dadosApi['nome'])) {
+                throw new UnexpectedValueException(
+                    'Os dados recebidos da PokeAPI não correspondem à evolução cadastrada.'
+                );
+            }
+
+            $consultaItem = $this->db->prepare(
+                'SELECT inventario.id_inventario
+                 FROM inventario
+                 INNER JOIN itens_loja AS item
+                    ON item.id_item = inventario.id_item
+                 WHERE inventario.id_usuario = :id_usuario
+                   AND item.nome = :nome_item
+                   AND item.tipo = :tipo_item
+                   AND inventario.quantidade > 0
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $consultaItem->execute([
+                'id_usuario' => $idUsuario,
+                'nome_item' => 'Item Evolutivo',
+                'tipo_item' => 'evolucao',
+            ]);
+            $itemInventario = $consultaItem->fetch(PDO::FETCH_ASSOC);
+            if ($itemInventario === false) {
+                $this->db->commit();
+                return 'sem_item_evolutivo';
+            }
+
+            $consultaDuplicado = $this->db->prepare(
+                'SELECT id_time_pokemon
+                 FROM time_pokemons
+                 WHERE id_time = :id_time
+                   AND id_pokemon = :id_pokemon
+                   AND id_time_pokemon <> :id_time_pokemon
+                 FOR UPDATE'
+            );
+            $consultaDuplicado->execute([
+                'id_time' => (int) $pokemon['id_time'],
+                'id_pokemon' => (int) $destino['id_pokemon'],
+                'id_time_pokemon' => $idTimePokemon,
+            ]);
+            if ($consultaDuplicado->fetchColumn() !== false) {
+                $this->db->commit();
+                return 'evolucao_ja_possuida';
+            }
+
+            $tipos = $this->obterIdsTiposApi($dadosApi['tipos']);
+            $this->atualizarAtributosEspecie(
+                (int) $destino['id_pokemon'],
+                $dadosApi,
+                $tipos
+            );
+
+            $atualizarEspecieDoMembro = $this->db->prepare(
+                'UPDATE time_pokemons
+                 SET id_pokemon = :id_pokemon_destino
+                 WHERE id_time_pokemon = :id_time_pokemon
+                   AND id_time = :id_time'
+            );
+            $atualizarEspecieDoMembro->execute([
+                'id_pokemon_destino' => (int) $destino['id_pokemon'],
+                'id_time_pokemon' => $idTimePokemon,
+                'id_time' => (int) $pokemon['id_time'],
+            ]);
+            if ($atualizarEspecieDoMembro->rowCount() !== 1) {
+                throw new RuntimeException('Não foi possível atualizar o Pokémon evoluído.');
+            }
+
+            $restaurarHp = $this->db->prepare(
+                'INSERT INTO time_pokemons_estado (id_time_pokemon, hp_atual)
+                 VALUES (:id_time_pokemon, :hp_atual)
+                 ON DUPLICATE KEY UPDATE hp_atual = VALUES(hp_atual)'
+            );
+            $restaurarHp->execute([
+                'id_time_pokemon' => $idTimePokemon,
+                'hp_atual' => $dadosApi['hp'],
+            ]);
+
+            $consumirItem = $this->db->prepare(
+                'UPDATE inventario
+                 SET quantidade = quantidade - 1
+                 WHERE id_inventario = :id_inventario
+                   AND quantidade > 0'
+            );
+            $consumirItem->execute([
+                'id_inventario' => (int) $itemInventario['id_inventario'],
+            ]);
+            if ($consumirItem->rowCount() !== 1) {
+                throw new RuntimeException('Não foi possível consumir o Item Evolutivo.');
+            }
+
+            $this->db->commit();
+            return 'evoluido';
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
     /**
@@ -174,7 +397,7 @@ class TimePokemon
     private function buscarPokemonDoUsuario(int $idUsuario, int $idTimePokemon)
     {
         $consulta = $this->db->prepare(
-            'SELECT tp.id_time, tp.posicao
+            'SELECT tp.id_time, tp.id_pokemon, tp.posicao
              FROM time_pokemons tp
              INNER JOIN times t ON t.id_time = tp.id_time
              WHERE t.id_usuario = :id_usuario
@@ -187,6 +410,148 @@ class TimePokemon
         ]);
 
         return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /** Localiza a próxima espécie cadastrada para o Pokémon de origem. */
+    private function buscarProximaEvolucao(int $idPokemon)
+    {
+        $consulta = $this->db->prepare(
+            'SELECT destino.id_pokemon, destino.nome
+             FROM pokemon_evolucoes AS evolucao
+             INNER JOIN pokemons AS destino
+                ON destino.id_pokemon = evolucao.id_pokemon_destino
+             WHERE evolucao.id_pokemon_origem = :id_pokemon'
+        );
+        $consulta->execute(['id_pokemon' => $idPokemon]);
+
+        return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /** Confirma o formato e os valores mínimos dos atributos recebidos da PokeAPI. */
+    private function validarAtributosApi(array $dadosApi): void
+    {
+        if (!isset($dadosApi['nome']) || !is_string($dadosApi['nome'])) {
+            throw new UnexpectedValueException('A PokeAPI não retornou o nome da espécie.');
+        }
+
+        foreach ([
+            'hp',
+            'forca_ataque',
+            'defesa',
+            'ataque_especial',
+            'defesa_especial',
+            'velocidade',
+        ] as $atributo) {
+            if (!isset($dadosApi[$atributo]) || !is_int($dadosApi[$atributo]) || $dadosApi[$atributo] < 1) {
+                throw new UnexpectedValueException(
+                    'A PokeAPI retornou um atributo inválido: ' . $atributo . '.'
+                );
+            }
+        }
+
+        if (!isset($dadosApi['tipos']) || !is_array($dadosApi['tipos']) || $dadosApi['tipos'] === []) {
+            throw new UnexpectedValueException('A PokeAPI não retornou os tipos da espécie.');
+        }
+    }
+
+    /** Converte os nomes ingleses da PokeAPI para os tipos cadastrados no projeto. */
+    private function obterIdsTiposApi(array $tiposApi): array
+    {
+        $mapaTipos = [
+            'normal' => 'Normal',
+            'fighting' => 'Lutador',
+            'flying' => 'Voador',
+            'poison' => 'Veneno',
+            'ground' => 'Terra',
+            'rock' => 'Pedra',
+            'bug' => 'Inseto',
+            'ghost' => 'Fantasma',
+            'steel' => 'Aco',
+            'fire' => 'Fogo',
+            'water' => 'Agua',
+            'grass' => 'Planta',
+            'electric' => 'Eletrico',
+            'psychic' => 'Psiquico',
+            'ice' => 'Gelo',
+            'dragon' => 'Dragao',
+            'dark' => 'Sombrio',
+        ];
+        $consultaTipo = $this->db->prepare(
+            'SELECT id_tipo FROM tipos WHERE nome = :nome_tipo'
+        );
+        $idsTipos = [];
+
+        foreach (array_values($tiposApi) as $nomeTipoApi) {
+            if (!is_string($nomeTipoApi) || !isset($mapaTipos[$nomeTipoApi])) {
+                throw new UnexpectedValueException(
+                    'O tipo retornado pela PokeAPI não é compatível com o projeto.'
+                );
+            }
+
+            $consultaTipo->execute(['nome_tipo' => $mapaTipos[$nomeTipoApi]]);
+            $idTipo = $consultaTipo->fetchColumn();
+            if ($idTipo === false) {
+                throw new UnexpectedValueException(
+                    'O tipo ' . $mapaTipos[$nomeTipoApi] . ' não está cadastrado no banco.'
+                );
+            }
+
+            $idsTipos[] = (int) $idTipo;
+        }
+
+        return array_values(array_unique($idsTipos));
+    }
+
+    /** Atualiza dados compartilhados da espécie e sua tipagem consultada na API. */
+    private function atualizarAtributosEspecie(
+        int $idPokemon,
+        array $dadosApi,
+        array $idsTipos
+    ): void {
+        if ($idsTipos === []) {
+            throw new UnexpectedValueException('A espécie evoluída precisa ter ao menos um tipo.');
+        }
+
+        $atualizarPokemon = $this->db->prepare(
+            'UPDATE pokemons
+             SET hp = :hp,
+                 hp_maximo = :hp_maximo,
+                 forca_ataque = :forca_ataque,
+                 defesa = :defesa,
+                 ataque_especial = :ataque_especial,
+                 defesa_especial = :defesa_especial,
+                 velocidade = :velocidade,
+                 id_tipo = :id_tipo
+             WHERE id_pokemon = :id_pokemon'
+        );
+        $atualizarPokemon->execute([
+            'hp' => $dadosApi['hp'],
+            'hp_maximo' => $dadosApi['hp'],
+            'forca_ataque' => $dadosApi['forca_ataque'],
+            'defesa' => $dadosApi['defesa'],
+            'ataque_especial' => $dadosApi['ataque_especial'],
+            'defesa_especial' => $dadosApi['defesa_especial'],
+            'velocidade' => $dadosApi['velocidade'],
+            'id_tipo' => $idsTipos[0],
+            'id_pokemon' => $idPokemon,
+        ]);
+
+        $removerTipos = $this->db->prepare(
+            'DELETE FROM pokemon_tipos WHERE id_pokemon = :id_pokemon'
+        );
+        $removerTipos->execute(['id_pokemon' => $idPokemon]);
+
+        $adicionarTipo = $this->db->prepare(
+            'INSERT INTO pokemon_tipos (id_pokemon, id_tipo, ordem)
+             VALUES (:id_pokemon, :id_tipo, :ordem)'
+        );
+        foreach ($idsTipos as $indice => $idTipo) {
+            $adicionarTipo->execute([
+                'id_pokemon' => $idPokemon,
+                'id_tipo' => $idTipo,
+                'ordem' => $indice + 1,
+            ]);
+        }
     }
 
     /** Mapeia cada posição ocupada ao identificador do Pokémon associado. */

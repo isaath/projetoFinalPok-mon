@@ -3,6 +3,8 @@
 use App\Models\TimeInicial;
 use App\Models\TimePokemon;
 
+require_once __DIR__ . '/../Services/PokeApiService.php';
+
 /**
  * Recebe ações das telas de time e coordena validações, Models e Views.
  */
@@ -161,6 +163,36 @@ class TimeController
                                 $idUsuario,
                                 $idTimePokemon
                             );
+                        } elseif ($acao === 'evoluir') {
+                            $preparacao = $modelo->prepararEvolucao(
+                                $idUsuario,
+                                $idTimePokemon
+                            );
+                            $resultado = $preparacao['status'];
+
+                            if ($resultado === 'pronto') {
+                                try {
+                                    $dadosApi = (new PokeApiService())->obterAtributosBase(
+                                        (string) $preparacao['nome_evolucao']
+                                    );
+                                } catch (RuntimeException $exception) {
+                                    error_log(
+                                        'Erro ao consultar atributos da evolução na PokeAPI: '
+                                        . $exception->getMessage()
+                                    );
+                                    http_response_code(502);
+                                    $erro = 'Não foi possível consultar os atributos na PokeAPI. '
+                                        . 'O Pokémon não evoluiu e o item não foi consumido.';
+                                }
+
+                                if ($erro === null) {
+                                    $resultado = $modelo->evoluirComItem(
+                                        $idUsuario,
+                                        $idTimePokemon,
+                                        $dadosApi
+                                    );
+                                }
+                            }
                         } elseif ($acao === 'prioridade') {
                             $posicao = filter_var(
                                 $_POST['posicao'] ?? null,
@@ -178,15 +210,17 @@ class TimeController
                             $resultado = 'dados_invalidos';
                         }
 
-                        $mensagem = $this->mensagemTime($resultado);
-                        if ($mensagem['tipo'] === 'sucesso') {
-                            // Redireciona após salvar para evitar repetir a ação ao atualizar a página.
-                            $_SESSION['flash_meu_time'] = $mensagem['texto'];
-                            header('Location: index.php?rota=meu_time');
-                            exit;
-                        }
+                        if ($erro === null) {
+                            $mensagem = $this->mensagemTime($resultado);
+                            if ($mensagem['tipo'] === 'sucesso') {
+                                // Redireciona após salvar para evitar repetir a ação ao atualizar a página.
+                                $_SESSION['flash_meu_time'] = $mensagem['texto'];
+                                header('Location: index.php?rota=meu_time');
+                                exit;
+                            }
 
-                        $erro = $mensagem['texto'];
+                            $erro = $mensagem['texto'];
+                        }
                     } catch (PDOException | RuntimeException $exception) {
                         error_log('Erro ao atualizar o time do usuário: ' . $exception->getMessage());
                         http_response_code(500);
@@ -242,6 +276,20 @@ class TimeController
                 return [
                     'tipo' => 'sucesso',
                     'texto' => 'Pokémon colocado na posição 3; o anterior foi para a reserva.',
+                ];
+            case 'evoluido':
+                return [
+                    'tipo' => 'sucesso',
+                    'texto' => 'Evolução concluída! Os atributos foram atualizados e o HP foi restaurado ao máximo.',
+                ];
+            case 'sem_item_evolutivo':
+                return ['tipo' => 'erro', 'texto' => 'Você precisa ter um Item Evolutivo no inventário.'];
+            case 'nao_elegivel':
+                return ['tipo' => 'erro', 'texto' => 'Esse Pokémon não possui um próximo estágio cadastrado.'];
+            case 'evolucao_ja_possuida':
+                return [
+                    'tipo' => 'erro',
+                    'texto' => 'Seu time já possui essa espécie; o Item Evolutivo não foi consumido.',
                 ];
             case 'mesma_posicao':
                 return ['tipo' => 'erro', 'texto' => 'Esse Pokémon já ocupa essa posição.'];

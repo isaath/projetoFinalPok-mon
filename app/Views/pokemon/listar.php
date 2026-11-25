@@ -34,21 +34,26 @@
                 <!-- Cria um card para cada Pokémon recebido pelo Controller. -->
                 <?php foreach ($pokemons as $pokemon): ?>
                     <article class="pokemon-card">
+                        <?php $nomePokemon = $pokemon->getNome(); ?>
+                        <?php $tiposPokemon = $pokemon->getTipos(); ?>
                         <img
                             class="pokemon-image imagem-pokemon"
-                            data-nome="<?= htmlspecialchars(strtolower($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?>"
-                            alt="Imagem de <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-nome="<?= htmlspecialchars(strtolower($nomePokemon), ENT_QUOTES, 'UTF-8') ?>"
+                            alt="Imagem de <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?>"
                             loading="lazy"
                         >
                         <div class="pokemon-image image-placeholder" aria-hidden="true" hidden>?</div>
 
                         <!-- Exibe os dados textuais e estatísticas do Pokémon atual. -->
                         <div class="pokemon-info">
-                            <h2><?= htmlspecialchars(ucfirst($pokemon['nome']), ENT_QUOTES, 'UTF-8') ?></h2>
+                            <h2><?= htmlspecialchars(ucfirst($nomePokemon), ENT_QUOTES, 'UTF-8') ?></h2>
 
                             <!-- Mostra todos os tipos associados a este Pokémon. -->
                             <div class="pokemon-types" aria-label="Tipos">
-                                <?php foreach ($pokemon['tipos'] as $tipo): ?>
+                                <span class="type-badge">
+                                    <?= htmlspecialchars(ucfirst($pokemon->getTipo()), ENT_QUOTES, 'UTF-8') ?>
+                                </span>
+                                <?php foreach (array_slice($tiposPokemon, 1) as $tipo): ?>
                                     <span class="type-badge">
                                         <?= htmlspecialchars(ucfirst($tipo), ENT_QUOTES, 'UTF-8') ?>
                                     </span>
@@ -57,10 +62,10 @@
 
                             <!-- Lista atributos básicos cadastrados no banco de dados. -->
                             <dl class="pokemon-stats">
-                                <div><dt>HP</dt><dd><?= (int) $pokemon['hp_maximo'] ?></dd></div>
-                                <div><dt>Ataque</dt><dd><?= (int) $pokemon['forca_ataque'] ?></dd></div>
-                                <div><dt>Defesa</dt><dd><?= (int) $pokemon['defesa'] ?></dd></div>
-                                <div><dt>Velocidade</dt><dd><?= (int) $pokemon['velocidade'] ?></dd></div>
+                                <div><dt>HP</dt><dd><?= $pokemon->getHpMaximo() ?></dd></div>
+                                <div><dt>Ataque</dt><dd><?= $pokemon->getForcaAtaque() ?></dd></div>
+                                <div><dt>Defesa</dt><dd><?= $pokemon->getDefesa() ?></dd></div>
+                                <div><dt>Velocidade</dt><dd><?= $pokemon->getVelocidade() ?></dd></div>
                             </dl>
 
                         </div>

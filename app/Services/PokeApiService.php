@@ -96,8 +96,7 @@ class PokeApiService
     public function obterImagem(string $nome): string
     {
         // Normaliza nomes com espaços ou pontuação para o formato de endereço da API.
-        $slug = strtolower(trim($nome));
-        $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', $slug), '-');
+        $slug = $this->normalizarSlug($nome);
 
         if ($slug === '') {
             throw new InvalidArgumentException('O nome do Pokémon não é válido para consulta.');
@@ -116,6 +115,95 @@ class PokeApiService
         }
 
         return $imagem;
+    }
+
+    /**
+     * Consulta na PokeAPI os atributos base e os tipos da espécie evoluída.
+     *
+     * @return array{
+     *     nome:string,
+     *     hp:int,
+     *     forca_ataque:int,
+     *     defesa:int,
+     *     ataque_especial:int,
+     *     defesa_especial:int,
+     *     velocidade:int,
+     *     tipos:string[]
+     * }
+     */
+    public function obterAtributosBase(string $nome): array
+    {
+        $slug = $this->normalizarSlug($nome);
+
+        if ($slug === '') {
+            throw new InvalidArgumentException('O nome do Pokémon não é válido para consulta.');
+        }
+
+        $detalhes = $this->get(self::BASE_URL . '/pokemon/' . rawurlencode($slug));
+        $estatisticas = [];
+        foreach ($detalhes['stats'] ?? [] as $estatistica) {
+            if (
+                isset($estatistica['stat']['name'])
+                && is_string($estatistica['stat']['name'])
+                && isset($estatistica['base_stat'])
+                && is_int($estatistica['base_stat'])
+            ) {
+                $estatisticas[$estatistica['stat']['name']] = $estatistica['base_stat'];
+            }
+        }
+
+        $campos = [
+            'hp' => 'hp',
+            'forca_ataque' => 'attack',
+            'defesa' => 'defense',
+            'ataque_especial' => 'special-attack',
+            'defesa_especial' => 'special-defense',
+            'velocidade' => 'speed',
+        ];
+        $atributos = [];
+        foreach ($campos as $campoLocal => $campoApi) {
+            if (!isset($estatisticas[$campoApi]) || $estatisticas[$campoApi] < 1) {
+                throw new UnexpectedValueException(
+                    'A PokeAPI não retornou o atributo ' . $campoApi . ' para ' . $slug . '.'
+                );
+            }
+
+            $atributos[$campoLocal] = $estatisticas[$campoApi];
+        }
+
+        $tipos = [];
+        foreach ($detalhes['types'] ?? [] as $tipo) {
+            $nomeTipo = $tipo['type']['name'] ?? null;
+            if (!is_string($nomeTipo) || $nomeTipo === '') {
+                throw new UnexpectedValueException(
+                    'A PokeAPI retornou um tipo inválido para ' . $slug . '.'
+                );
+            }
+
+            $tipos[] = $nomeTipo;
+        }
+
+        $nomeApi = $detalhes['name'] ?? null;
+        if (!is_string($nomeApi) || $tipos === []) {
+            throw new UnexpectedValueException(
+                'A PokeAPI não retornou os dados completos de ' . $slug . '.'
+            );
+        }
+
+        return array_merge(
+            ['nome' => $nomeApi],
+            $atributos,
+            ['tipos' => $tipos]
+        );
+    }
+
+    /** Converte nomes recebidos para o formato de slug usado nos endereços da API. */
+    private function normalizarSlug(string $nome): string
+    {
+        return trim(
+            (string) preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($nome))),
+            '-'
+        );
     }
 
     // Recebe a cadeia evolutiva da PokeAPI e transforma em caminhos de evolução legíveis.
@@ -201,8 +289,16 @@ class PokeApiService
             );
         }
 
-        // Converte resposta JSON em array associativo.
-        $dados = json_decode($resposta, true, 512, JSON_THROW_ON_ERROR);
+        // Converte resposta JSON em array associativo e informa erros de formato claramente.
+        try {
+            $dados = json_decode($resposta, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new UnexpectedValueException(
+                'A PokeAPI retornou um JSON inválido.',
+                0,
+                $exception
+            );
+        }
 
         // Verifica se o retorno realmente é um array.
         if (!is_array($dados)) {

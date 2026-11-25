@@ -113,6 +113,22 @@ CREATE TABLE IF NOT EXISTS pokemon_movimentos (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+-- Define o próximo estágio de evolução para as espécies cadastradas no jogo.
+CREATE TABLE IF NOT EXISTS pokemon_evolucoes (
+    id_pokemon_origem INT UNSIGNED NOT NULL,
+    id_pokemon_destino INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_pokemon_origem),
+    UNIQUE KEY uq_pokemon_evolucao_destino (id_pokemon_destino),
+    CONSTRAINT fk_pokemon_evolucoes_origem
+        FOREIGN KEY (id_pokemon_origem) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_pokemon_evolucoes_destino
+        FOREIGN KEY (id_pokemon_destino) REFERENCES pokemons (id_pokemon)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Times criados pelos usuários.
 CREATE TABLE IF NOT EXISTS times (
     id_time INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -216,6 +232,11 @@ WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Full Heal');
 INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
 SELECT 'Revive', 'revive', 70, 'Revive um Pokémon desmaiado com metade da vida.', 50
 WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Revive');
+
+INSERT INTO itens_loja (nome, tipo, preco, descricao, valor_efeito)
+SELECT 'Item Evolutivo', 'evolucao', 300,
+       'Evolui um Pokémon elegível para o próximo estágio e restaura o HP ao máximo.', 0
+WHERE NOT EXISTS (SELECT 1 FROM itens_loja WHERE nome = 'Item Evolutivo');
 
 -- Itens atualmente pertencentes a cada usuário.
 CREATE TABLE IF NOT EXISTS inventario (
@@ -572,6 +593,32 @@ WHERE NOT EXISTS (
     FROM pokemons AS existente
     WHERE LOWER(existente.nome) = LOWER(catalogo.nome)
 );
+
+-- Relações diretas entre estágios cujas espécies existem no catálogo atual.
+-- O item genérico avança somente uma etapa por utilização.
+INSERT IGNORE INTO pokemon_evolucoes (id_pokemon_origem, id_pokemon_destino)
+SELECT origem.id_pokemon, destino.id_pokemon
+FROM (
+    SELECT 'Bulbasaur' AS origem, 'Ivysaur' AS destino
+    UNION ALL SELECT 'Ivysaur', 'Venusaur'
+    UNION ALL SELECT 'Charmander', 'Charmeleon'
+    UNION ALL SELECT 'Charmeleon', 'Charizard'
+    UNION ALL SELECT 'Squirtle', 'Wartortle'
+    UNION ALL SELECT 'Wartortle', 'Blastoise'
+    UNION ALL SELECT 'Bellsprout', 'Weepinbell'
+    UNION ALL SELECT 'Weepinbell', 'Victreebel'
+    UNION ALL SELECT 'Vulpix', 'Ninetales'
+    UNION ALL SELECT 'Rhyhorn', 'Rhydon'
+    UNION ALL SELECT 'Voltorb', 'Electrode'
+    UNION ALL SELECT 'Koffing', 'Weezing'
+    UNION ALL SELECT 'Kadabra', 'Alakazam'
+    UNION ALL SELECT 'Growlithe', 'Arcanine'
+    UNION ALL SELECT 'Ponyta', 'Rapidash'
+) AS evolucao
+INNER JOIN pokemons AS origem
+    ON LOWER(origem.nome) = LOWER(evolucao.origem)
+INNER JOIN pokemons AS destino
+    ON LOWER(destino.nome) = LOWER(evolucao.destino);
 
 -- Preenche o tipo principal na relação completa sem alterar os registros existentes.
 INSERT IGNORE INTO pokemon_tipos (id_pokemon, id_tipo, ordem)
@@ -955,6 +1002,91 @@ INNER JOIN treinadores
 SET equipe.ordem_batalha = equipe.ordem_batalha + 10,
     equipe.ordem_captura = equipe.ordem_captura + 10
 WHERE treinadores.nivel_jornada BETWEEN 5 AND 8;
+
+-- View 1: catálogo de espécies com tipos reunidos em uma coluna para a listagem.
+-- pokemon_tipos preserva a ordem dos tipos; o tipo principal é uma alternativa
+-- para registros antigos que ainda não possuam relações em pokemon_tipos.
+CREATE OR REPLACE VIEW vw_catalogo_pokemon AS
+SELECT pokemon.id_pokemon,
+       pokemon.nivel,
+       pokemon.nome,
+       pokemon.hp,
+       pokemon.hp_maximo,
+       pokemon.forca_ataque,
+       pokemon.defesa,
+       pokemon.ataque_especial,
+       pokemon.defesa_especial,
+       pokemon.velocidade,
+       pokemon.experiencia,
+       COALESCE(
+           GROUP_CONCAT(
+               tipo.nome
+               ORDER BY relacao.ordem
+               SEPARATOR '|'
+           ),
+           tipo_principal.nome
+       ) AS tipos
+FROM pokemons AS pokemon
+LEFT JOIN pokemon_tipos AS relacao
+    ON relacao.id_pokemon = pokemon.id_pokemon
+LEFT JOIN tipos AS tipo
+    ON tipo.id_tipo = relacao.id_tipo
+LEFT JOIN tipos AS tipo_principal
+    ON tipo_principal.id_tipo = pokemon.id_tipo
+GROUP BY pokemon.id_pokemon,
+         pokemon.nivel,
+         pokemon.nome,
+         pokemon.hp,
+         pokemon.hp_maximo,
+         pokemon.forca_ataque,
+         pokemon.defesa,
+         pokemon.ataque_especial,
+         pokemon.defesa_especial,
+         pokemon.velocidade,
+         pokemon.experiencia,
+         tipo_principal.nome;
+
+-- View 2: membros dos times com dono, posição e HP individual persistido.
+-- O COALESCE mantém compatibilidade com Pokémon sem linha em time_pokemons_estado.
+CREATE OR REPLACE VIEW vw_time_pokemons AS
+SELECT time_pokemon.id_time_pokemon,
+       time_pokemon.id_time,
+       equipe_time.id_usuario,
+       equipe_time.nome AS nome_time,
+       time_pokemon.posicao,
+       pokemon.id_pokemon,
+       pokemon.nome,
+       tipo.nome AS tipo,
+       COALESCE(estado.hp_atual, pokemon.hp) AS hp_atual,
+       pokemon.hp_maximo
+FROM time_pokemons AS time_pokemon
+INNER JOIN times AS equipe_time
+    ON equipe_time.id_time = time_pokemon.id_time
+INNER JOIN pokemons AS pokemon
+    ON pokemon.id_pokemon = time_pokemon.id_pokemon
+LEFT JOIN tipos AS tipo
+    ON tipo.id_tipo = pokemon.id_tipo
+LEFT JOIN time_pokemons_estado AS estado
+    ON estado.id_time_pokemon = time_pokemon.id_time_pokemon;
+
+-- View 3: progresso individual de cada usuário para cada líder cadastrado.
+-- O CROSS JOIN garante que níveis ainda não vencidos também apareçam com zero vitórias.
+CREATE OR REPLACE VIEW vw_progresso_ginasios AS
+SELECT usuario.id_usuario,
+       treinador.id_treinador,
+       treinador.nivel_jornada,
+       treinador.nome AS nome_treinador,
+       treinador.nome_insignia,
+       tipo.nome AS especialidade,
+       COALESCE(progresso.vitorias, 0) AS vitorias,
+       COALESCE(progresso.capturas_desbloqueadas, 0) AS capturas_desbloqueadas
+FROM usuarios AS usuario
+CROSS JOIN treinadores AS treinador
+INNER JOIN tipos AS tipo
+    ON tipo.id_tipo = treinador.id_tipo_especialidade
+LEFT JOIN treinadores_progresso AS progresso
+    ON progresso.id_usuario = usuario.id_usuario
+   AND progresso.id_treinador = treinador.id_treinador;
 
 -- As equipes começam pelo Pokémon mais fraco e terminam pelo mais forte.
 -- A ordem de captura também acompanha o total dos atributos base, do menor ao maior.

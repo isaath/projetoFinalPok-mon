@@ -130,6 +130,28 @@ h1 {
     min-height: 18px;
 }
 
+.evolucao {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #edf6f0;
+    font-size: 0.78rem;
+    line-height: 1.7;
+}
+
+.btn-evoluir {
+    width: 100%;
+    margin-top: 6px;
+    background: #6a4c93;
+    font-family: inherit;
+    font-size: 0.72rem;
+    line-height: 1.6;
+}
+
+.btn-evoluir:hover {
+    background: #4a3470;
+}
+
 .botoes-prioridade {
     display: flex;
     flex-wrap: wrap;

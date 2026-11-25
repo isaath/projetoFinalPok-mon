@@ -195,8 +195,9 @@ Os demais atributos devem complementar a mecânica de batalha.
 
 - Traits não são mais um requisito obrigatório do trabalho.
 - Os Pokémon da jornada usam a tipagem da Geração I definida para o projeto. Não aplicar tipos introduzidos posteriormente às espécies; por exemplo, Magnemite continua Elétrico e Mr. Mime continua Psíquico.
-- Os tipos devem ser representados como dados do Pokémon e podem ser relacionados pela tabela `pokemon_tipos`.
-- Comportamentos compartilhados podem ser implementados com Traits quando fizerem sentido, mas não é necessário criar uma Trait por tipo. A efetividade dos tipos deve seguir uma regra centralizada e consistente.
+- O tipo principal deve ser representado por uma subclasse de `Pokemon` correspondente ao tipo. Para espécies com mais de um tipo, mantenha o tipo secundário como dado relacionado por `pokemon_tipos`, pois PHP permite apenas uma classe-pai.
+- Crie subclasses para os tipos principais usados pelas espécies cadastradas e carregue a subclasse adequada ao montar os objetos do catálogo.
+- Traits são opcionais; a efetividade dos tipos deve continuar seguindo uma regra centralizada e consistente.
 
 # 8. PROGRAMAÇÃO ORIENTADA A OBJETOS
 
@@ -259,10 +260,8 @@ Não é obrigatório utilizar DROP e TRUNCATE.
 
 ## TRIGGERS
 
-- É obrigatório utilizar TRIGGERS.
-- Pesquisar e compreender seu funcionamento antes da implementação.
-- Criar triggers que tenham utilidade real nas regras de negócio.
-- Documentar o objetivo de cada trigger.
+- O uso de TRIGGERS é opcional para a avaliação.
+- Se forem implementadas, devem ter utilidade real e seu objetivo deve ser documentado.
 
 ## VIEWS
 
@@ -328,7 +327,7 @@ Regras:
 
 ## PRAZO CRÍTICO
 
-- Último commit permitido: **22/11/2026 (domingo)**.
+- Último commit permitido: **26/11/2026 (quinta-feira), até às 23h59**.
 - Qualquer commit adicional após o prazo resulta em nota zero, conforme orientação dos professores.
 
 **O agente deve tratar esse prazo como uma restrição absoluta.**
@@ -346,8 +345,8 @@ O trabalho vale 6,5 pontos na nota do trimestre.
 
 Bancas de correção:
 
-- **23/11/2026:** DS3T, das 13h10 às 16h50.
 - **27/11/2026:** DS3M, das 8h às 11h40.
+- **27/11/2026:** DS3T, das 13h10 às 16h50.
 
 Cada professor avaliará o projeto e atribuirá a nota correspondente à sua disciplina.
 
@@ -703,9 +702,13 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 | Paralyze Heal | 15 |
 | Full Heal | 30 |
 | Revive | 70 |
+| Item Evolutivo | 300 |
 
 - A evolução acontece por meio da compra e utilização de itens de evolução.
 - Compras, saldo, inventário, uso de itens e efeitos nos Pokémon devem ser validados no servidor e persistidos no banco.
+- O Item Evolutivo genérico custa 300 PokePila e é o item mais caro da loja. Cada uso avança um estágio direto cadastrado, apenas quando as duas espécies existem no catálogo.
+- Ao evoluir, consulte na PokeAPI os atributos base e os tipos da nova espécie, atualize o cadastro da espécie e restaure o HP individual ao novo máximo retornado pela API.
+- Se a espécie de destino já estiver no time do jogador, recuse a evolução sem consumir o item.
 
 ## 19.7. Apresentação visual
 
@@ -718,11 +721,9 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 Não invente nem fixe sem confirmação dos desenvolvedores:
 
-- como funciona a tentativa/confirmação de captura;
 - a lista, frequência e distribuição dos eventos aleatórios;
-- a lista, os preços e os efeitos dos itens de evolução.
 
-Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra. O equilíbrio dos oito níveis ainda deve ser acompanhado em testes de jogo, especialmente após implementar captura e evolução.
+Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra. As regras do Item Evolutivo estão definidas na seção 19.6. O equilíbrio dos oito níveis ainda deve ser acompanhado em testes de jogo com capturas e evoluções.
 
 **Referências consultadas para as regras de batalha:**
 

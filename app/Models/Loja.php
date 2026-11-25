@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\SaldoInsuficienteException;
 use InvalidArgumentException;
 use PDO;
 use RuntimeException;
@@ -100,7 +101,9 @@ class Loja
 
             $preco = (int) $item['preco'];
             if ((int) $saldo < $preco) {
-                throw new InvalidArgumentException('Saldo insuficiente para comprar esse item.');
+                throw new SaldoInsuficienteException(
+                    'Saldo insuficiente para comprar esse item.'
+                );
             }
 
             $debitar = $this->db->prepare(
@@ -138,9 +141,24 @@ class Loja
                 'id_item' => $idItem,
             ]);
 
+            $consultarQuantidade = $this->db->prepare(
+                'SELECT quantidade FROM inventario
+                 WHERE id_usuario = :id_usuario AND id_item = :id_item'
+            );
+            $consultarQuantidade->execute([
+                'id_usuario' => $idUsuario,
+                'id_item' => $idItem,
+            ]);
+            $quantidade = $consultarQuantidade->fetchColumn();
+            if ($quantidade === false) {
+                throw new RuntimeException('Não foi possível confirmar o inventário atualizado.');
+            }
+
             $this->db->commit();
             return [
                 'nome' => (string) $item['nome'],
+                'id_item' => $idItem,
+                'quantidade' => (int) $quantidade,
                 'saldo' => (int) $saldo - $preco,
             ];
         } catch (Throwable $exception) {

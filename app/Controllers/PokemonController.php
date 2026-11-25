@@ -22,7 +22,7 @@ class PokemonController
 
         try {
             $pokemons = Pokemon::listarTodos($this->db);
-        } catch (PDOException $exception) {
+        } catch (PDOException | UnexpectedValueException $exception) {
             // Registra detalhes técnicos no servidor e evita expor SQL ao usuário.
             error_log('Erro ao listar Pokémon do banco de dados: ' . $exception->getMessage());
             http_response_code(500);

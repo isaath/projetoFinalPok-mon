@@ -1,19 +1,19 @@
 # Relatório de revisão do projeto
 
-**Data:** 17/11/2026  
-**Escopo:** verificação somente de leitura; nenhum código foi alterado durante a revisão.
+**Data da revisão inicial:** 17/11/2026
+**Escopo:** este arquivo registra o diagnóstico inicial e as atualizações posteriores; os itens descritos como corrigidos refletem o estado atualizado do projeto.
 
 ## Resumo
 
-O projeto possui funcionalidades já operacionais, mas ainda não está pronto como jogo completo. Foram identificados conflitos entre a documentação e as regras, uma rota da loja incompatível com o construtor do Controller e requisitos funcionais e acadêmicos pendentes.
+O diagnóstico inicial identificou conflitos de documentação, uma incompatibilidade na rota da loja e requisitos acadêmicos pendentes. A incompatibilidade da rota e as operações da loja foram corrigidas depois; permanecem pendências de equilíbrio, eventos aleatórios e demonstração de alguns conceitos acadêmicos.
 
 ## Conflitos e problemas prioritários
 
 1. **Batalha — núcleo implementado; equilíbrio ainda em teste.** Os movimentos estão cadastrados por espécie; a aplicação resolve prioridade/Velocidade, efetividade, STAB, dano, status temporários, troca automática, HP, resultado, progresso e recompensas. A finalização persiste os dados em transação e usa um token único para evitar duplicação de log, recompensa ou sorteio de captura. A regra atual é chance inicial de 30%, aumento de 20 pontos após falha e limite de 90%; uma espécie já possuída é pulada sem sorteio. Traits não são requisito obrigatório; as existentes não foram removidas.
 
-2. **Loja ainda sem operações.** O Controller agora recebe PDO e a rota mostra a tela do Bolicho para usuários autenticados. A tela [bolicho.php](./app/Views/bolicho/bolicho.php) continua sendo apenas visual; compras e uso de itens ficam para a implementação da loja.
+2. **Loja — compras e uso de itens implementados.** O Model [Loja.php](./app/Models/Loja.php) valida o saldo e persiste débito, inventário e histórico de compra em transação. As compras do Bolicho também usam `fetch` com JSON; o Controller valida sessão e token CSRF e retorna saldo e quantidade atualizados para a tela.
 
-3. **Listagem de Pokémon — corrigido nesta atualização.** A rota principal lê o catálogo do banco pelo [PokemonController.php](./app/Controllers/PokemonController.php) e [Pokemon.php](./app/Models/Pokemon.php); a PokeAPI é usada no navegador apenas para sprites. No banco local havia 41 espécies na última verificação.
+3. **Listagem de Pokémon — corrigido nesta atualização.** A rota lê o catálogo pelo [PokemonController.php](./app/Controllers/PokemonController.php) e [Pokemon.php](./app/Models/Pokemon.php); [PokemonTipoFactory.php](./app/Models/PokemonTipoFactory.php) cria a subclasse de cada tipo principal. Tipos secundários continuam em `pokemon_tipos`, e a PokeAPI é usada no navegador para sprites. O catálogo local contém 41 espécies.
 
 4. **Links diretos para Views — corrigido nesta atualização.** A navegação usa rotas e Controllers, e [app/.htaccess](./app/.htaccess) bloqueia requisições HTTP diretas à pasta interna `app`.
 
@@ -32,44 +32,40 @@ O projeto possui funcionalidades já operacionais, mas ainda não está pronto c
 | Ginásios | Oito líderes e suas equipes estão cadastrados. O mapa mostra níveis liberados/bloqueados conforme o progresso. |
 | Batalha | Turnos, movimentos, efetividade, status, HP individual, troca automática, log, recompensa e progressão estão implementados. A tela não oferece troca manual nem itens em batalha. |
 | Captura | Tentativa aleatória após vitória, tela própria com resultado e chance crescente por falha. Uma falha mantém o alvo; espécies que o jogador já possui são puladas. Capturas bem-sucedidas entram na reserva, sem remover o Pokémon da equipe do líder. |
-| Loja | Os 12 itens obrigatórios estão cadastrados, mas a tela, as compras, o inventário e o uso dos itens não estão implementados. Itens de evolução e suas regras dependem de decisão. |
-| Evolução | A PokeAPI fornece dados de linhas evolutivas para exibição, mas não há evolução do Pokémon do jogador por item. |
-| Listagem de Pokémon | O catálogo consulta as espécies no banco; a PokeAPI fornece os sprites. |
-| Comunicação assíncrona | Há `fetch` JavaScript para imagens diretamente da PokeAPI e cURL no PHP. Não foi encontrada comunicação JSON assíncrona entre JavaScript e PHP. |
+| Loja | Os 12 itens obrigatórios e o Item Evolutivo estão cadastrados. Compra, saldo e inventário são persistidos; itens podem ser usados conforme os fluxos implementados. |
+| Evolução | O Item Evolutivo custa 300 PokePila e evolui um estágio direto cadastrado. A PokeAPI fornece atributos e tipos da nova espécie, e o HP individual é restaurado ao máximo. |
+| Listagem de Pokémon | O catálogo consulta o banco e instancia subclasses para os nove tipos principais presentes nas espécies; tipos secundários vêm de `pokemon_tipos` e a PokeAPI fornece os sprites. |
+| Comunicação assíncrona | Compras do Bolicho usam `fetch` com corpo e resposta JSON entre JavaScript e PHP. Saldo e inventário são atualizados sem recarregar a página; as imagens de itens e Pokémon continuam sendo consultadas na PokeAPI. |
 
 ## Requisitos acadêmicos
 
 **Presentes ou parcialmente demonstrados:**
 
 - MVC básico, autoload e consultas PDO.
-- A classe Pokémon possui dez atributos privados e há herança. Traits existem no código, mas não são mais requisito obrigatório.
+- A classe Pokémon possui onze atributos privados e subclasses por tipo principal; o catálogo usa uma fábrica para instanciar as subclasses dos nove tipos principais presentes. Tipos secundários continuam nos dados de `pokemon_tipos`. Traits existem no código, mas não são requisito obrigatório.
 - Há transações PDO no gerenciamento de time e no Pokecenter.
 - O encerramento de cada batalha grava o resultado e os Pokémon do jogador envolvidos no log.
+- Três Views SQL estão definidas no schema e uma exceção customizada trata saldo insuficiente na loja.
 
 **Não encontrados ou ainda não demonstrados:**
 
-- Triggers e as três Views do banco: não há definições no schema nem no banco local.
-- Exceção personalizada: há exceções padrão do PHP, mas nenhuma classe customizada.
 - Sobrecarga de métodos.
 - Uso funcional de polimorfismo no combate.
-- Comunicação JSON entre JavaScript e PHP.
 
 ## Validações realizadas
 
 - O lint passou nos arquivos PHP verificados, usando PHP 8.2.
 - `git diff --check` passou.
-- Banco local: **8 líderes**, equipes com os tamanhos esperados, **41 espécies**, **12 itens**, **zero Views** e **zero triggers**.
+- Banco local: **8 líderes**, equipes com os tamanhos esperados, **41 espécies**, **13 itens** e **3 Views**. Triggers são opcionais no enunciado oficial.
 - Não foi encontrada suíte automatizada de testes.
 - O schema completo foi executado em um banco temporário para validar a criação e a carga dos movimentos; foram cadastradas 41 espécies e 126 associações de movimentos no teste. Nenhum commit ou push foi realizado.
 
 ## Próximas prioridades recomendadas
 
-1. Implementar compras e uso de itens na loja.
-2. Definir e implementar tentativa/conclusão de capturas; validar a progressão de equipe.
-3. Continuar testes de equilíbrio dos oito níveis com equipes iniciais, capturadas e evoluídas.
-4. Implementar compra/uso de itens de evolução e respectivos efeitos.
-5. Planejar triggers, Views, exceção customizada e demonstração de sobrecarga.
-6. Implementar comunicação JSON entre JavaScript e PHP em uma funcionalidade apropriada.
+1. Continuar testes de equilíbrio dos oito níveis com equipes iniciais, capturadas e evoluídas.
+2. Testar no navegador os fluxos de compra assíncrona, incluindo sucesso, saldo insuficiente, sessão expirada e token inválido.
+3. Demonstrar sobrecarga de métodos e polimorfismo conforme os recursos disponíveis nas linguagens.
+4. Verificar os demais requisitos acadêmicos e preparar a apresentação.
 
 ## Testes de batalha — 20/11/2026
 

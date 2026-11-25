@@ -75,6 +75,30 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                 <p class="papel">Entra se o anterior desmaiar</p>
                             <?php endif; ?>
 
+                            <?php if (!empty($pokemon['nome_evolucao'])): ?>
+                                <div class="evolucao">
+                                    <p>
+                                        Próxima evolução:
+                                        <strong><?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?></strong>
+                                    </p>
+                                    <?php if ((int) $pokemon['evolucao_ja_possuida'] === 1): ?>
+                                        <p>Seu time já possui essa espécie.</p>
+                                    <?php elseif ((int) $pokemon['quantidade_item_evolutivo'] > 0): ?>
+                                        <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time"
+                                              onsubmit="return confirm('Evoluir este Pokémon? Um Item Evolutivo será consumido e o HP será restaurado ao máximo.');">
+                                            <input type="hidden" name="csrf_token"
+                                                   value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="acao" value="evoluir">
+                                            <input type="hidden" name="id_time_pokemon"
+                                                   value="<?= (int) $pokemon['id_time_pokemon'] ?>">
+                                            <button type="submit" class="btn-evoluir">Usar Item Evolutivo</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <p>Compre um Item Evolutivo no Bolicho para evoluir.</p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="botoes-prioridade">
                                 <?php for ($destino = 1; $destino <= 3; $destino++): ?>
                                     <?php if ($destino !== $posicaoAtual): ?>
@@ -127,6 +151,29 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                             <p class="vida">
                                 HP <?= (int) $pokemon['hp_atual'] ?> / <?= (int) $pokemon['hp_maximo'] ?>
                             </p>
+                            <?php if (!empty($pokemon['nome_evolucao'])): ?>
+                                <div class="evolucao">
+                                    <p>
+                                        Próxima evolução:
+                                        <strong><?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?></strong>
+                                    </p>
+                                    <?php if ((int) $pokemon['evolucao_ja_possuida'] === 1): ?>
+                                        <p>Seu time já possui essa espécie.</p>
+                                    <?php elseif ((int) $pokemon['quantidade_item_evolutivo'] > 0): ?>
+                                        <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time"
+                                              onsubmit="return confirm('Evoluir este Pokémon? Um Item Evolutivo será consumido e o HP será restaurado ao máximo.');">
+                                            <input type="hidden" name="csrf_token"
+                                                   value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="acao" value="evoluir">
+                                            <input type="hidden" name="id_time_pokemon"
+                                                   value="<?= (int) $pokemon['id_time_pokemon'] ?>">
+                                            <button type="submit" class="btn-evoluir">Usar Item Evolutivo</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <p>Compre um Item Evolutivo no Bolicho para evoluir.</p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                             <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time">
                                 <input type="hidden" name="csrf_token"
                                        value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">

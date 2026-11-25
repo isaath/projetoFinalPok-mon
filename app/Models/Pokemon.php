@@ -20,6 +20,7 @@ class Pokemon
     private int $defesa_especial = 0;
     private int $velocidade = 0;
     private int $experiencia = 0;
+    private array $tipos = [];
 
     // Retorna o identificador do Pokémon.
     public function getId(): int
@@ -43,6 +44,30 @@ class Pokemon
     public function setNome(string $nome): void
     {
         $this->nome = $nome;
+    }
+
+    /** Retorna o tipo principal definido pela subclasse concreta. */
+    public function getTipo(): string
+    {
+        return $this->tipos[0] ?? 'Sem tipo';
+    }
+
+    /** Retorna todos os tipos associados a esta espécie, na ordem do banco. */
+    public function getTipos(): array
+    {
+        return $this->tipos;
+    }
+
+    /** Define os tipos principal e secundário carregados do banco. */
+    public function setTipos(array $tipos): void
+    {
+        foreach ($tipos as $tipo) {
+            if (!is_string($tipo) || trim($tipo) === '') {
+                throw new \InvalidArgumentException('O tipo do Pokémon precisa ser um texto válido.');
+            }
+        }
+
+        $this->tipos = array_values($tipos);
     }
 
     // Retorna os pontos de vida atuais.
@@ -181,46 +206,33 @@ class Pokemon
     }
 
     /**
-     * Retorna as espécies cadastradas e seus tipos em arrays associativos.
+     * Carrega as espécies como objetos da subclasse correspondente ao tipo principal.
      *
      * Pode receber uma conexão PDO existente; sem ela, usa a conexão padrão da aplicação.
+     *
+     * @return Pokemon[]
      */
     public static function listarTodos(?PDO $db = null): array
     {
         $conn = $db ?? \getConnection();
-        // Agrega os tipos relacionados e mantém o tipo principal como alternativa compatível.
+        // A View centraliza os atributos e a agregação dos tipos usados no catálogo.
         $stmt = $conn->query(
-            'SELECT pokemon.id_pokemon,
-                    pokemon.nome,
-                    pokemon.hp,
-                    pokemon.hp_maximo,
-                    pokemon.forca_ataque,
-                    pokemon.defesa,
-                    pokemon.ataque_especial,
-                    pokemon.defesa_especial,
-                    pokemon.velocidade,
-                    COALESCE(
-                        (
-                            SELECT GROUP_CONCAT(tipo.nome ORDER BY relacao.ordem SEPARATOR \'|\')
-                            FROM pokemon_tipos AS relacao
-                            INNER JOIN tipos AS tipo ON tipo.id_tipo = relacao.id_tipo
-                            WHERE relacao.id_pokemon = pokemon.id_pokemon
-                        ),
-                        tipo_principal.nome
-                    ) AS tipos
-             FROM pokemons AS pokemon
-             LEFT JOIN tipos AS tipo_principal
-                ON tipo_principal.id_tipo = pokemon.id_tipo
-             ORDER BY pokemon.nome'
+            'SELECT id_pokemon, nome, hp, hp_maximo, forca_ataque, defesa,
+                    ataque_especial, defesa_especial, velocidade, tipos
+             FROM vw_catalogo_pokemon
+             ORDER BY nome'
         );
 
-        $pokemons = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // A consulta entrega tipos como texto separado por |; a View recebe uma lista.
-        foreach ($pokemons as $indice => $pokemon) {
-            $pokemons[$indice]['tipos'] = is_string($pokemon['tipos'])
+        $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $pokemons = [];
+
+        // A View recebe objetos; a fábrica escolhe a subclasse usando o tipo principal.
+        foreach ($registros as $pokemon) {
+            $pokemon['tipos'] = is_string($pokemon['tipos'])
                 && $pokemon['tipos'] !== ''
                 ? explode('|', $pokemon['tipos'])
                 : [];
+            $pokemons[] = PokemonTipoFactory::criar($pokemon);
         }
 
         return $pokemons;

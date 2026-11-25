@@ -24,14 +24,10 @@ class CentroPokemon
     public function listarPokemonsUsuario(int $idUsuario): array
     {
         $consulta = $this->db->prepare(
-            'SELECT tp.id_time_pokemon, t.nome AS nome_time, tp.posicao, p.nome,
-                    COALESCE(e.hp_atual, p.hp) AS hp_atual, p.hp_maximo
-             FROM time_pokemons tp
-             INNER JOIN times t ON t.id_time = tp.id_time
-             INNER JOIN pokemons p ON p.id_pokemon = tp.id_pokemon
-             LEFT JOIN time_pokemons_estado e ON e.id_time_pokemon = tp.id_time_pokemon
-             WHERE t.id_usuario = :id_usuario
-             ORDER BY t.id_time, tp.posicao'
+            'SELECT id_time_pokemon, nome_time, posicao, nome, hp_atual, hp_maximo
+             FROM vw_time_pokemons
+             WHERE id_usuario = :id_usuario
+             ORDER BY id_time, posicao'
         );
         $consulta->execute(['id_usuario' => $idUsuario]);
 

@@ -11,8 +11,9 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 * **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
 * **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro. Após uma vitória há uma tentativa de captura com chance inicial de 30%, que aumenta 20 pontos percentuais após cada falha até 90%; espécies já possuídas são puladas, e uma captura bem-sucedida adiciona o Pokémon à reserva sem removê-lo da equipe do líder.
-* **Tipos de Pokémon:** as regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens de espécies da Geração I.
+* **Tipos de Pokémon:** cada espécie é instanciada como uma subclasse de `Pokemon` correspondente ao tipo principal; tipos secundários continuam associados pelos dados de `pokemon_tipos`. As regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens das espécies da Geração I.
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
+* **Compras assíncronas:** o Bolicho envia as compras do navegador ao PHP em JSON e atualiza saldo e inventário sem recarregar a página; a validação de sessão, CSRF, preço e saldo continua no servidor.
 * **Inventário:** gerenciamento dos itens adquiridos pelo jogador.
 * **Evolução:** possibilidade de evoluir Pokémon utilizando itens específicos.
 * **Sistema de recompensas:** obtenção de PokePila após vencer batalhas.
@@ -149,10 +150,11 @@ O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível d
 | Paralyze Heal | 15 |
 | Full Heal | 30 |
 | Revive | 70 |
+| Item Evolutivo | 300 |
 
-Esses itens são cadastrados por `database/schema.sql`. Os itens de evolução ainda não têm lista ou preços aprovados.
+O Item Evolutivo é o item mais caro da loja. Ele evolui o Pokémon em um estágio direto cadastrado no banco; atualmente há 15 relações possíveis entre as espécies do catálogo. Ao usar o item, o sistema consulta os atributos e tipos da espécie evoluída na PokeAPI, atualiza os dados dessa espécie e restaura o HP individual do Pokémon ao novo máximo. A operação consome uma unidade do item e é persistida em transação. Se o time já possuir a espécie de destino, a evolução é recusada sem consumir o item.
 
-**Ainda pendente:** eventos aleatórios; itens, preços e efeitos de evolução; loja funcional; e testar o equilíbrio da jornada com as capturas aleatórias e evoluções funcionando. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e as tentativas de captura pós-batalha estão implementados conforme as regras acima.
+Esses itens são cadastrados por `database/schema.sql`. **Ainda pendente:** definir os eventos aleatórios e testar o equilíbrio da jornada com capturas e evoluções. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e as tentativas de captura pós-batalha estão implementados conforme as regras acima.
 
 ## Objetivos Acadêmicos
 

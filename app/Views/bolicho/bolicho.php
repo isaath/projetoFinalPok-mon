@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=4">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
+    <script src="/projetoFinalPok-mon/public/js/bolicho_compras.js" defer></script>
     <script src="/projetoFinalPok-mon/public/js/pocoes_images.js" defer></script>
 </head>
 <body>
@@ -20,7 +21,7 @@
 
         <p>
             <!-- O saldo é carregado pelo Controller e a imagem é apenas decorativa. -->
-            Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> PokePila
+            Saldo: <strong data-saldo-pokepila="<?= (int) $saldo ?>"><?= number_format($saldo, 0, ',', '.') ?></strong> PokePila
             <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
         </p>
     </header>
@@ -42,6 +43,7 @@
     <?php if ($erro !== null): ?>
         <p class="mensagem-erro" role="alert"><?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?></p>
     <?php endif; ?>
+    <p id="mensagem-compra-async" class="mensagem" role="status" aria-live="polite" hidden></p>
 
     <!-- Cada card usa preço e estoque atuais vindos do banco de dados. -->
     <section class="grade-itens" aria-label="Itens disponíveis">
@@ -64,8 +66,9 @@
                 >
                 <p><?= htmlspecialchars((string) ($item['descricao'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Preço: <?= (int) $item['preco'] ?> PokePila</p>
-                <p>No inventário: <?= (int) $item['quantidade'] ?></p>
-                <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=bolicho">
+                <p>No inventário: <span data-quantidade-item="<?= (int) $item['id_item'] ?>"><?= (int) $item['quantidade'] ?></span></p>
+                <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=bolicho"
+                    data-compra-item data-preco="<?= (int) $item['preco'] ?>">
                     <!-- O token protege o POST; o servidor ainda valida saldo e preço no Model. -->
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($csrfBolicho, ENT_QUOTES, 'UTF-8') ?>">
