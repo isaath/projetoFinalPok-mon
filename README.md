@@ -15,7 +15,7 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
 * **Inventário:** gerenciamento dos itens adquiridos pelo jogador.
 * **Evolução:** possibilidade de evoluir Pokémon utilizando itens específicos.
-* **Sistema de recompensas:** obtenção de Pokédollars após vencer batalhas.
+* **Sistema de recompensas:** obtenção de PokePila após vencer batalhas.
 * **Histórico de batalhas:** registro dos resultados e informações dos combates.
 * **Consumo de API:** obtenção dos sprites dos Pokémon pela PokeAPI; o catálogo e os atributos exibidos vêm do banco de dados do projeto.
 * **Interface web:** telas para navegação, gerenciamento da equipe, loja e batalhas.
@@ -123,7 +123,7 @@ O botão **Time** mostra os três Pokémon ativos e os demais na reserva. É pos
 | 7 | 170 | 50 |
 | 8 | 190 | 55 |
 
-A primeira campanha completa rende 960 Pokédollars em recompensas de primeira vitória. O nível 7 mantém a recompensa aprovada de 170/50 para Blaine; o nível 8 concede 190/55 a Giovanni. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
+A primeira campanha completa rende 960 PokePila em recompensas de primeira vitória. O nível 7 mantém a recompensa aprovada de 170/50 para Blaine; o nível 8 concede 190/55 a Giovanni. A repetição de um nível não pode alterar a recompensa inédita de outro nível.
 
 **Jornada de ginásios:** os níveis seguem Brock (Rocha), Misty (Cascata), Lt. Surge (Trovão), Erika (Arco-íris), Koga (Alma), Sabrina (Pântano), Blaine (Vulcão) e Giovanni (Terra). Os quatro primeiros líderes têm três Pokémon; de Koga em diante, cada líder tem quatro Pokémon da Geração I. As espécies adversárias são cadastradas separadamente do time inicial do jogador. As equipes começam com o membro mais fraco e terminam com o mais forte; insígnias e vitórias são registradas por usuário. A PokeAPI fornece os sprites dos Pokémon, mas não possui retratos de treinadores.
 
@@ -131,7 +131,7 @@ O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível d
 
 **Capturas dos líderes:** após cada vitória, o jogador tenta capturar o próximo Pokémon da ordem do líder, do mais fraco ao mais forte. A chance começa em 30%, sobe 20 pontos após cada falha e tem limite de 90%. Uma falha repete a tentativa contra o mesmo Pokémon na próxima vitória; só após o sucesso a sequência avança. A chance reinicia em 30% para cada novo Pokémon. O sorteio aparece em uma tela própria depois da batalha. No sucesso, uma cópia vai para a reserva e o Pokémon do líder continua disponível em sua equipe.
 
-**Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 Pokédollars uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
+**Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 PokePila uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
 
 **Preços aprovados da loja:**
 

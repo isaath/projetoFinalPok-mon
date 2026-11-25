@@ -2,6 +2,7 @@
     box-sizing: border-box;
 }
 
+/* Organiza o fundo e centraliza o painel da escolha inicial. */
 body {
     min-height: 100vh;
     margin: 0;
@@ -15,9 +16,10 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     color: #173b35;
-    font-family: Arial, sans-serif;
+    font-family: 'Press Start 2P', monospace;
 }
 
+/* Limita a largura do formulário e dá destaque visual ao conteúdo principal. */
 .selecao {
     width: min(1050px, 100%);
     margin: 0 auto;
@@ -51,12 +53,14 @@ h1 {
     color: #52796f;
 }
 
+/* Apresenta as cinco opções em uma grade que se adapta à largura disponível. */
 .grade-pokemons {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
     gap: 16px;
 }
 
+/* Faz o card inteiro funcionar como área de seleção e destaca a escolha ativa. */
 .cartao-pokemon {
     position: relative;
     display: flex;
@@ -162,6 +166,7 @@ button:hover {
 }
 
 @media (max-width: 550px) {
+    /* Empilha contador e botão quando não há espaço horizontal suficiente. */
     .acoes {
         align-items: stretch;
         flex-direction: column;

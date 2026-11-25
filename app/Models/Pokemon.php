@@ -4,7 +4,9 @@ namespace App\Models;
 
 use PDO;
 
-// Representa um Pokémon e reúne seus dados, operações no banco e ações de batalha.
+/**
+ * Representa um Pokémon e reúne seus dados, operações no banco e ações de batalha.
+ */
 class Pokemon
 {
     // Informações privadas: são acessadas ou alteradas pelos métodos da classe.
@@ -178,10 +180,15 @@ class Pokemon
         return $pokemon === false ? null : $pokemon;
     }
 
-    // Retorna todos os registros da tabela como uma lista de arrays associativos.
+    /**
+     * Retorna as espécies cadastradas e seus tipos em arrays associativos.
+     *
+     * Pode receber uma conexão PDO existente; sem ela, usa a conexão padrão da aplicação.
+     */
     public static function listarTodos(?PDO $db = null): array
     {
         $conn = $db ?? \getConnection();
+        // Agrega os tipos relacionados e mantém o tipo principal como alternativa compatível.
         $stmt = $conn->query(
             'SELECT pokemon.id_pokemon,
                     pokemon.nome,
@@ -208,6 +215,7 @@ class Pokemon
         );
 
         $pokemons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // A consulta entrega tipos como texto separado por |; a View recebe uma lista.
         foreach ($pokemons as $indice => $pokemon) {
             $pokemons[$indice]['tipos'] = is_string($pokemon['tipos'])
                 && $pokemon['tipos'] !== ''

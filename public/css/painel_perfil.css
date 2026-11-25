@@ -13,22 +13,26 @@ body {
     flex-direction: column;
 }
 
+/* Centraliza os dados do usuário sem limitar a altura necessária para rolagem. */
 .perfil {
     max-width: 700px;
     text-align: center;
 }
 
+/* Alinha o cabeçalho e a foto ao centro do painel. */
 .perfil-cabecalho {
     justify-content: center;
     text-align: center;
 }
 
+/* Caixa clara que agrupa foto, nome e demais dados do perfil. */
 .dados-perfil {
     padding: 24px;
     border: 1px solid #b7d9c5;
     background: #f7fcf8;
 }
 
+/* Mantém a foto redonda e reserva o mesmo espaço quando ela não existe. */
 .foto-perfil {
     display: grid;
     width: 180px;
@@ -57,6 +61,7 @@ body {
 }
 
 @media (max-width: 600px) {
+    /* Reduz foto e espaçamento para caber em telas estreitas. */
     .dados-perfil {
         padding: 18px;
     }

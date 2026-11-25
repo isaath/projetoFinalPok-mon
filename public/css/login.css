@@ -107,40 +107,28 @@ body {
 /* Alinha os botões no rodapé do formulário. */
 .box-botoes {
     display: flex;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-top: 10px;
 }
 
-/* Estilo dos botões com visual pixel e efeito de clique. */
-.btn-pixel {
-    flex: 1;
-    padding: 8px 0;
-    background-color: #475569;
-    color: #ffffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    text-decoration: none;
-    text-align: center;
-    border: 2px solid #0f172a;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow: 
-        inset 0 2px 0 #94a3b8,
-        0 3px 0 #0f172a;
-    transition: all 0.1s ease;
+.box-botoes .auth-action {
+    display: inline-flex;
+    flex: 0 0 150px;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 48px;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.btn-pixel:hover {
-    /* Clareia e levanta o botão quando o ponteiro passa sobre ele. */
-    background-color: #64748b;
-    transform: translateY(-2px);
-}
-
-.btn-pixel:active {
-    /* Simula o botão sendo pressionado pelo usuário. */
-    transform: translateY(2px);
-    box-shadow: inset 0 1px 0 #94a3b8;
+.box-botoes .auth-action img {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill;
 }
 
 /* Ajuste para telas menores para evitar quebra visual. */
@@ -152,11 +140,15 @@ body {
 
     .box-botoes {
         flex-direction: column;
+        align-items: center;
     }
 
-    .btn-pixel {
-        width: 100%;
+    .box-botoes .auth-action {
+        flex: 0 0 48px;
+        width: 150px;
+        height: 48px;
     }
+
 }
 .box_foto_usr label {
     cursor: pointer;

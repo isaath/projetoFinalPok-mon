@@ -1,4 +1,5 @@
 <?php
+// A View só é renderizada quando recebe as opções e o token preparados pelo Controller.
 if (!isset($pokemons, $token) || !is_array($pokemons)) {
     http_response_code(404);
     exit;
@@ -12,6 +13,7 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
     <title>Escolha seu time | PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/escolher_time.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
     <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
@@ -29,6 +31,7 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
         <?php endif; ?>
 
         <?php if (count($pokemons) === 5): ?>
+            <!-- O servidor valida novamente a seleção; a limitação visual em JavaScript não é segurança. -->
             <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=escolher_time" id="form-time">
                 <input type="hidden" name="csrf_token"
                        value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
@@ -75,6 +78,7 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
             </form>
 
             <script>
+                // Mantém a contagem atualizada e impede selecionar mais de três cards pela interface.
                 const formularioTime = document.getElementById('form-time');
                 const contadorSelecao = document.getElementById('contador-selecao');
                 const caixasPokemon = formularioTime.querySelectorAll('input[name="pokemon_ids[]"]');
@@ -109,5 +113,7 @@ if (!isset($pokemons, $token) || !is_array($pokemons)) {
             </script>
         <?php endif; ?>
     </main>
+    <!-- Usa o mesmo componente de música compartilhado pelas demais telas autenticadas. -->
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

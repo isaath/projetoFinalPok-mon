@@ -138,12 +138,12 @@ O PokeBagual deverá possuir as seguintes telas:
 - Utilizar HP e velocidade nos cálculos.
 - Registrar todas as batalhas em uma tabela de logs.
 - Atualizar as informações necessárias após cada batalha.
-- Conceder Pokédollars ao jogador vencedor.
+- Conceder PokePila ao jogador vencedor.
 - Garantir que os resultados das batalhas sejam armazenados corretamente.
 
 ## 6.4. POKÉ MART — LOJA
 
-Permitir que o jogador utilize seus Pokédollars para comprar itens.
+Permitir que o jogador utilize seu saldo de PokePila para comprar itens.
 
 Todos os itens abaixo são obrigatórios.
 
@@ -649,7 +649,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 | 8 | 190 | 55 |
 
 - A progressão de recompensas foi estendida ao nível 8: Blaine (nível 7) mantém a recompensa aprovada de 170/50 e Giovanni (nível 8) recebe 190/55.
-- A primeira campanha completa concede 960 Pokédollars em recompensas de batalha.
+- A primeira campanha completa concede 960 PokePila em recompensas de batalha.
 - A verificação é individual por usuário e por nível. Vencer um nível pela primeira vez não altera a recompensa de primeira vitória dos outros níveis.
 - O histórico de conclusão deve ser salvo de forma persistente, para que novas batalhas não concedam indevidamente a recompensa `X`, a insígnia ou o desbloqueio inicial outra vez.
 - O jogador pode repetir níveis já vencidos para juntar moedas.
@@ -684,7 +684,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 ## 19.6. Pokecenter e loja
 
 - O Pokecenter restaura o HP de todos os Pokémon associados aos times do usuário, inclusive os desmaiados, até o HP máximo.
-- Cada visita custa 40 Pokédollars, cobrados uma única vez. Não há cobrança quando todos já estão com HP completo.
+- Cada visita custa 40 PokePila, cobrados uma única vez. Não há cobrança quando todos já estão com HP completo.
 - A cura é individual por jogador e não pode alterar o HP dos registros globais de Pokémon.
 - A loja permite comprar e usar os itens obrigatórios definidos neste documento, além dos itens de evolução necessários ao jogo.
 - Os preços aprovados para os itens obrigatórios são:

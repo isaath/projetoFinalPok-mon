@@ -1,0 +1,109 @@
+/* Fixa um mixer compacto no canto para continuar acessível em todas as telas. */
+.music-player {
+    position: fixed;
+    z-index: 200;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border: 1px solid #9aa4b2;
+    border-radius: 6px;
+    background: rgb(248 249 251 / 94%);
+    color: #263445;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 18%);
+    font: 0.55rem 'Press Start 2P', monospace;
+}
+
+/* O elemento real toca a faixa; os controles visíveis são desenhados abaixo. */
+.music-player audio {
+    display: none;
+}
+
+/* Botão de mudo e slider seguem o estilo minimalista do mixer. */
+.music-player .music-toggle {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #263445;
+    cursor: pointer;
+}
+
+.music-player .music-volume {
+    display: flex;
+    align-items: center;
+}
+
+.music-player .music-volume input {
+    width: 92px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    accent-color: #3478c8;
+    cursor: pointer;
+}
+
+.music-icon {
+    /* O ícone vetorial alterna ondas e marca de mudo sem precisar de imagens externas. */
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.music-mute-mark {
+    display: none;
+}
+
+.music-toggle.is-muted .music-wave {
+    display: none;
+}
+
+.music-toggle.is-muted .music-mute-mark {
+    display: block;
+}
+
+.music-player .music-toggle:hover {
+    background: #e6ebf2;
+}
+
+.music-player .music-visually-hidden {
+    /* Mantém rótulos e status acessíveis a leitores de tela sem ocupar espaço visual. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 480px) {
+    /* Reduz o controle em celulares para não cobrir o conteúdo da página. */
+    .music-player {
+        top: 6px;
+        right: 6px;
+        gap: 6px;
+        padding: 3px 6px;
+    }
+
+    .music-player .music-toggle {
+        width: 26px;
+        height: 26px;
+    }
+
+    .music-player .music-volume input {
+        width: 76px;
+    }
+}

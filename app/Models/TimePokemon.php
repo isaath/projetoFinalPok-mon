@@ -6,15 +6,18 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
+/** Consulta e reorganiza os Pokémon que pertencem aos times do jogador. */
 class TimePokemon
 {
     private PDO $db;
 
+    /** Mantém a conexão PDO para leituras e alterações persistentes. */
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
+    /** Busca espécies, posições e HP individual para montar a tela do time. */
     public function listarDoUsuario(int $idUsuario): array
     {
         $consulta = $this->db->prepare(
@@ -33,6 +36,9 @@ class TimePokemon
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Move um Pokémon ativo e desloca os demais para preservar a ordem relativa.
+     */
     public function moverPrioridade(
         int $idUsuario,
         int $idTimePokemon,
@@ -45,6 +51,7 @@ class TimePokemon
         $this->db->beginTransaction();
 
         try {
+            // O bloqueio serializa alterações concorrentes ao mesmo time.
             if (!$this->bloquearUsuario($idUsuario)) {
                 $this->db->commit();
                 return 'usuario_nao_encontrado';
@@ -87,6 +94,7 @@ class TimePokemon
             $this->db->commit();
             return 'movido';
         } catch (Throwable $exception) {
+            // Evita deixar posições parcialmente atualizadas se uma etapa falhar.
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -95,6 +103,9 @@ class TimePokemon
         }
     }
 
+    /**
+     * Substitui o Pokémon da posição 3 por um da reserva e envia o substituído à reserva.
+     */
     public function colocarNaPosicaoTres(int $idUsuario, int $idTimePokemon): string
     {
         if ($idTimePokemon < 1) {
@@ -131,6 +142,7 @@ class TimePokemon
             }
 
             $idPokemonTerceiro = $posicoes[3];
+            // A posição temporária 0 evita colidir com a chave única durante a troca.
             $this->atualizarPosicao($idTime, $idTimePokemon, 0);
             $this->atualizarPosicao($idTime, $idPokemonTerceiro, $posicaoReserva);
             $this->atualizarPosicao($idTime, $idTimePokemon, 3);
@@ -138,6 +150,7 @@ class TimePokemon
             $this->db->commit();
             return 'colocado';
         } catch (Throwable $exception) {
+            // Reverte a troca inteira se qualquer atualização não puder ser concluída.
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -146,6 +159,7 @@ class TimePokemon
         }
     }
 
+    /** Bloqueia a linha do usuário e confirma que ela ainda existe. */
     private function bloquearUsuario(int $idUsuario): bool
     {
         $consulta = $this->db->prepare(
@@ -156,6 +170,7 @@ class TimePokemon
         return $consulta->fetchColumn() !== false;
     }
 
+    /** Busca um membro somente se ele pertencer a um time do usuário autenticado. */
     private function buscarPokemonDoUsuario(int $idUsuario, int $idTimePokemon)
     {
         $consulta = $this->db->prepare(
@@ -174,6 +189,7 @@ class TimePokemon
         return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 
+    /** Mapeia cada posição ocupada ao identificador do Pokémon associado. */
     private function carregarPosicoes(int $idTime): array
     {
         $consulta = $this->db->prepare(
@@ -192,11 +208,13 @@ class TimePokemon
         return $posicoes;
     }
 
+    /** Confirma que as três posições de batalha estão ocupadas. */
     private function timeAtivoCompleto(array $posicoes): bool
     {
         return isset($posicoes[1], $posicoes[2], $posicoes[3]);
     }
 
+    /** Reordena a escalação sem deixar posições duplicadas durante a atualização. */
     private function moverComDeslocamento(
         int $idTime,
         int $idTimePokemon,
@@ -219,6 +237,7 @@ class TimePokemon
         $this->atualizarPosicao($idTime, $idTimePokemon, $posicaoDestino);
     }
 
+    /** Atualiza uma posição e lança erro se nenhuma linha for alterada. */
     private function atualizarPosicao(int $idTime, int $idTimePokemon, int $posicao): void
     {
         $atualizacao = $this->db->prepare(

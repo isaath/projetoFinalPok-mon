@@ -1,0 +1,205 @@
+/* Moldura comum às telas de resultado após uma batalha. */
+.post-battle-page {
+    min-height: 100vh;
+    margin: 0;
+    padding: 28px 14px;
+    box-sizing: border-box;
+    background:
+        linear-gradient(rgb(255 255 255 / 28%), rgb(255 255 255 / 28%)),
+        url("img/tela_batalha.png") center / cover fixed no-repeat;
+    color: #17243b;
+}
+
+/* Limita e centraliza o conteúdo pós-batalha sobre o cenário. */
+.post-battle-shell {
+    width: min(820px, 100%);
+    margin: 0 auto;
+    padding: 22px;
+    box-sizing: border-box;
+    border: 4px solid #17243b;
+    background: rgb(255 253 241 / 97%);
+    box-shadow: 6px 6px 0 rgb(52 68 93 / 78%);
+    text-align: center;
+}
+
+.post-battle-eyebrow {
+    margin: 0 0 12px;
+    color: #a52a2a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.68rem;
+    line-height: 1.7;
+}
+
+.post-battle-shell > h1 {
+    margin: 10px 0;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(1.05rem, 3.8vw, 1.6rem);
+    line-height: 1.6;
+}
+
+.post-battle-lead {
+    margin: 10px 0 18px;
+    font-weight: 700;
+}
+
+.post-battle-reward {
+    /* Reúne valor e ícone da recompensa sem separar o conjunto. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 12px 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.reward-coin {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    vertical-align: middle;
+}
+
+/* Apresenta tentativa, resultado da captura e insígnia em cartões distintos. */
+.capture-prompt,
+.capture-outcome,
+.badge-award {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 16px 0;
+    padding: 16px;
+    border: 3px solid #17243b;
+    background: #fff;
+    text-align: left;
+}
+
+.capture-prompt {
+    flex-direction: column;
+    text-align: center;
+}
+
+.capture-prompt h2,
+.capture-outcome h2,
+.badge-award h2 {
+    margin: 5px 0;
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    line-height: 1.5;
+}
+
+.capture-pokemon-image,
+.capture-pokemon-fallback {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}
+
+.capture-pokemon-fallback {
+    display: grid;
+    place-items: center;
+    border: 3px dashed #7b8797;
+    background: #edf1f7;
+    color: #52617a;
+    font-size: 3rem;
+    font-weight: 800;
+}
+
+.capture-ball {
+    flex: 0 0 auto;
+    width: 130px;
+    height: 110px;
+}
+
+.capture-outcome p,
+.badge-award p {
+    margin: 7px 0;
+    line-height: 1.5;
+}
+
+.gym-badge {
+    flex: 0 0 auto;
+    width: 130px;
+    height: 120px;
+    filter: drop-shadow(3px 4px 0 rgb(23 36 59 / 25%));
+}
+
+.post-battle-notice,
+.post-battle-error {
+    margin: 10px 0;
+    font-weight: 700;
+}
+
+.post-battle-notice {
+    color: #805d17;
+}
+
+.post-battle-error {
+    color: #b3261e;
+}
+
+.post-battle-actions {
+    /* Mantém os formulários de captura, repetição e jornada alinhados. */
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.post-battle-actions form {
+    margin: 0;
+}
+
+.post-battle-button {
+    display: inline-flex;
+    min-width: 150px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 3px solid #17243b;
+    background: #fff;
+    box-shadow: 3px 3px 0 #34445d;
+    color: #17243b;
+    font: 700 0.58rem 'Press Start 2P', monospace;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.capture-button {
+    background: #f8d030;
+}
+
+.continue-button {
+    background: #dce8f8;
+}
+
+.replay-button {
+    background: #fff;
+}
+
+.post-battle-button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 #34445d;
+}
+
+@media (max-width: 560px) {
+    /* Empilha imagem e texto para preservar a leitura em celulares. */
+    .post-battle-shell {
+        padding: 16px 12px;
+    }
+
+    .capture-outcome,
+    .badge-award {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .capture-pokemon-image,
+    .capture-pokemon-fallback {
+        width: 120px;
+        height: 120px;
+    }
+}

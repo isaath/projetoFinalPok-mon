@@ -90,8 +90,12 @@ class PokeApiService
         return $pokemons;
     }
 
+    /**
+     * Consulta a PokeAPI e retorna a URL HTTPS do sprite de uma espécie.
+     */
     public function obterImagem(string $nome): string
     {
+        // Normaliza nomes com espaços ou pontuação para o formato de endereço da API.
         $slug = strtolower(trim($nome));
         $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', $slug), '-');
 
@@ -100,6 +104,7 @@ class PokeApiService
         }
 
         $detalhes = $this->get(self::BASE_URL . '/pokemon/' . rawurlencode($slug));
+        // Prefere o sprite frontal padrão e usa a arte oficial como alternativa.
         $imagem = $detalhes['sprites']['front_default']
             ?? $detalhes['sprites']['other']['official-artwork']['front_default']
             ?? null;

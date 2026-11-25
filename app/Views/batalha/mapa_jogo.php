@@ -18,10 +18,13 @@ $classesDosNiveis = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa do Jogo - Pokebagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/mapa_jogo.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 <body>
     
     <main class="mapa-container">
+        <!-- Os pontos de batalha são posicionados sobre esta imagem pelo CSS. -->
         <img
             src="/projetoFinalPok-mon/public/css/img/img_mapa/mapa_do_jogo.png"
             alt="Mapa do Jogo"
@@ -69,8 +72,11 @@ $classesDosNiveis = [
 
     </main>
 
+    <!-- Retorna ao painel do jogador sem alterar o progresso da jornada. -->
     <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
             <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
     </a>
+    <!-- Reutiliza o player compartilhado para manter a música entre as telas. -->
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

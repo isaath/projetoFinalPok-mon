@@ -1,4 +1,5 @@
 <?php
+// Prepara a foto somente se o conteúdo salvo e o tipo MIME forem permitidos.
 $foto = $perfil['foto'] ?? null;
 $tipoFoto = $perfil['tipo_foto'] ?? '';
 $fotoPermitida = in_array($tipoFoto, ['image/jpeg', 'image/png'], true);
@@ -16,6 +17,7 @@ $nomePerfil = (string) ($perfil['nome'] ?? '');
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/centro.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/painel_perfil.css?v=2">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 <body>
     
@@ -34,6 +36,7 @@ $nomePerfil = (string) ($perfil['nome'] ?? '');
                 <?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?>
             </p>
         <?php else: ?>
+            <!-- Mostra a imagem cadastrada ou um texto alternativo quando não há foto. -->
             <section class="dados-perfil" aria-label="Dados do usuário">
                 <div class="foto-perfil">
                     <?php if ($fotoSrc !== null): ?>
@@ -54,5 +57,6 @@ $nomePerfil = (string) ($perfil['nome'] ?? '');
     <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
             <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
         </a>
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

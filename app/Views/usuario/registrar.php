@@ -12,8 +12,8 @@ $email = $email ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - PokeBagual</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/login.css?v=auth-buttons-3">
 </head>
 <body>
     <!-- Cartão principal que contém o formulário de criação da conta. -->
@@ -98,13 +98,11 @@ $email = $email ?? '';
 
             <!-- Botão de envio do cadastro e link para retornar ao login. -->
             <div class="box-botoes">
-                <button type="submit" class="btn_pixel">
-                    <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Registrar"
-                         style="width: 250px !important; height: auto;">
+                <button type="submit" class="btn_pixel auth-action">
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_registrar.png" alt="Registrar">
                 </button>
-                <a href="index.php?rota=login" class="btn_pixel">
-                    <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar ao login"
-                         style="width: 170px !important; height: auto;">
+                <a href="/projetoFinalPok-mon/public/index.php?rota=login" class="btn_pixel auth-action">
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar ao login">
                 </a>
             </div>
         </form>

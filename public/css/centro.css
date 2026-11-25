@@ -1,7 +1,9 @@
 * {
+    /* Faz dimensões declaradas já incluírem padding e bordas. */
     box-sizing: border-box;
 }
 
+/* Fundo e tipografia que mantêm o Pokecenter coerente com as outras telas. */
 body {
     min-height: 100vh;
     margin: 0;
@@ -15,7 +17,7 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     color: #173b35;
-    font-family: Arial, sans-serif;
+    font-family: 'Press Start 2P', monospace;
 }
 
 .voltar {
@@ -25,6 +27,7 @@ body {
     font-weight: 700;
 }
 
+/* Organiza o saldo, mensagens e conteúdo do tratamento. */
 .cabecalho {
     display: flex;
     justify-content: space-between;
@@ -74,6 +77,7 @@ h1 {
     gap: 14px;
 }
 
+/* Cartão com sprite, nome e HP individual de cada Pokémon. */
 .cartao-pokemon {
     padding: 16px;
     border: 1px solid #b7d9c5;
@@ -92,6 +96,7 @@ h1 {
 }
 
 .barra-hp {
+    /* Esconde a parte preenchida que ultrapassaria o trilho da barra. */
     height: 12px;
     overflow: hidden;
     border-radius: 8px;
@@ -99,6 +104,7 @@ h1 {
 }
 
 .barra-hp span {
+    /* A largura é calculada pela View conforme o HP atual. */
     display: block;
     height: 100%;
     border-radius: inherit;
@@ -112,6 +118,7 @@ h1 {
 }
 
 .visita {
+    /* Mantém a descrição do serviço e o botão de cura lado a lado. */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,6 +160,7 @@ button:hover {
 }
 
 @media (max-width: 600px) {
+    /* Empilha saldo, descrição e botão em telas estreitas. */
     .cabecalho,
     .visita {
         flex-direction: column;

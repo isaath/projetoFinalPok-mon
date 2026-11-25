@@ -4,6 +4,7 @@ if (!defined('POKEBAGUAL_BATALHA_VIEW')) {
     exit;
 }
 
+// O controller entrega o estado do combate; aqui os dados são preparados para apresentação.
 $dadosBatalha = $dadosBatalha ?? null;
 $treinador = is_array($dadosBatalha['treinador'] ?? null)
     ? $dadosBatalha['treinador']
@@ -31,6 +32,7 @@ $hpJogador = (int) ($pokemonJogador['hp'] ?? 0);
 $hpMaximoJogador = (int) ($pokemonJogador['hp_maximo'] ?? 0);
 $hpAdversario = (int) ($pokemonAdversario['hp'] ?? 0);
 $hpMaximoAdversario = (int) ($pokemonAdversario['hp_maximo'] ?? 0);
+// Converte o HP atual em porcentagem para dimensionar visualmente as barras de vida.
 $percentualHpJogador = $hpMaximoJogador > 0
     ? max(0, min(100, (int) round($hpJogador / $hpMaximoJogador * 100)))
     : 0;
@@ -38,15 +40,23 @@ $percentualHpAdversario = $hpMaximoAdversario > 0
     ? max(0, min(100, (int) round($hpAdversario / $hpMaximoAdversario * 100)))
     : 0;
 
+// O mapa de nomes cobre variações como "Lt. Surge"; se a imagem faltar, o HTML usa iniciais.
 $iniciaisTreinador = strtoupper(substr($nomeTreinador, 0, 2));
-$arquivoImagemTreinador = strtolower(trim(
-    (string) preg_replace('/[^a-z0-9]+/i', '-', $nomeTreinador),
-    '-'
-));
-$imagemTreinadorDisponivel = is_file(
-    __DIR__ . '/../../../public/css/img/treinadores/' . $arquivoImagemTreinador . '.png'
-);
+$imagensTreinadores = [
+    'brock' => 'foto_brock.png',
+    'misty' => 'foto_misty.png',
+    'lt. surge' => 'foto_ltsurge.png',
+    'erika' => 'foto_erika.png',
+    'koga' => 'foto_koga.png',
+    'sabrina' => 'foto_sabrina.png',
+    'blaine' => 'foto_blaine.png',
+    'giovanni' => 'foto_giovanni.png',
+];
+$arquivoImagemTreinador = $imagensTreinadores[strtolower(trim((string) $nomeTreinador))] ?? null;
+$imagemTreinadorDisponivel = is_string($arquivoImagemTreinador)
+    && is_file(__DIR__ . '/../../../public/css/img/' . $arquivoImagemTreinador);
 
+// Traduz as chaves internas de condição para os rótulos que aparecem na tela.
 $nomeStatus = [
     'queimadura' => 'Queimado',
     'veneno' => 'Envenenado',
@@ -67,7 +77,8 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalha - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=ataques-tipo-2">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=battle-attack-stats-1">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 <body class="battle-page">
     <div class="textos_cabecalho">
@@ -79,24 +90,16 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
         </p>
     </div>
 
-    <div class="battle-score" aria-label="Resumo da batalha">
-        <span>SEU TIME <strong><?= count(array_filter(
-            $equipeJogador,
-            static fn (array $pokemon): bool => (int) ($pokemon['hp'] ?? 0) > 0
-        )) ?> Pokémon ativo(s)</strong></span>
-        <span class="score-divider" aria-hidden="true">VS</span>
-        <span>GINÁSIO <strong><?= count($equipeAdversario) ?> Pokémon</strong></span>
-    </div>
-
     <div class="lado-a-lado">
         <div class="info_direita">
+            <!-- O cartão resume o líder, sua insígnia e a equipe adversária. -->
             <aside class="trainer-card" aria-labelledby="trainer-title">
                 <p class="eyebrow">LÍDER DO GINÁSIO</p>
                 <div class="trainer-avatar">
                     <?php if ($imagemTreinadorDisponivel): ?>
                         <img
                             class="trainer-image"
-                            src="/projetoFinalPok-mon/public/css/img/treinadores/<?= rawurlencode($arquivoImagemTreinador) ?>.png"
+                            src="/projetoFinalPok-mon/public/css/img/<?= rawurlencode($arquivoImagemTreinador) ?>"
                             alt="Retrato de <?= htmlspecialchars($nomeTreinador, ENT_QUOTES, 'UTF-8') ?>"
                         >
                     <?php else: ?>
@@ -117,12 +120,15 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                 <h3>Equipe do lider</h3>
                 <ol class="trainer-team">
                     <?php foreach ($equipeAdversario as $indice => $pokemon): ?>
-                        <li>
+                        <?php $desmaiado = (int) $pokemon['hp'] <= 0; ?>
+                        <li class="<?= $desmaiado ? 'is-fainted' : '' ?>">
                             <span><?= $indice + 1 ?></span>
-                            <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>
-                            <?php if ((int) $pokemon['hp'] <= 0): ?>
-                                <small>Desmaiado</small>
-                            <?php endif; ?>
+                            <span class="trainer-team-name">
+                                <?= htmlspecialchars($pokemon['nome'], ENT_QUOTES, 'UTF-8') ?>
+                                <?php if ($desmaiado): ?>
+                                    <small>(Desmaiado)</small>
+                                <?php endif; ?>
+                            </span>
                         </li>
                     <?php endforeach; ?>
                 </ol>
@@ -130,6 +136,7 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
         </div>
 
         <div class="info_meio">
+            <!-- O painel central mostra os combatentes, o registro e as ações do jogador. -->
             <main class="battle-shell">
                 <?php if ($erroBatalha !== null): ?>
                     <p class="battle-message battle-message-error" role="alert">
@@ -214,7 +221,15 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                     <?php if ($mensagens !== []): ?>
                         <ol>
                             <?php foreach ($mensagens as $mensagem): ?>
-                                <li><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></li>
+                                <?php
+                                $marcadorTurno = preg_match(
+                                    '/\ATurno \d+\.\z/u',
+                                    (string) $mensagem
+                                ) === 1;
+                                ?>
+                                <li class="<?= $marcadorTurno ? 'battle-log-turn' : 'battle-log-event' ?>">
+                                    <?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?>
+                                </li>
                             <?php endforeach; ?>
                         </ol>
                     <?php else: ?>
@@ -240,6 +255,14 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                             <div class="opcoes-ataques" id="opcoes-ataques" hidden>
                                 <?php foreach ($pokemonJogador['movimentos'] as $movimento): ?>
                                     <?php
+                                    $danoEstimado = (int) $movimento['potencia'] > 0
+                                        && $pokemonAdversario !== null
+                                        ? \App\Services\BatalhaEngine::calcularDano(
+                                            $pokemonJogador,
+                                            $pokemonAdversario,
+                                            $movimento
+                                        )
+                                        : 0;
                                     $tipoAtaque = strtolower(
                                         (string) ($movimento['tipo'] ?? 'normal')
                                     );
@@ -257,7 +280,11 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                                         title="<?= htmlspecialchars($movimento['nome'] . ' · ' . $movimento['tipo'], ENT_QUOTES, 'UTF-8') ?>"
                                     >
                                         <strong><?= htmlspecialchars($movimento['nome'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                        <small><?= htmlspecialchars($movimento['tipo'], ENT_QUOTES, 'UTF-8') ?></small>
+                                        <small class="attack-details">
+                                            <?= htmlspecialchars($movimento['tipo'], ENT_QUOTES, 'UTF-8') ?>
+                                            · Dano
+                                            <?= $danoEstimado > 0 ? $danoEstimado . ' HP' : '—' ?>
+                                        </small>
                                     </button>
                                 <?php endforeach; ?>
                             </div>
@@ -265,57 +292,141 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
 
                         <div class="battle-options">
                             <?php
-                            $pokemonsReservaTroca = [];
-                            foreach ($equipeJogador as $indice => $pokemonReserva) {
-                                if (
-                                    $indice !== (int) ($dadosBatalha['jogador']['ativo'] ?? -1)
-                                    && (int) ($pokemonReserva['hp'] ?? 0) > 0
-                                ) {
-                                    $pokemonsReservaTroca[$indice] = $pokemonReserva;
-                                }
-                            }
+                            $indiceAtivoJogador = (int) ($dadosBatalha['jogador']['ativo'] ?? -1);
                             ?>
-                            <?php if ($pokemonsReservaTroca !== []): ?>
                             <div class="battle-option-control">
-                                <select name="indice_troca" aria-label="Pokémon para trocar">
-                                    <?php foreach ($pokemonsReservaTroca as $indice => $pokemonReserva): ?>
-                                        <option value="<?= $indice ?>">
-                                            <?= htmlspecialchars($pokemonReserva['nome'], ENT_QUOTES, 'UTF-8') ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button type="submit" name="acao" value="trocar_pokemon">
-                                <img src="/projetoFinalPok-mon/public/css/img/btn_trocar_pokemon.png" alt="Trocar Pokémon">
+                                <button
+                                    type="button"
+                                    id="abrir-troca"
+                                    class="battle-menu-button"
+                                    aria-expanded="false"
+                                    aria-controls="opcoes-pokemon-troca"
+                                >
+                                    <img src="/projetoFinalPok-mon/public/css/img/btn_trocar_pokemon.png" alt="Trocar Pokémon">
                                 </button>
+                                <div class="battle-choice-panel" id="opcoes-pokemon-troca" hidden>
+                                    <?php foreach ($equipeJogador as $indice => $pokemonEquipe): ?>
+                                        <?php if ($indice === $indiceAtivoJogador): ?>
+                                            <?php continue; ?>
+                                        <?php endif; ?>
+                                        <button
+                                            type="submit"
+                                            name="trocar_pokemon"
+                                            value="<?= (int) $indice ?>"
+                                            class="battle-choice pokemon-choice"
+                                            <?= (int) $pokemonEquipe['hp'] <= 0 ? 'disabled' : '' ?>
+                                        >
+                                            <?php if (is_string($imagensEquipeJogador[$indice] ?? null)): ?>
+                                                <img
+                                                    src="<?= htmlspecialchars($imagensEquipeJogador[$indice], ENT_QUOTES, 'UTF-8') ?>"
+                                                    alt=""
+                                                    loading="lazy"
+                                                >
+                                            <?php else: ?>
+                                                <span class="pokemon-choice-fallback" aria-hidden="true">
+                                                    <?= htmlspecialchars(strtoupper(substr($pokemonEquipe['nome'], 0, 1)), ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                            <?php endif; ?>
+                                            <span>
+                                                <strong><?= htmlspecialchars($pokemonEquipe['nome'], ENT_QUOTES, 'UTF-8') ?></strong>
+                                                <small>HP <?= (int) $pokemonEquipe['hp'] ?> / <?= (int) $pokemonEquipe['hp_maximo'] ?></small>
+                                            </span>
+                                        </button>
+                                    <?php endforeach; ?>
+                                    <?php if (count(array_filter(
+                                        $equipeJogador,
+                                        static fn (array $pokemon): bool =>
+                                            (int) ($pokemon['hp'] ?? 0) > 0
+                                            && (int) ($pokemon['posicao'] ?? 0) !== $indiceAtivoJogador + 1
+                                    )) === 0): ?>
+                                        <p>Não há outros Pokémon no time para trocar.</p>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <?php endif; ?>
 
-                            <?php if ($inventario !== []): ?>
                             <div class="battle-option-control">
-                                <select name="id_item" aria-label="Item para usar">
+                                <button
+                                    type="button"
+                                    id="abrir-itens"
+                                    class="battle-menu-button"
+                                    aria-expanded="false"
+                                    aria-controls="opcoes-itens"
+                                >
+                                    <img src="/projetoFinalPok-mon/public/css/img/btn_usar_item.png" alt="Usar item">
+                                </button>
+                                <div class="battle-choice-panel item-choice-panel" id="opcoes-itens" hidden>
+                                    <?php if ($inventario !== []): ?>
+                                        <label class="item-target-label" for="indice-alvo-item">Usar em:</label>
+                                        <select name="indice_alvo_item" id="indice-alvo-item">
+                                            <?php foreach ($equipeJogador as $indice => $pokemonEquipe): ?>
+                                                <option value="<?= (int) $indice ?>">
+                                                    <?= htmlspecialchars($pokemonEquipe['nome'], ENT_QUOTES, 'UTF-8') ?>
+                                                    · HP <?= (int) $pokemonEquipe['hp'] ?>/<?= (int) $pokemonEquipe['hp_maximo'] ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    <?php endif; ?>
                                     <?php foreach ($inventario as $item): ?>
-                                        <option value="<?= (int) $item['id_item'] ?>">
-                                            <?= htmlspecialchars($item['nome'], ENT_QUOTES, 'UTF-8') ?>
-                                            (<?= (int) $item['quantidade'] ?>)
-                                        </option>
+                                        <button
+                                            type="submit"
+                                            name="usar_item"
+                                            value="<?= (int) $item['id_item'] ?>"
+                                            class="battle-choice item-choice"
+                                        >
+                                            <strong><?= htmlspecialchars($item['nome'], ENT_QUOTES, 'UTF-8') ?></strong>
+                                            <small>Quantidade: <?= (int) $item['quantidade'] ?></small>
+                                        </button>
                                     <?php endforeach; ?>
-                                </select>
-                                <button type="submit" name="acao" value="usar_item">
-                                <img src="/projetoFinalPok-mon/public/css/img/btn_usar_item.png" alt="Usar item">
-                                </button>
+                                    <?php if ($inventario === []): ?>
+                                        <p>Você ainda não possui itens para usar.</p>
+                                        <a href="/projetoFinalPok-mon/public/index.php?rota=bolicho">Ir ao Bolicho</a>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <?php endif; ?>
 
-                            <button type="submit" name="acao" value="fugir">
+                            <button
+                                type="button"
+                                id="abrir-confirmacao-fuga"
+                                class="battle-menu-button"
+                            >
                                 <img src="/projetoFinalPok-mon/public/css/img/btn_fugir.png" alt="Fugir">
                             </button>
+
+                            <dialog
+                                id="confirmacao-fuga"
+                                class="flee-confirmation"
+                                aria-labelledby="confirmacao-fuga-titulo"
+                            >
+                                <h2 id="confirmacao-fuga-titulo">Você tem certeza que vai fugir?</h2>
+                                <p>
+                                    O HP atual dos seus Pokémon será salvo. O time do adversário
+                                    estará recuperado quando você iniciar outra batalha.
+                                </p>
+                                <div class="flee-confirmation-actions">
+                                    <button
+                                        type="button"
+                                        id="cancelar-fuga"
+                                        class="flee-cancel-button"
+                                    >
+                                        Continuar batalhando
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        name="acao"
+                                        value="confirmar_fuga"
+                                        class="flee-confirm-button"
+                                    >
+                                        Confirmar e ir ao mapa
+                                    </button>
+                                </div>
+                            </dialog>
                         </div>
                     </form>
                 <?php elseif ($finalizada): ?>
                     <section class="battle-finish" aria-live="polite">
                         <?php if ($vitoria): ?>
                             <h2>Voce venceu!</h2>
-                            <p>Recompensa: <strong><?= (int) $dadosBatalha['recompensa'] ?> Pokedollars</strong></p>
+                            <p>Recompensa: <strong><?= (int) $dadosBatalha['recompensa'] ?> PokePila</strong></p>
                             <a class="battle-submit" href="/projetoFinalPok-mon/public/index.php?rota=captura">Ver captura</a>
                         <?php else: ?>
                             <h2>Voce perdeu a batalha</h2>
@@ -338,16 +449,37 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
              style="width: 200px !important; height: auto;">
     </a>
     <script>
-        const botaoAtacar = document.getElementById('abrir-ataques');
-        const opcoesAtaques = document.getElementById('opcoes-ataques');
+        // Associa cada botão de ação ao painel correspondente de opções.
+        [
+            ['abrir-ataques', 'opcoes-ataques'],
+            ['abrir-troca', 'opcoes-pokemon-troca'],
+            ['abrir-itens', 'opcoes-itens'],
+        ].forEach(function ([idBotao, idPainel]) {
+            const botao = document.getElementById(idBotao);
+            const painel = document.getElementById(idPainel);
+            if (botao && painel) {
+                botao.addEventListener('click', function () {
+                    // O atributo hidden controla a exibição; aria-expanded informa leitores de tela.
+                    painel.hidden = !painel.hidden;
+                    botao.setAttribute('aria-expanded', painel.hidden ? 'false' : 'true');
+                });
+            }
+        });
 
-        if (botaoAtacar && opcoesAtaques) {
-            botaoAtacar.addEventListener('click', function () {
-                const aberto = !opcoesAtaques.hidden;
-                opcoesAtaques.hidden = aberto;
-                botaoAtacar.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+        const botaoFugir = document.getElementById('abrir-confirmacao-fuga');
+        const confirmacaoFuga = document.getElementById('confirmacao-fuga');
+        const cancelarFuga = document.getElementById('cancelar-fuga');
+        if (botaoFugir && confirmacaoFuga && cancelarFuga) {
+            // showModal abre a confirmação nativa sem enviar o formulário de fuga.
+            botaoFugir.addEventListener('click', function () {
+                confirmacaoFuga.showModal();
+            });
+            // Cancelar fecha o diálogo e mantém a batalha atual.
+            cancelarFuga.addEventListener('click', function () {
+                confirmacaoFuga.close();
             });
         }
     </script>
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

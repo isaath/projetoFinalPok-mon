@@ -12,8 +12,8 @@ $email = $email ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - PokeBagual</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/login.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/login.css?v=auth-buttons-3">
 </head>
 <body>
     <!-- Cartão visual que agrupa o título, mensagens e formulário de login. -->
@@ -59,18 +59,17 @@ $email = $email ?? '';
 
             <!-- Ações: entrar, abrir cadastro ou voltar à listagem. -->
             <div class="box-botoes">
-                <button type="submit" class="btn_pixel">
+                <button type="submit" class="btn_pixel auth-action">
                     <img src="/projetoFinalPok-mon/public/css/img/btn_login.png" alt="Login"
-                         style="width: 150px !important; height: auto;">
+                    >
                 </button>
-                <a href="/projetoFinalPok-mon/public/index.php?rota=registrar" class="btn_pixel">
+                <a href="/projetoFinalPok-mon/public/index.php?rota=registrar" class="btn_pixel auth-action">
                     <img src="/projetoFinalPok-mon/public/css/img/btn_registrar.png" alt="Registrar"
-                         style="width: 125px !important; height: auto;">
+                    >
                 </a>
-                <a href="/projetoFinalPok-mon/public/index.php?rota=inicio" class="btn_pixel">
-    <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar"
-         style="width: 125px !important; height: auto;">
-</a>
+                <a href="/projetoFinalPok-mon/public/index.php?rota=inicio" class="btn_pixel auth-action">
+                    <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar">
+                </a>
             </div>
         </form>
     </div>

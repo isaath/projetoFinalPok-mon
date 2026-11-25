@@ -6,6 +6,7 @@
     <title>PokeBagual | Bolicho</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=4">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
     <script src="/projetoFinalPok-mon/public/js/pocoes_images.js" defer></script>
 </head>
 <body>
@@ -17,171 +18,71 @@
             <h1>Bolicho</h1>
         </div>
 
-        <p>Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> Pokédollars</p>
+        <p>
+            <!-- O saldo é carregado pelo Controller e a imagem é apenas decorativa. -->
+            Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> PokePila
+            <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
+        </p>
     </header>
 
+    <?php if ($mensagem !== null): ?>
+        <!-- Exibe o retorno de uma compra somente após o redirecionamento do formulário. -->
+        <?php if (is_array($mensagem) && ($mensagem['tipo'] ?? null) === 'compra'): ?>
+            <p class="mensagem" role="status">
+                <?= htmlspecialchars((string) ($mensagem['item'] ?? 'Item'), ENT_QUOTES, 'UTF-8') ?>
+                comprado com sucesso. Saldo restante:
+                <strong><?= number_format((int) ($mensagem['saldo'] ?? 0), 0, ',', '.') ?></strong>
+                PokePila
+                <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
+            </p>
+        <?php elseif (is_string($mensagem)): ?>
+            <p class="mensagem" role="status"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
+    <?php if ($erro !== null): ?>
+        <p class="mensagem-erro" role="alert"><?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?></p>
+    <?php endif; ?>
+
+    <!-- Cada card usa preço e estoque atuais vindos do banco de dados. -->
     <section class="grade-itens" aria-label="Itens disponíveis">
-        <article class="card-item">
-            <h2>Potion</h2>
-            <img
-                class="imagem-item"
-                data-nome="potion"
-                alt="Potion"
-                loading="lazy"
-            >
-            <p>Recupera 20 HP.</p>
-            <p>Preço: 25 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Super Potion</h2>
-            <img
-                class="imagem-item"
-                data-nome="super-potion"
-                alt="Super Potion"
-                loading="lazy"
-            >
-            <p>Recupera 50 HP.</p>
-            <p>Preço: 50 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Hyper Potion</h2>
-            <img
-                class="imagem-item"
-                data-nome="hyper-potion"
-                alt="Hyper Potion"
-                loading="lazy"
-            >
-            <p>Recupera 200 HP.</p>
-            <p>Preço: 100 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Max Potion</h2>
-            <img
-                class="imagem-item"
-                data-nome="max-potion"
-                alt="Max Potion"
-                loading="lazy"
-            >
-            <p>Recupera todo os HP.</p>
-            <p>Preço: 180 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-        
-        <article class="card-item">
-            <h2>Full Restore</h2>
-            <img
-                class="imagem-item"
-                data-nome="full-restore"
-                alt="Full Restore"
-                loading="lazy"
-            >
-            <p>Recupera todo os HP +  cura todas as condições de status</p>
-            <p>Preço: 220 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Antidote</h2>
-            <img
-                class="imagem-item"
-                data-nome="antidote"
-                alt="Antidote"
-                loading="lazy"
-            >
-            <p>Cura o status de envenenamento</p>
-            <p>Preço: 15 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Burn Heal</h2>
-            <img
-                class="imagem-item"
-                data-nome="burn-heal"
-                alt="Burn Heal"
-                loading="lazy"
-            >
-            <p>Remove a condição de status queimado</p>
-            <p>Preço: 15 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Ice Heal</h2>
-            <img
-                class="imagem-item"
-                data-nome="ice-heal"
-                alt="Ice Heal"
-                loading="lazy"
-            >
-            <p>Remove a condição de status congelado</p>
-            <p>Preço: 15 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Awakening</h2>
-            <img
-                class="imagem-item"
-                data-nome="awakening"
-                alt="Awakening"
-                loading="lazy"
-            >
-            <p>Acorda o Pokémon adormecido</p>
-            <p>Preço: 15 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Paralyze Heal</h2>
-            <img
-                class="imagem-item"
-                data-nome="paralyze-heal"
-                alt="Paralyze Heal"
-                loading="lazy"
-            >
-            <p>Cura o status de paralisia</p>
-            <p>Preço: 15 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Full Heal</h2>
-            <img
-                class="imagem-item"
-                data-nome="full-heal"
-                alt="Full Heal"
-                loading="lazy"
-            >
-            <p>Remove todas as condições de status negativas</p>
-            <p>Preço: 30 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-
-        <article class="card-item">
-            <h2>Revive</h2>
-            <img
-                class="imagem-item"
-                data-nome="revive"
-                alt="Revive"
-                loading="lazy"
-            >
-            <p>Restaura a vida de um Pokémon desmaiado</p>
-            <p>Preço: 70 Pokédollars</p>
-            <button type="button">Comprar</button>
-        </article>
-        
+        <?php foreach ($itens as $item): ?>
+            <?php
+            $nomeItem = (string) $item['nome'];
+            $slugItem = strtolower(trim(
+                (string) preg_replace('/[^a-z0-9]+/i', '-', $nomeItem),
+                '-'
+            ));
+            ?>
+            <article class="card-item">
+                <h2><?= htmlspecialchars($nomeItem, ENT_QUOTES, 'UTF-8') ?></h2>
+                <!-- O script consulta a imagem pelo nome; o envio da compra usa o ID persistido. -->
+                <img
+                    class="imagem-item"
+                    data-nome="<?= htmlspecialchars($slugItem, ENT_QUOTES, 'UTF-8') ?>"
+                    alt="<?= htmlspecialchars($nomeItem, ENT_QUOTES, 'UTF-8') ?>"
+                    loading="lazy"
+                >
+                <p><?= htmlspecialchars((string) ($item['descricao'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+                <p>Preço: <?= (int) $item['preco'] ?> PokePila</p>
+                <p>No inventário: <?= (int) $item['quantidade'] ?></p>
+                <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=bolicho">
+                    <!-- O token protege o POST; o servidor ainda valida saldo e preço no Model. -->
+                    <input type="hidden" name="csrf_token"
+                        value="<?= htmlspecialchars($csrfBolicho, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="id_item" value="<?= (int) $item['id_item'] ?>">
+                    <!-- O bloqueio melhora a interface, mas não substitui a validação no servidor. -->
+                    <button type="submit" <?= $saldo < (int) $item['preco'] ? 'disabled' : '' ?>>
+                        Comprar
+                    </button>
+                </form>
+            </article>
+        <?php endforeach; ?>
     </section>
 
     <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
         <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
     </a>
 </main>
+<?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

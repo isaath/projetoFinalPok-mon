@@ -6,6 +6,7 @@
     <title>Pokecenter - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/centro.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
     <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
@@ -21,11 +22,28 @@
                 <h1>Pokecenter</h1>
                 <p>Recupere o HP de todos os Pokémon associados aos seus times.</p>
             </div>
-            <p class="saldo">Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> Pokédollars</p>
+            <p class="saldo">
+                <!-- Saldo enviado pelo Controller, sem consulta direta pela View. -->
+                Saldo: <strong><?= number_format($saldo, 0, ',', '.') ?></strong> PokePila
+                <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
+            </p>
         </header>
 
         <?php if (!empty($mensagem)): ?>
-            <p class="mensagem" role="status"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></p>
+            <!-- Diferencia saldo insuficiente dos demais resultados da visita. -->
+            <?php if (is_array($mensagem) && ($mensagem['tipo'] ?? null) === 'saldo_insuficiente'): ?>
+                <p class="mensagem" role="status">
+                    A visita custa <?= (int) ($mensagem['custo'] ?? 0) ?> PokePila.
+                    Seu saldo atual é
+                    <strong><?= number_format((int) ($mensagem['saldo'] ?? 0), 0, ',', '.') ?></strong>
+                    PokePila
+                    <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
+                </p>
+            <?php elseif (is_array($mensagem) && is_string($mensagem['texto'] ?? null)): ?>
+                <p class="mensagem" role="status"><?= htmlspecialchars($mensagem['texto'], ENT_QUOTES, 'UTF-8') ?></p>
+            <?php elseif (is_string($mensagem)): ?>
+                <p class="mensagem" role="status"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></p>
+            <?php endif; ?>
         <?php endif; ?>
 
         <?php if (!empty($erro)): ?>
@@ -33,11 +51,13 @@
         <?php endif; ?>
 
         <?php if ($pokemons === []): ?>
+            <!-- Orienta o usuário quando ainda não existe equipe associada à conta. -->
             <section class="vazio">
                 <h2>Seu time ainda está vazio</h2>
                 <p>Quando você tiver Pokémon associados a um time, eles aparecerão aqui.</p>
             </section>
         <?php else: ?>
+            <!-- Exibe cada Pokémon e a porcentagem de HP calculada para a barra. -->
             <section class="lista-pokemons" aria-label="Pokémon dos seus times">
                 <?php foreach ($pokemons as $pokemon): ?>
                     <?php
@@ -77,9 +97,10 @@
                 <div>
                     <h2>Tratamento completo</h2>
                     <p>Todos os Pokémon dos seus times, inclusive os desmaiados, voltam ao HP máximo.</p>
-                    <p class="preco">Custo por visita: <?= $custoVisita ?> Pokédollars</p>
+                    <p class="preco">Custo por visita: <?= $custoVisita ?> PokePila</p>
                 </div>
                 <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=centro">
+                    <!-- O token confirma que a solicitação de cura partiu desta sessão. -->
                     <input type="hidden" name="csrf_token"
                            value="<?= htmlspecialchars($_SESSION['csrf_centro'], ENT_QUOTES, 'UTF-8') ?>">
                     <button type="submit" class="btn_pixel">
@@ -90,5 +111,7 @@
             </section>
         <?php endif; ?>
     </main>
+    <!-- Reutiliza o player comum às telas do jogo. -->
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+// Evita renderizar a tela sem os dados já separados pelo Controller.
 if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reservas)) {
     http_response_code(404);
     exit;
@@ -12,6 +13,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
     <title>Meu time | PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/meu_time.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
     <script src="/projetoFinalPok-mon/public/js/pokemon_images.js" defer></script>
 </head>
 <body>
@@ -48,6 +50,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
             <?php if ($ativos === []): ?>
                 <p class="vazio">Você ainda não possui Pokémon ativos.</p>
             <?php else: ?>
+                <!-- A ordem destes cards define quem entra primeiro na batalha. -->
                 <div class="grade-time">
                     <?php foreach ($ativos as $pokemon): ?>
                         <?php $posicaoAtual = (int) $pokemon['posicao']; ?>
@@ -75,6 +78,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                             <div class="botoes-prioridade">
                                 <?php for ($destino = 1; $destino <= 3; $destino++): ?>
                                     <?php if ($destino !== $posicaoAtual): ?>
+                                        <!-- Cada formulário solicita ao Controller uma nova posição prioritária. -->
                                         <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time">
                                             <input type="hidden" name="csrf_token"
                                                    value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
@@ -107,6 +111,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
             <?php if ($reservas === []): ?>
                 <p class="vazio">Você ainda não possui Pokémon na reserva.</p>
             <?php else: ?>
+                <!-- Um Pokémon reserva pode substituir apenas o membro da posição 3. -->
                 <div class="grade-reservas">
                     <?php foreach ($reservas as $pokemon): ?>
                         <article class="cartao-pokemon reserva">
@@ -143,5 +148,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
             <?php endif; ?>
         </section>
     </main>
+    <!-- Reaproveita o player global sem duplicar sua implementação nesta View. -->
+    <?php require __DIR__ . '/../layouts/music_player.php'; ?>
 </body>
 </html>

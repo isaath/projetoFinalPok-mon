@@ -1,3 +1,4 @@
+/* Fundo e alinhamento da página informativa. */
 body {
     min-height: 100vh;
     margin: 0;
@@ -16,10 +17,12 @@ body {
     flex-direction: column;
 }
 
+/* Espaçamento entre o painel de história e o botão de retorno. */
 .historia_sobre > .btn_pixel {
     margin-bottom: 20px;
 }
 
+/* Mantém os parágrafos legíveis e dá destaque à frase final. */
 .historia_sobre p {
     margin: 0 0 16px;
     line-height: 1.6;

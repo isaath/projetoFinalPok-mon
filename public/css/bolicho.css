@@ -1,5 +1,5 @@
 body {
-    /* Define a imagem de fundo da tela inicial. */
+    /* Define a imagem de fundo da tela da loja. */
     background-image: url("img/tela_bolicho.png");
     background-attachment: fixed; /* Fixa a imagem no fundo da página. */
     background-size: cover; /* Faz a imagem cobrir toda a área visível. */
@@ -13,13 +13,14 @@ body {
     flex-direction: column;
 }
 
+/* Ajusta o painel pixelado sem deixar o catálogo ocupar a tela inteira. */
 .painel-pixel.bolicho {
     width: min(1000px, calc(100% - 32px));
     min-height: auto;
     padding: 16px;
 }
 
-    /* Conteúdo da loja sobre o fundo existente. */
+/* Organiza o catálogo dentro do painel e permite altura suficiente para rolar. */
 .bolicho {
     width: min(1100px, calc(100% - 32px));
     min-height: 100vh;
@@ -44,6 +45,7 @@ body {
     gap: 10px;
 }
 
+/* Compacta as informações de cada item para caberem em uma grade de produtos. */
 .card-item {
     box-sizing: border-box;
     min-width: 0;
@@ -85,6 +87,7 @@ body {
 }
 
 @media (max-width: 700px) {
+    /* Reduz o número de colunas conforme diminui a largura da tela. */
     .grade-itens {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }

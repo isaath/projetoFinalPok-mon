@@ -28,7 +28,7 @@ O projeto possui funcionalidades já operacionais, mas ainda não está pronto c
 | Cadastro e login | Implementados com hash de senha e sessão. Troca de perfis não encontrada; não há papéis de usuário no banco nem fluxo para alterná-los. |
 | Escolha inicial | Implementada: seleção de três entre cinco Pokémon, com validação e persistência. |
 | Meu time | Exibe ativos e reservas, reorganiza prioridades e troca um ativo pela reserva. Capturas bem-sucedidas entram na reserva. |
-| Pokecenter | Cura individual por jogador, cobra 40 Pokédollars quando necessário e usa transação no banco. |
+| Pokecenter | Cura individual por jogador, cobra 40 PokePila quando necessário e usa transação no banco. |
 | Ginásios | Oito líderes e suas equipes estão cadastrados. O mapa mostra níveis liberados/bloqueados conforme o progresso. |
 | Batalha | Turnos, movimentos, efetividade, status, HP individual, troca automática, log, recompensa e progressão estão implementados. A tela não oferece troca manual nem itens em batalha. |
 | Captura | Tentativa aleatória após vitória, tela própria com resultado e chance crescente por falha. Uma falha mantém o alvo; espécies que o jogador já possui são puladas. Capturas bem-sucedidas entram na reserva, sem remover o Pokémon da equipe do líder. |
@@ -77,7 +77,7 @@ O projeto possui funcionalidades já operacionais, mas ainda não está pronto c
 
 - Em uma cópia temporária do projeto e do banco, foi feito login, aberto o mapa, iniciado Brock e concluída a batalha em 10 turnos.
 - O mapa permitiu clicar no ponto de Brock após ajustar a camada do botão “Voltar”; na vitória, o sprite do Pokémon do jogador continuou visível.
-- O teste gravou vitória, recompensa de 50 Pokédollars, progresso e HP final: Charmander 0, Bulbasaur 0 e Squirtle 12. Reabrir a tela manteve apenas uma finalização e o saldo em 550.
+- O teste gravou vitória, recompensa de 50 PokePila, progresso e HP final: Charmander 0, Bulbasaur 0 e Squirtle 12. Reabrir a tela manteve apenas uma finalização e o saldo em 550.
 - A simulação também cobriu repetição idempotente, vitória repetida, derrota e rollback em caso de Pokémon inválido. Todos passaram em banco isolado.
 
 ### Simulação exploratória de equilíbrio

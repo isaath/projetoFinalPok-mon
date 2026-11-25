@@ -2,6 +2,9 @@
 
 use App\Models\Batalha;
 
+/**
+ * Controla o acesso ao mapa e prepara o progresso individual do jogador.
+ */
 class MapaController
 {
     // Guarda a conexão necessária para consultar o progresso da jornada.
@@ -13,6 +16,9 @@ class MapaController
         $this->db = $db;
     }
 
+    /**
+     * Confere a sessão, consulta os níveis liberados e carrega a tela do mapa.
+     */
     public function index(): void
     {
         // O mapa e o progresso são pessoais, então exigem um usuário autenticado.

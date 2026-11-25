@@ -16,7 +16,12 @@ class UsuarioController
         $this->db = $db;
     }
 
-    // Método que processa o formulário de login.
+    /**
+     * Valida as credenciais e inicia a sessão do usuário.
+     *
+     * Depois da autenticação, encaminha quem ainda não iniciou a jornada
+     * para escolher o time inicial.
+     */
     public function login(): void
     {
         // Variáveis de estado da tela: erro, e-mail preservado e sucesso do cadastro.
@@ -79,7 +84,9 @@ class UsuarioController
         require __DIR__ . '/../Views/usuario/login.php';
     }
 
-    // Exibe o painel do jogo somente para um usuário autenticado.
+    /**
+     * Exibe o painel somente para usuários autenticados que já iniciaram a jornada.
+     */
     public function painel_jogar(): void
     {
         if (
@@ -119,6 +126,7 @@ class UsuarioController
         require __DIR__ . '/../Views/layouts/painel_jogar.php';
     }
 
+    /** Carrega os dados do perfil do usuário autenticado para a View. */
     public function perfil(): void
     {
         $idUsuario = filter_var(
@@ -151,7 +159,11 @@ class UsuarioController
         require __DIR__ . '/../Views/usuario/perfil.php';
     }
 
-    // Método responsável pelo cadastro de usuários.
+    /**
+     * Valida e cadastra uma nova conta, incluindo uma foto opcional.
+     *
+     * Senhas, limites dos campos e o tipo/tamanho da imagem são conferidos no servidor.
+     */
     public function registrar(): void
     {
         // Variáveis para mensagem de erro e valores preenchidos no formulário.
@@ -170,6 +182,7 @@ class UsuarioController
             $tipoFoto = null;
             $erroFoto = null;
 
+            // A imagem é validada pelo conteúdo MIME e pelo tamanho, não apenas pelo nome do arquivo.
             if (!empty($_FILES['foto']['tmp_name'])) {
                 $informacoesImagem = @getimagesize($_FILES['foto']['tmp_name']);
 

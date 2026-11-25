@@ -6,17 +6,21 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
+/** Consulta Pokémon do usuário e aplica o serviço de recuperação do Pokecenter. */
 class CentroPokemon
 {
+    // Valor descontado uma vez quando há pelo menos um Pokémon ferido.
     public const CUSTO_VISITA = 40;
 
     private PDO $db;
 
+    /** Recebe a conexão usada para consultar e atualizar os dados do jogador. */
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
+    /** Lista Pokémon de todos os times do usuário com seu HP individual atual. */
     public function listarPokemonsUsuario(int $idUsuario): array
     {
         $consulta = $this->db->prepare(
@@ -34,6 +38,7 @@ class CentroPokemon
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /** Consulta o saldo e informa erro se a conta não existir. */
     public function obterSaldo(int $idUsuario): int
     {
         $consulta = $this->db->prepare(
@@ -49,11 +54,17 @@ class CentroPokemon
         return (int) $saldo;
     }
 
+    /**
+     * Cura Pokémon feridos e cobra uma única visita dentro da mesma transação.
+     *
+     * Os estados são gravados por membro do time, sem alterar o HP global da espécie.
+     */
     public function curarTodosDoUsuario(int $idUsuario): array
     {
         $this->db->beginTransaction();
 
         try {
+            // Bloqueia a conta enquanto saldo e custo da visita são verificados.
             $consultaSaldo = $this->db->prepare(
                 'SELECT dinheiro FROM usuarios WHERE id_usuario = :id_usuario FOR UPDATE'
             );
@@ -89,6 +100,7 @@ class CentroPokemon
                     (int) $pokemon['hp_atual'] < (int) $pokemon['hp_maximo']
             );
 
+            // Não cobra uma visita quando não há HP para recuperar.
             if ($feridos === []) {
                 $this->db->commit();
                 return ['status' => 'ja_completo', 'saldo' => (int) $saldo];
@@ -99,6 +111,7 @@ class CentroPokemon
                 return ['status' => 'saldo_insuficiente', 'saldo' => (int) $saldo];
             }
 
+            // Condição no UPDATE protege o saldo caso ele mude antes da cobrança.
             $cobrar = $this->db->prepare(
                 'UPDATE usuarios
                  SET dinheiro = dinheiro - :custo
@@ -119,6 +132,7 @@ class CentroPokemon
                  ON DUPLICATE KEY UPDATE hp_atual = VALUES(hp_atual)'
             );
 
+            // Atualiza apenas os Pokémon feridos, inclusive os que estavam com HP zero.
             foreach ($feridos as $pokemon) {
                 $salvarHp->execute([
                     'id_time_pokemon' => (int) $pokemon['id_time_pokemon'],
@@ -134,6 +148,7 @@ class CentroPokemon
                 'saldo' => (int) $saldo - self::CUSTO_VISITA,
             ];
         } catch (Throwable $exception) {
+            // Desfaz a cobrança e qualquer atualização de HP se algo falhar.
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }

@@ -2,6 +2,7 @@
     box-sizing: border-box;
 }
 
+/* Mantém a página legível sobre a arte de fundo e permite rolagem em telas pequenas. */
 body {
     min-height: 100vh;
     margin: 0;
@@ -15,9 +16,10 @@ body {
     background-repeat: no-repeat;
     background-size: cover;
     color: #173b35;
-    font-family: Arial, sans-serif;
+    font-family: 'Press Start 2P', monospace;
 }
 
+/* Centraliza e limita o conteúdo de gerenciamento do time. */
 .pagina-time {
     width: min(1050px, 100%);
     margin: 0 auto;
@@ -86,12 +88,14 @@ h1 {
     gap: 14px;
 }
 
+/* Reserva pode conter mais de três Pokémon e por isso usa colunas flexíveis. */
 .grade-reservas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 12px;
 }
 
+/* Cards mostram dados e ações de cada Pokémon ativo ou reservado. */
 .cartao-pokemon {
     padding: 16px;
     border: 2px solid #b7d9c5;
@@ -186,6 +190,7 @@ button:hover {
 }
 
 @media (max-width: 700px) {
+    /* Em telas estreitas, evita cards de batalha espremidos lado a lado. */
     .grade-time {
         grid-template-columns: 1fr;
     }

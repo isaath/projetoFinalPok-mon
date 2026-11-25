@@ -1,5 +1,9 @@
 -- Esquema inicial do banco de dados do PokeBagual.
 -- No DBeaver, abra este arquivo e execute o script com o servidor MySQL iniciado.
+-- O script começa com DDL (banco e tabelas) e depois usa DML para cadastrar os dados-base.
+-- As tabelas são criadas antes de suas dependências por causa das chaves estrangeiras.
+-- O mecanismo InnoDB permite aplicar essas relações e usar transações nas operações do jogo.
+-- IF NOT EXISTS, NOT EXISTS e INSERT IGNORE evitam duplicações em vários cadastros iniciais.
 
 CREATE DATABASE IF NOT EXISTS bancodedados_pokefish
     CHARACTER SET utf8mb4

@@ -5,8 +5,21 @@ namespace App\Services;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * Aplica as regras de combate sem acessar o banco de dados ou a sessão PHP.
+ *
+ * Recebe o estado da batalha, altera esse estado e devolve o resultado para
+ * o controller persistir ou exibir.
+ */
 final class BatalhaEngine
 {
+    /** Dano mínimo de um golpe que não seja imune ou exclusivamente de status. */
+    private const DANO_MINIMO_GOLPE = 8;
+
+    /**
+     * Para cada tipo defensor, lista os tipos de ataque que causam dano dobrado.
+     * As chaves e valores usam os nomes de tipos cadastrados no projeto.
+     */
     private const FRAQUEZAS = [
         'normal' => ['lutador'],
         'fogo' => ['agua', 'terra', 'pedra'],
@@ -27,6 +40,9 @@ final class BatalhaEngine
         'aco' => ['fogo', 'lutador', 'terra'],
     ];
 
+    /**
+     * Lista os tipos de ataque que causam metade do dano a cada tipo defensor.
+     */
     private const RESISTENCIAS = [
         'normal' => [],
         'fogo' => ['fogo', 'planta', 'gelo', 'inseto', 'aco'],
@@ -50,6 +66,9 @@ final class BatalhaEngine
         ],
     ];
 
+    /**
+     * Lista os ataques que não causam dano ao tipo defensor correspondente.
+     */
     private const IMUNIDADES = [
         'normal' => ['fantasma'],
         'eletrico' => [],
@@ -60,6 +79,12 @@ final class BatalhaEngine
         'aco' => ['veneno'],
     ];
 
+    /**
+     * Resolve um turno completo: ataque do jogador, resposta do líder e efeitos residuais.
+     *
+     * A prioridade do movimento decide primeiro; velocidade desempata e, se
+     * também empatar, a ordem é sorteada.
+     */
     public static function resolverTurno(array $batalha, int $idMovimentoJogador): array
     {
         if (!empty($batalha['finalizada'])) {
@@ -98,6 +123,7 @@ final class BatalhaEngine
             ],
         ];
 
+        // Organiza as duas ações conforme prioridade e velocidade.
         $primeiraAcao = $acoes[0];
         $segundaAcao = $acoes[1];
         if (
@@ -129,6 +155,7 @@ final class BatalhaEngine
             self::definirResultadoSeAcabou($batalha, $mensagens);
         }
 
+        // Condições como veneno e queimadura causam dano depois das ações do turno.
         if (empty($batalha['finalizada'])) {
             foreach (['jogador', 'adversario'] as $lado) {
                 self::aplicarDanoResidual($batalha, $lado, $mensagens);
@@ -149,6 +176,9 @@ final class BatalhaEngine
         return $batalha;
     }
 
+    /**
+     * Troca o Pokémon ativo e consome o turno, dando ao adversário uma ação.
+     */
     public static function resolverTroca(array $batalha, int $indiceTroca): array
     {
         if (!empty($batalha['finalizada'])) {
@@ -179,12 +209,24 @@ final class BatalhaEngine
         return $batalha;
     }
 
-    public static function resolverUsoItem(array $batalha, array $item): array
+    /**
+     * Aplica um item permitido durante a batalha e, se possível, executa a resposta do líder.
+     *
+     * O índice do alvo é opcional; sem ele, o item é usado no Pokémon ativo.
+     */
+    public static function resolverUsoItem(
+        array $batalha,
+        array $item,
+        ?int $indiceAlvo = null
+    ): array
     {
         if (!empty($batalha['finalizada'])) {
             throw new RuntimeException('Esta batalha já foi encerrada.');
         }
-        $indice = (int) $batalha['jogador']['ativo'];
+        $indice = $indiceAlvo ?? (int) $batalha['jogador']['ativo'];
+        if (!isset($batalha['jogador']['equipe'][$indice])) {
+            throw new InvalidArgumentException('O Pokémon escolhido para o item não existe.');
+        }
         $pokemon =& $batalha['jogador']['equipe'][$indice];
         $tipo = (string) $item['tipo'];
 
@@ -204,17 +246,17 @@ final class BatalhaEngine
 
             if ($tipo === 'cura_status') {
                 $nomeItem = strtolower((string) $item['nome']);
-                $statusPermitido = [
-                    'antidote' => 'veneno',
-                    'burn heal' => 'queimadura',
-                    'ice heal' => 'congelamento',
-                    'awakening' => 'sono',
-                    'paralyze heal' => 'paralisia',
+                $statusPermitidos = [
+                    'antidote' => ['veneno', 'toxico'],
+                    'burn heal' => ['queimadura'],
+                    'ice heal' => ['congelamento'],
+                    'awakening' => ['sono'],
+                    'paralyze heal' => ['paralisia'],
                 ];
-                $statusDesejado = $statusPermitido[$nomeItem] ?? null;
+                $statusDesejado = $statusPermitidos[$nomeItem] ?? null;
                 if (
                     $statusDesejado !== null
-                    && $pokemon['status'] !== $statusDesejado
+                    && !in_array($pokemon['status'], $statusDesejado, true)
                 ) {
                     throw new InvalidArgumentException(
                         $item['nome'] . ' não cura a condição atual de ' . $pokemon['nome'] . '.'
@@ -222,6 +264,7 @@ final class BatalhaEngine
                 }
                 $pokemon['status'] = null;
                 $pokemon['status_turnos'] = 0;
+                $pokemon['toxico_contagem'] = 0;
                 $mensagens = [
                     'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
                     $item['nome'] . ' removeu a condição de ' . $pokemon['nome'] . '.',
@@ -238,6 +281,7 @@ final class BatalhaEngine
                 if ($tipo === 'cura_hp_status') {
                     $pokemon['status'] = null;
                     $pokemon['status_turnos'] = 0;
+                    $pokemon['toxico_contagem'] = 0;
                 }
                 $mensagens = [
                     'Turno ' . ((int) $batalha['turnos'] + 1) . '.',
@@ -256,6 +300,9 @@ final class BatalhaEngine
         return $batalha;
     }
 
+    /**
+     * Marca a batalha como encerrada por fuga; o controller trata o salvamento do HP.
+     */
     public static function resolverFuga(array $batalha): array
     {
         if (!empty($batalha['finalizada'])) {
@@ -263,6 +310,7 @@ final class BatalhaEngine
         }
         $batalha['finalizada'] = true;
         $batalha['resultado'] = 'derrota';
+        $batalha['fugiu'] = true;
         $batalha['mensagens'] = array_merge(
             $batalha['mensagens'] ?? [],
             ['Você fugiu da batalha.']
@@ -270,6 +318,7 @@ final class BatalhaEngine
         return $batalha;
     }
 
+    /** Escolhe e executa imediatamente a ação automática do líder. */
     private static function executarAcaoComputador(array &$batalha, array &$mensagens): void
     {
         $jogador = self::pokemonAtivo($batalha, 'jogador');
@@ -283,6 +332,9 @@ final class BatalhaEngine
         self::definirResultadoSeAcabou($batalha, $mensagens);
     }
 
+    /**
+     * Calcula o multiplicador de tipo; em Pokémon com dois tipos, os fatores se multiplicam.
+     */
     public static function calcularEfetividade(string $tipoAtaque, array $tiposDefensor): float
     {
         $ataque = strtolower($tipoAtaque);
@@ -303,13 +355,19 @@ final class BatalhaEngine
         return $multiplicador;
     }
 
+    /**
+     * Calcula o dano físico ou especial, aplicando estágios, queimadura, STAB e tipo.
+     *
+     * O resultado respeita o mínimo de dano do projeto e usa como teto metade
+     * do HP máximo do alvo (com o mesmo limite mínimo de 8 HP).
+     */
     public static function calcularDano(array $atacante, array $alvo, array $movimento): int
     {
         $efetividade = self::calcularEfetividade(
             (string) $movimento['tipo'],
             $alvo['tipos']
         );
-        if ($efetividade === 0.0) {
+        if ($efetividade === 0.0 || (int) $movimento['potencia'] <= 0) {
             return 0;
         }
 
@@ -338,6 +396,7 @@ final class BatalhaEngine
             true
         ) ? 1.5 : 1.0;
 
+        // Fórmula adaptada do projeto: potência × ataque ÷ (4 × defesa) × STAB × efetividade.
         $dano = (int) round(
             (int) $movimento['potencia']
             * $ataque
@@ -345,11 +404,15 @@ final class BatalhaEngine
             * $stab
             * $efetividade
         );
-        $limite = max(1, (int) floor((int) $alvo['hp_maximo'] / 2));
+        $limite = max(
+            self::DANO_MINIMO_GOLPE,
+            (int) floor((int) $alvo['hp_maximo'] / 2)
+        );
 
-        return min($limite, max(1, $dano));
+        return min($limite, max(self::DANO_MINIMO_GOLPE, $dano));
     }
 
+    /** Valida e aplica um movimento, incluindo acerto, dano e seus efeitos. */
     private static function executarAcao(
         array &$batalha,
         string $lado,
@@ -433,6 +496,9 @@ final class BatalhaEngine
         self::aplicarEfeito($ator, $alvo, $movimento, $mensagens);
     }
 
+    /**
+     * Aplica efeitos secundários de movimentos, como status, cura e alterações de atributos.
+     */
     private static function aplicarEfeito(
         array &$ator,
         array &$alvo,
@@ -508,6 +574,9 @@ final class BatalhaEngine
         }
     }
 
+    /**
+     * Aplica uma condição temporária, respeitando imunidades e o limite de um status por vez.
+     */
     private static function aplicarStatus(array &$alvo, string $status, array &$mensagens): void
     {
         if ($alvo['status'] !== null) {
@@ -542,6 +611,9 @@ final class BatalhaEngine
             . self::nomeStatus($status) . '.';
     }
 
+    /**
+     * Decide se o Pokémon consegue agir após verificar sono, paralisia, congelamento e confusão.
+     */
     private static function podeAgir(array &$pokemon, array &$mensagens): bool
     {
         if ($pokemon['recuo']) {
@@ -598,6 +670,7 @@ final class BatalhaEngine
         return true;
     }
 
+    /** Sorteia o acerto usando a precisão do movimento e o estágio de precisão do atacante. */
     private static function acertou(array $atacante, array $movimento): bool
     {
         $precisao = (int) $movimento['precisao']
@@ -607,6 +680,9 @@ final class BatalhaEngine
         return random_int(1, 100) <= $precisao;
     }
 
+    /**
+     * Seleciona o movimento do líder pela pontuação de dano, cura ou efeito útil.
+     */
     private static function escolherMovimentoComputador(array $atacante, array $alvo): array
     {
         if ($atacante['movimentos'] === []) {
@@ -662,6 +738,7 @@ final class BatalhaEngine
         return $melhorMovimento;
     }
 
+    /** Confirma que o movimento enviado pertence ao Pokémon ativo. */
     private static function buscarMovimento(array $pokemon, int $idMovimento): array
     {
         foreach ($pokemon['movimentos'] as $movimento) {
@@ -673,6 +750,9 @@ final class BatalhaEngine
         throw new InvalidArgumentException('O movimento escolhido não pertence ao Pokémon ativo.');
     }
 
+    /**
+     * Aplica o dano de fim de turno; o contador de Toxic aumenta a cada aplicação.
+     */
     private static function aplicarDanoResidual(
         array &$batalha,
         string $lado,
@@ -699,6 +779,7 @@ final class BatalhaEngine
             . ' HP pela condição de ' . self::nomeStatus($pokemon['status']) . '.';
     }
 
+    /** Altera um estágio de atributo sem permitir valores abaixo de -2 ou acima de +2. */
     private static function alterarEstagio(
         array &$pokemon,
         string $atributo,
@@ -717,6 +798,7 @@ final class BatalhaEngine
             . ($alteracao > 0 ? ' aumentou.' : ' diminuiu.');
     }
 
+    /** Calcula a velocidade após estágios e a redução causada por paralisia. */
     private static function velocidadeEfetiva(array $pokemon): float
     {
         $multiplicador = self::multiplicadorEstagio(
@@ -729,6 +811,7 @@ final class BatalhaEngine
         return (int) $pokemon['velocidade'] * $multiplicador;
     }
 
+    /** Converte um estágio entre -2 e +2 no multiplicador usado nos cálculos do combate. */
     private static function multiplicadorEstagio(int $estagio): float
     {
         if ($estagio >= 0) {
@@ -738,12 +821,14 @@ final class BatalhaEngine
         return 1.0 / (1.0 + (0.25 * abs($estagio)));
     }
 
+    /** Retorna o Pokémon apontado como ativo ou null se a equipe acabou. */
     private static function pokemonAtivo(array $batalha, string $lado): ?array
     {
         $indice = (int) ($batalha[$lado]['ativo'] ?? -1);
         return $batalha[$lado]['equipe'][$indice] ?? null;
     }
 
+    /** Avança automaticamente para o próximo Pokémon com HP em cada equipe. */
     private static function avancarPokemonsDesmaiados(array &$batalha, array &$mensagens): void
     {
         foreach (['jogador', 'adversario'] as $lado) {
@@ -767,6 +852,7 @@ final class BatalhaEngine
         }
     }
 
+    /** Encerra a batalha quando o índice ativo ultrapassa uma das equipes. */
     private static function definirResultadoSeAcabou(array &$batalha, array &$mensagens): void
     {
         $jogadorAcabou = (int) $batalha['jogador']['ativo']
@@ -783,6 +869,7 @@ final class BatalhaEngine
         }
     }
 
+    /** Traduz as chaves internas de status para os nomes usados no registro. */
     private static function nomeStatus(string $status): string
     {
         $nomes = [
@@ -798,6 +885,7 @@ final class BatalhaEngine
         return $nomes[$status] ?? $status;
     }
 
+    /** Traduz as chaves internas de atributos para os nomes exibidos ao jogador. */
     private static function nomeEstagio(string $atributo): string
     {
         $nomes = [

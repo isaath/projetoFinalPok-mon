@@ -6,8 +6,10 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
+/** Persiste a primeira equipe do jogador e consulta as opções iniciais permitidas. */
 class TimeInicial
 {
+    // Lista fechada de espécies que podem ser escolhidas no começo da jornada.
     private const NOMES_POKEMONS = [
         'vulpix',
         'bellsprout',
@@ -18,13 +20,16 @@ class TimeInicial
 
     private PDO $db;
 
+    /** Mantém a conexão PDO usada nas consultas deste Model. */
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
+    /** Busca no catálogo as cinco espécies iniciais aprovadas pelo projeto. */
     public function listarDisponiveis(): array
     {
+        // Placeholders mantêm os nomes parametrizados em vez de concatenar valores no SQL.
         $consulta = $this->db->prepare(
             'SELECT p.id_pokemon, p.nome, p.hp_maximo, p.forca_ataque, p.defesa,
                     p.velocidade, t.nome AS tipo
@@ -38,6 +43,7 @@ class TimeInicial
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /** Informa se o jogador já possui um time com pelo menos três Pokémon. */
     public function jornadaIniciada(int $idUsuario): bool
     {
         $consulta = $this->db->prepare(
@@ -56,6 +62,11 @@ class TimeInicial
         return (int) $consulta->fetchColumn() > 0;
     }
 
+    /**
+     * Cria o time, associa os três Pokémon escolhidos e inicializa o HP persistido.
+     *
+     * A transação garante que o time e seus membros sejam gravados juntos ou desfeitos juntos.
+     */
     public function salvarSelecaoInicial(int $idUsuario, array $idsPokemons): string
     {
         if (count($idsPokemons) !== 3) {
@@ -75,6 +86,7 @@ class TimeInicial
         $this->db->beginTransaction();
 
         try {
+            // Bloqueia a conta até o fim da gravação para evitar duas seleções simultâneas.
             $usuario = $this->db->prepare(
                 'SELECT id_usuario FROM usuarios WHERE id_usuario = :id_usuario FOR UPDATE'
             );
@@ -127,6 +139,7 @@ class TimeInicial
                 'INSERT INTO time_pokemons (posicao, id_time, id_pokemon)
                  VALUES (:posicao, :id_time, :id_pokemon)'
             );
+            // O HP de cada exemplar do jogador é salvo separado do cadastro global da espécie.
             $salvarHp = $this->db->prepare(
                 'INSERT INTO time_pokemons_estado (id_time_pokemon, hp_atual)
                  VALUES (:id_time_pokemon, :hp_atual)'
@@ -150,6 +163,7 @@ class TimeInicial
 
             return 'salvo';
         } catch (Throwable $exception) {
+            // Se qualquer inserção falhar, desfaz todas as partes da seleção inicial.
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -158,6 +172,7 @@ class TimeInicial
         }
     }
 
+    /** Cria um placeholder SQL para cada nome permitido na lista fechada. */
     private function placeholdersNomes(): string
     {
         return implode(', ', array_fill(0, count(self::NOMES_POKEMONS), '?'));

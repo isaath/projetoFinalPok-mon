@@ -47,6 +47,7 @@ class Usuario
         ];
     }
 
+    /** Busca somente os dados públicos usados na tela de perfil. */
     public function buscarPerfil(int $idUsuario): ?array
     {
         $consulta = $this->db->prepare(

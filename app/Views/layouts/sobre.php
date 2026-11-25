@@ -10,9 +10,10 @@
     <!-- Carrega o estilo externo específico desta tela. -->
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/sobre.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 <body>
-    
+    <!-- O painel central apresenta a proposta do jogo sem misturar regras de negócio. -->
     <main class="historia_sobre painel-pixel">
         
 
@@ -34,6 +35,8 @@
             Monte seu time, explore o cenário e prove que você é um verdadeiro mestre Pokémon!
         </p>
     </main>
+    <!-- Reaproveita o player e o botão de retorno do painel principal. -->
+    <?php require __DIR__ . '/music_player.php'; ?>
     <a href="/projetoFinalPok-mon/public/index.php?rota=jogar" class="btn_pixel">
             <img src="/projetoFinalPok-mon/public/css/img/btn_voltar.png" alt="Voltar" style="width: 200px !important; height: auto;">
         </a>

@@ -9,25 +9,10 @@
     <title>PokeBagual - Jogar</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/painel_jogar.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 
 <body>
-    <!-- Áudio de fundo em repetição; o navegador pode exigir interação para iniciar. -->
-    <audio id="musica" src="/projetoFinalPok-mon/public/audio/musica_jogar.mp3" loop autoplay></audio>
-
-    <script>
-        // Navegadores podem bloquear áudio automático até que o usuário interaja.
-        // Busca o elemento de áudio pelo ID definido acima.
-        const musica = document.getElementById('musica');
-        // Define o volume em uma escala de zero a um.
-        musica.volume = 0.4;
-
-        // Se a reprodução automática falhar, tenta novamente no primeiro clique.
-        musica.play().catch(() => {
-            document.addEventListener('click', () => musica.play(), { once: true });
-        });
-    </script>
-
     <!-- Menu de navegação lateral para as telas auxiliares. -->
     <div class="menu_lateral">
         <a href="/projetoFinalPok-mon/public/index.php?rota=sobre" class="btn_pixel">
@@ -56,5 +41,7 @@
     <a href="/projetoFinalPok-mon/public/index.php?rota=mapa" class="btn_pixel btn_jogar">
         <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png" alt="Jogar" style="width: 400px !important; height: auto;">
     </a>
+    <!-- Inclui os controles compartilhados de volume e reprodução da música. -->
+    <?php require __DIR__ . '/music_player.php'; ?>
 </body>
 </html>

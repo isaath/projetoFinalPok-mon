@@ -3,17 +3,26 @@
 use App\Models\TimeInicial;
 use App\Models\TimePokemon;
 
+/**
+ * Recebe ações das telas de time e coordena validações, Models e Views.
+ */
 class TimeController
 {
+    // A mesma conexão PDO é compartilhada com os Models desta requisição.
     private PDO $db;
 
+    /** Recebe a conexão criada pelo ponto de entrada da aplicação. */
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
+    /**
+     * Exibe as cinco opções iniciais e salva a escolha de três espécies.
+     */
     public function escolher(): void
     {
+        // A seleção inicial pertence a uma conta autenticada.
         if (!isset($_SESSION['usuario']['id_usuario'])) {
             header('Location: index.php?rota=login');
             exit;
@@ -33,12 +42,14 @@ class TimeController
         $erro = null;
         $token = $_SESSION['csrf_escolher_time'] ?? null;
 
+        // O token protege o formulário contra envios forjados de outro site.
         if (!is_string($token)) {
             $token = bin2hex(random_bytes(32));
             $_SESSION['csrf_escolher_time'] = $token;
         }
 
         try {
+            // Uma jornada já iniciada não deve permitir substituir silenciosamente o time inicial.
             if ($modelo->jornadaIniciada($idUsuario)) {
                 header('Location: index.php?rota=jogar');
                 exit;
@@ -65,6 +76,7 @@ class TimeController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $erro === null) {
+            // Confere o token antes de interpretar qualquer dado enviado pelo formulário.
             $tokenEnviado = $_POST['csrf_token'] ?? '';
 
             if (
@@ -81,6 +93,7 @@ class TimeController
                     $erro = 'Selecione exatamente três Pokémon diferentes.';
                 } else {
                     try {
+                        // O Model valida de novo as espécies permitidas e grava o time em transação.
                         $resultado = $modelo->salvarSelecaoInicial($idUsuario, $idsPokemons);
 
                         if ($resultado === 'salvo' || $resultado === 'jornada_iniciada') {
@@ -107,6 +120,7 @@ class TimeController
         require __DIR__ . '/../Views/time/escolher_time.php';
     }
 
+    /** Lista os Pokémon do jogador e processa mudanças no time ativo. */
     public function meuTime(): void
     {
         $idUsuario = $this->idUsuarioSessao();
@@ -124,6 +138,7 @@ class TimeController
 
         $erro = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Cada formulário envia um token para validar a origem da alteração.
             $tokenEnviado = $_POST['csrf_token'] ?? '';
 
             if (!is_string($tokenEnviado) || !hash_equals($token, $tokenEnviado)) {
@@ -140,6 +155,7 @@ class TimeController
                     $erro = 'A ação solicitada não é válida.';
                 } else {
                     try {
+                        // Converte a ação do formulário em uma chamada explícita ao Model.
                         if ($acao === 'colocar') {
                             $resultado = $modelo->colocarNaPosicaoTres(
                                 $idUsuario,
@@ -164,6 +180,7 @@ class TimeController
 
                         $mensagem = $this->mensagemTime($resultado);
                         if ($mensagem['tipo'] === 'sucesso') {
+                            // Redireciona após salvar para evitar repetir a ação ao atualizar a página.
                             $_SESSION['flash_meu_time'] = $mensagem['texto'];
                             header('Location: index.php?rota=meu_time');
                             exit;
@@ -195,6 +212,7 @@ class TimeController
             $pokemons,
             static fn (array $pokemon): bool => (int) $pokemon['posicao'] <= 3
         ));
+        // As posições a partir de 4 ficam fora da escalação usada na batalha.
         $reservas = array_values(array_filter(
             $pokemons,
             static fn (array $pokemon): bool => (int) $pokemon['posicao'] > 3
@@ -203,6 +221,7 @@ class TimeController
         require __DIR__ . '/../Views/time/meu_time.php';
     }
 
+    /** Retorna um ID de sessão válido ou null para uma sessão ausente/inválida. */
     private function idUsuarioSessao(): ?int
     {
         if (!isset($_SESSION['usuario']['id_usuario'])) {
@@ -213,6 +232,7 @@ class TimeController
         return $idUsuario !== false && $idUsuario > 0 ? $idUsuario : null;
     }
 
+    /** Traduz os resultados padronizados do Model em mensagens para a tela. */
     private function mensagemTime(string $resultado): array
     {
         switch ($resultado) {
@@ -242,6 +262,12 @@ class TimeController
         }
     }
 
+    /**
+     * Valida o formato do formulário; as regras de propriedade também são conferidas no Model.
+     *
+     * @param mixed $valor
+     * @return int[]|null
+     */
     private function validarIds($valor): ?array
     {
         if (!is_array($valor) || count($valor) !== 3) {

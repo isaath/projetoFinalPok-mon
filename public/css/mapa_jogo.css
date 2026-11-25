@@ -1,5 +1,5 @@
 body {
-    /* Define a imagem de fundo da tela inicial. */
+    /* Define a imagem de fundo da tela do mapa. */
     background-image: url("img/img_mapa/img_fundo_mapa.png");
     background-attachment: fixed; /* Fixa a imagem no fundo da página. */
     background-size: cover; /* Faz a imagem cobrir toda a área visível. */
@@ -13,6 +13,7 @@ body {
     flex-direction: column;
 }
 
+/* Mantém a arte inteira visível dentro da janela, sem deformar suas proporções. */
 .mapa {
     display: block;
     width: auto;
@@ -22,6 +23,7 @@ body {
     object-fit: contain;
 }
 
+/* Aplica retorno visual ao botão de voltar quando o jogador interage com ele. */
 .btn_pixel img:hover {
     transform: scale(1.05);
 }
@@ -29,6 +31,7 @@ body {
     transform: scale(0.95);
 }
 
+/* Fixa o botão fora da área do mapa, mantendo-o acessível durante a navegação. */
 .btn_pixel {
     position: fixed; /* Fixa o botão na janela do navegador */
     bottom: 20px;    /* Distância da borda inferior da tela */
@@ -39,12 +42,14 @@ body {
 }
 
 
+/* Serve de referência para posicionar os pontos de batalha sobre a imagem. */
 .mapa-container {
     position: relative;
     display: inline-block;
     line-height: 0;
 }
 
+/* Cria uma área clicável posicionada relativamente à arte do mapa. */
 .ponto-mapa {
     position: absolute;
     z-index: 2;

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+/* Tokens de cor compartilhados para manter a mesma identidade nas telas do jogo. */
 :root {
     color-scheme: light;
     --pixel-ink: #17243b;
@@ -11,9 +12,25 @@
     --pixel-red: #8e2525;
 }
 
+/* Aplica a tipografia pixelada a textos e campos sem sobrescrever tamanhos por tela. */
 body {
     color: var(--pixel-ink);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Press Start 2P', monospace;
+}
+
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+.icone-moeda-saldo {
+    /* Evita deformar a imagem da moeda e preserva seus pixels em telas maiores. */
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    vertical-align: middle;
 }
 
 h1,
@@ -60,6 +77,7 @@ h3 {
 }
 
 .painel-pixel {
+    /* Painel reutilizável para telas informativas no tema visual do projeto. */
     box-sizing: border-box;
     width: min(900px, 100%);
     margin: 0 auto;
@@ -89,6 +107,7 @@ h3 {
 }
 
 button {
+    /* Aparência comum dos controles nativos, com borda e sombra em estilo pixel. */
     border: 3px solid var(--pixel-ink);
     border-radius: 0;
     background: var(--pixel-paper);
@@ -217,6 +236,7 @@ button.btn_pixel:active:not(:disabled) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* Respeita a preferência do sistema por animações reduzidas. */
     *,
     *::before,
     *::after {
@@ -225,7 +245,7 @@ button.btn_pixel:active:not(:disabled) {
     }
 }
 
-/* imagem da api */
+/* Define o espaço e o ajuste dos sprites vindos da API nas diferentes telas. */
 .imagem-pokemon {
     display: block;
     width: 120px;
