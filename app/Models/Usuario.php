@@ -63,6 +63,30 @@ class Usuario
         return is_array($perfil) ? $perfil : null;
     }
 
+    /** Lista somente as insígnias conquistadas pelo usuário autenticado. */
+    public function buscarInsigniasConquistadas(int $idUsuario): array
+    {
+        $consulta = $this->db->prepare(
+            'SELECT nivel_jornada, nome_treinador, nome_insignia
+             FROM vw_progresso_ginasios
+             WHERE id_usuario = :id_usuario
+               AND nivel_jornada BETWEEN 1 AND 8
+               AND vitorias > 0
+             ORDER BY nivel_jornada'
+        );
+        $consulta->execute(['id_usuario' => $idUsuario]);
+        $insignias = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($insignias as &$insignia) {
+            $insignia['nivel_jornada'] = (int) $insignia['nivel_jornada'];
+            $insignia['nome_treinador'] = (string) $insignia['nome_treinador'];
+            $insignia['nome_insignia'] = (string) $insignia['nome_insignia'];
+        }
+        unset($insignia);
+
+        return $insignias;
+    }
+
     // Cadastra um novo usuário, validando se o e-mail já existe.
     public function cadastrar(
         string $nome,

@@ -3,7 +3,6 @@
 use App\Models\Batalha;
 use App\Services\BatalhaEngine;
 
-require_once __DIR__ . '/../Services/PokeApiService.php';
 
 class BatalhaController
 {

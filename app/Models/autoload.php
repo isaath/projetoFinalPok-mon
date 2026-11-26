@@ -18,6 +18,6 @@ spl_autoload_register(static function (string $classe): void {
 
     // Inclui o arquivo apenas quando ele existir.
     if (is_file($arquivo)) {
-        require_once $arquivo;
+        require $arquivo;
     }
 });

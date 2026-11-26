@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeBagual | Bolicho</title>
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=4">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/bolicho.css?v=5">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
     <script src="/projetoFinalPok-mon/public/js/bolicho_compras.js" defer></script>
-    <script src="/projetoFinalPok-mon/public/js/pocoes_images.js" defer></script>
+    <script src="/projetoFinalPok-mon/public/js/pocoes_images.js?v=2" defer></script>
 </head>
 <body>
     <main class="painel-pixel bolicho">
@@ -19,7 +19,7 @@
             <h1>Bolicho</h1>
         </div>
 
-        <p>
+        <p class="saldo-bolicho">
             <!-- O saldo é carregado pelo Controller e a imagem é apenas decorativa. -->
             Saldo: <strong data-saldo-pokepila="<?= (int) $saldo ?>"><?= number_format($saldo, 0, ',', '.') ?></strong> PokePila
             <img class="icone-moeda-saldo" src="/projetoFinalPok-mon/public/css/img/moeda.png" alt="" aria-hidden="true">
@@ -64,7 +64,7 @@
                     alt="<?= htmlspecialchars($nomeItem, ENT_QUOTES, 'UTF-8') ?>"
                     loading="lazy"
                 >
-                <p><?= htmlspecialchars((string) ($item['descricao'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="descricao-item"><?= htmlspecialchars((string) ($item['descricao'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
                 <p>Preço: <?= (int) $item['preco'] ?> PokePila</p>
                 <p>No inventário: <span data-quantidade-item="<?= (int) $item['id_item'] ?>"><?= (int) $item['quantidade'] ?></span></p>
                 <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=bolicho"

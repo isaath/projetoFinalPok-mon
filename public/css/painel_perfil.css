@@ -60,10 +60,81 @@ body {
     overflow-wrap: anywhere;
 }
 
+/* Organiza a coleção de insígnias do jogador em cartões que se adaptam à tela. */
+.colecao-insignias {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid #d5e6da;
+    background: rgb(247 252 248 / 88%);
+}
+
+.colecao-insignias h2 {
+    margin: 0;
+    font-size: 0.75rem;
+}
+
+.colecao-insignias > p {
+    margin: 6px 0 10px;
+    font-size: 0.62rem;
+}
+
+.colecao-insignias .titulo-mestre {
+    color: #72561d;
+}
+
+.progresso-insignias {
+    font-weight: 400;
+}
+
+.lista-insignias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item-insignia {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 3px;
+    border: 1px solid #b7d9c5;
+    background: rgb(255 255 255 / 78%);
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+.item-insignia strong {
+    font-size: 0.52rem;
+    line-height: 1.4;
+}
+
+.icone-insignia {
+    width: 42px;
+    height: 39px;
+}
+
+.item-insignia span {
+    font-size: 0.48rem;
+    line-height: 1.4;
+}
+
+.sem-insignias {
+    margin-bottom: 0 !important;
+}
+
 @media (max-width: 600px) {
     /* Reduz foto e espaçamento para caber em telas estreitas. */
     .dados-perfil {
         padding: 18px;
+    }
+
+    .colecao-insignias {
+        padding: 10px;
     }
 
     .foto-perfil {

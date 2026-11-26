@@ -6,101 +6,163 @@ body {
     background-position: center center; /* Centraliza a imagem horizontal e verticalmente. */
     background-repeat: no-repeat; /* Evita repetição da imagem. */
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
+    box-sizing: border-box;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
+    padding: 20px 0;
 }
 
-/* Ajusta o painel pixelado sem deixar o catálogo ocupar a tela inteira. */
+/* Dá largura para o catálogo sem impedir a rolagem em telas baixas. */
 .painel-pixel.bolicho {
-    width: min(1000px, calc(100% - 32px));
-    min-height: auto;
-    padding: 16px;
+    width: min(1280px, calc(100% - 32px));
+    min-height: 0;
+    padding: 16px 20px;
 }
 
-/* Organiza o catálogo dentro do painel e permite altura suficiente para rolar. */
+/* Mantém a página rolável quando a altura da tela não comporta o catálogo inteiro. */
 .bolicho {
-    width: min(1100px, calc(100% - 32px));
-    min-height: 100vh;
+    width: min(1280px, calc(100% - 32px));
+    min-height: 0;
     margin: 0 auto;
-    padding: 32px 0;
+    padding: 0;
 }
 
 /* Título e saldo ficam lado a lado. */
-.bolicho-cabecalho{
+.bolicho-cabecalho {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     gap: 16px;
-    margin-bottom: 24px;
-    
+    margin-bottom: 14px;
+}
+
+.saldo-bolicho {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 3px solid var(--pixel-ink);
+    background: #fff3bd;
+    box-shadow: 3px 3px 0 var(--pixel-shadow);
+    font-size: clamp(0.62rem, 0.9vw, 0.78rem);
+    line-height: 1.6;
+}
+
+.saldo-bolicho strong {
+    color: var(--pixel-green-dark);
+    font-size: 1.15em;
 }
 
 /* Cria colunas responsivas para os produtos. */
 .grade-itens {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
 }
 
-/* Compacta as informações de cada item para caberem em uma grade de produtos. */
+/* Alinha as informações e os botões de compra em todos os cards. */
 .card-item {
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-width: 0;
-    padding: 6px;
+    padding: 9px;
+    background: rgb(229 235 245 / 97%);
     text-align: center;
 }
 
 .card-item h2 {
-    font-size: 0.55rem;
-    line-height: 1.4;
+    width: 100%;
+    min-height: 2.6em;
+    margin: 2px 0 5px;
+    font-size: clamp(0.55rem, 0.72vw, 0.68rem);
+    line-height: 1.5;
     overflow-wrap: anywhere;
 }
 
 .card-item p {
-    font-size: 0.65rem;
-    line-height: 1.25;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 4px 0;
+    font-size: clamp(0.5rem, 0.62vw, 0.6rem);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
-.card-item img {
-    width: 48px;
-    height: 48px;
+.card-item .imagem-item {
+    width: 56px;
+    height: 56px;
     object-fit: contain;
+    image-rendering: pixelated;
+    margin: 0 auto 4px;
+}
+
+.card-item form {
+    width: 100%;
+    margin-top: auto;
 }
 
 .card-item button {
     box-sizing: border-box;
     width: 100%;
-    padding: 5px 2px;
-    font-size: 0.42rem;
+    min-height: 34px;
+    padding: 5px 4px;
+    font-size: clamp(0.48rem, 0.62vw, 0.58rem);
+}
+
+.bolicho > .btn_pixel {
+    position: static;
+    align-self: center;
+    margin-top: 16px;
 }
 
 .btn_pixel {
-    position: fixed; /* Fixa o botão na janela do navegador */
-    bottom: 20px;    /* Distância da borda inferior da tela */
-    right: 100px;     /* Distância da borda direita da tela */
-    z-index: 1000;   /* Garante que o botão fique por cima de outros elementos */
+    position: fixed;
+    bottom: 20px;
+    right: 100px;
+    z-index: 1000;
     display: inline-block;
-    transition: transform 0.1s ease; /* Suaviza o efeito ao passar o mouse */
+    transition: transform 0.1s ease;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1100px) {
+    .grade-itens {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
     /* Reduz o número de colunas conforme diminui a largura da tela. */
     .grade-itens {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 520px) {
     .grade-itens {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 340px) {
+@media (max-width: 360px) {
     .grade-itens {
         grid-template-columns: 1fr;
+    }
+
+    .painel-pixel.bolicho {
+        width: calc(100% - 16px);
+        padding: 12px;
+    }
+
+    .bolicho-cabecalho {
+        justify-content: center;
+        text-align: center;
     }
 }

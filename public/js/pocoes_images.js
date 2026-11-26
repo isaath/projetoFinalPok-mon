@@ -22,6 +22,13 @@ class CarregadorImagensPocoes {
             .replace(/['’]/g, '')
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
+
+        if (nome === 'item-evolutivo') {
+            elementoImagem.src = '/projetoFinalPok-mon/public/css/img/item-evolutivo.svg';
+            elementoImagem.hidden = false;
+            return;
+        }
+
         const url = `https://pokeapi.co/api/v2/item/${encodeURIComponent(nome)}`;
 
         try {

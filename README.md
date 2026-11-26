@@ -9,6 +9,7 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 ## Funcionalidades
 
 * **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
+* **Perfil do jogador:** exibição das insígnias conquistadas por aquele usuário e do título “Mestre Pokémon” ao vencer os oito ginásios.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
 * **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro. Após uma vitória há uma tentativa de captura com chance inicial de 30%, que aumenta 20 pontos percentuais após cada falha até 90%; espécies já possuídas são puladas, e uma captura bem-sucedida adiciona o Pokémon à reserva sem removê-lo da equipe do líder.
 * **Tipos de Pokémon:** cada espécie é instanciada como uma subclasse de `Pokemon` correspondente ao tipo principal; tipos secundários continuam associados pelos dados de `pokemon_tipos`. As regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens das espécies da Geração I.
@@ -71,6 +72,10 @@ Referências: [gráfico de tipos Gerações II–V e jogos aplicáveis](https://
 * **JSON:** troca e organização de dados.
 * **API externa:** obtenção de informações para o jogo.
 * **Git e GitHub:** versionamento e colaboração no desenvolvimento.
+
+## Restrições técnicas definidas pelo professor
+
+É estritamente proibido utilizar `mysql_connect`, `require_once`, `include` ou `include_once`. A conexão com o banco deve continuar usando PDO. Para carregar classes, use o autoload existente; para arquivos PHP obrigatórios que não sejam carregados pelo autoload, use `require` simples e controle para que não sejam carregados repetidamente.
 
 ## Arquitetura do Projeto
 

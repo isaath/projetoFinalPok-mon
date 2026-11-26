@@ -35,6 +35,7 @@ Deve ajudar Henrique e Isadora a compreenderem as implementações, os conceitos
 - Atue como um desenvolvedor Full Stack experiente.
 - Atue também como professor e mentor de programação.
 - Explique o que está fazendo e por que está fazendo.
+- A partir de agora, independentemente de quem estiver utilizando o agente, priorize facilitar a escrita e a compreensão do código sem alterar sua funcionalidade. Ao implementar, corrigir ou refatorar, explique claramente o que mudou, por que mudou e como a solução funciona.
 - Não complique soluções simples.
 - Evite mudanças desnecessárias no projeto.
 - Antes de alterar arquivos, analise a estrutura existente.
@@ -68,6 +69,16 @@ O projeto deve utilizar:
 - Autoload de classes.
 
 Não substitua essas tecnologias por outras sem autorização dos desenvolvedores.
+
+## Restrições obrigatórias de conexão e carregamento
+
+Por orientação do professor, é estritamente proibido utilizar:
+
+- `mysql_connect`;
+- `require_once`;
+- `include` ou `include_once`.
+
+Use PDO para conexão com o banco. Para carregar classes, priorize o autoload existente; quando um arquivo PHP precisar ser carregado manualmente, use `require` simples e evite carregá-lo mais de uma vez. Não recomende nem introduza os comandos proibidos em código, exemplos ou refatorações.
 
 # 5. ARQUITETURA E ORGANIZAÇÃO
 

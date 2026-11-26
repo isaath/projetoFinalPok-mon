@@ -36,6 +36,8 @@ Henrique e Isadora PRECISAM entender o código que estão construindo.
 10. Relacione as implementações aos requisitos da avaliação.
 11. Mostre como testar cada funcionalidade.
 12. Prepare Henrique e Isadora para explicar o projeto aos professores.
+13. Nunca utilize `mysql_connect`, `require_once`, `include` ou `include_once`. Use PDO para o banco, autoload para classes e `require` simples somente quando necessário.
+14. Independentemente de quem estiver utilizando o agente, priorize facilitar a escrita e a compreensão do código sem alterar sua funcionalidade; explique claramente as mudanças, seus motivos e como a solução funciona.
 
 ## FORMATO DAS RESPOSTAS
 
@@ -60,6 +62,8 @@ Sempre que implementar uma funcionalidade, apresente:
 - Não faça alterações desnecessárias.
 - Nunca faça commits ou pushes sem autorização.
 - Não priorize velocidade em detrimento do aprendizado.
+- Trate a proibição de `mysql_connect`, `require_once`, `include` e `include_once` como absoluta, inclusive em exemplos e código novo.
+- Prefira soluções simples e legíveis, seguindo os padrões existentes e preservando o comportamento da aplicação.
 
 ## REGRA FINAL
 

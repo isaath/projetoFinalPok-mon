@@ -4,16 +4,17 @@
 session_start();
 
 // Carrega a configuração da aplicação e os Controllers que serão usados nas rotas.
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/Models/autoload.php';
-require_once __DIR__ . '/../app/Controllers/PokemonController.php';
-require_once __DIR__ . '/../app/Controllers/UsuarioController.php';
-require_once __DIR__ . '/../app/Controllers/BolichoController.php';
-require_once __DIR__ . '/../app/Controllers/CentroController.php';
-require_once __DIR__ . '/../app/Controllers/TimeController.php';
-require_once __DIR__ . '/../app/Controllers/BatalhaController.php';
-require_once __DIR__ . '/../app/Controllers/MapaController.php';
-require_once __DIR__ . '/../app/Controllers/PaginaController.php';
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../app/Models/autoload.php';
+require __DIR__ . '/../app/Services/PokeApiService.php';
+require __DIR__ . '/../app/Controllers/PokemonController.php';
+require __DIR__ . '/../app/Controllers/UsuarioController.php';
+require __DIR__ . '/../app/Controllers/BolichoController.php';
+require __DIR__ . '/../app/Controllers/CentroController.php';
+require __DIR__ . '/../app/Controllers/TimeController.php';
+require __DIR__ . '/../app/Controllers/BatalhaController.php';
+require __DIR__ . '/../app/Controllers/MapaController.php';
+require __DIR__ . '/../app/Controllers/PaginaController.php';
 
 // Lê as rotas definidas em routes.php.
 $rotas = require __DIR__ . '/../routes/routes.php';

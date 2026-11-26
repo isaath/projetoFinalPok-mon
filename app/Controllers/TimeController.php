@@ -3,7 +3,6 @@
 use App\Models\TimeInicial;
 use App\Models\TimePokemon;
 
-require_once __DIR__ . '/../Services/PokeApiService.php';
 
 /**
  * Recebe ações das telas de time e coordena validações, Models e Views.

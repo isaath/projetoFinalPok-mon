@@ -2,7 +2,7 @@
 use App\Models\TimeInicial;
 
 // Carrega o modelo de usuário para autenticação e cadastro.
-require_once __DIR__ . '/../Models/Usuario.php';
+require __DIR__ . '/../Models/Usuario.php';
 
 // Controller responsável pelas ações de login e cadastro de usuários.
 class UsuarioController
@@ -140,9 +140,12 @@ class UsuarioController
         }
 
         $erro = null;
+        $insignias = [];
 
         try {
-            $perfil = (new Usuario($this->db))->buscarPerfil($idUsuario);
+            $modeloUsuario = new Usuario($this->db);
+            $perfil = $modeloUsuario->buscarPerfil($idUsuario);
+            $insignias = $modeloUsuario->buscarInsigniasConquistadas($idUsuario);
         } catch (PDOException $exception) {
             error_log('Erro ao carregar o perfil do usuário: ' . $exception->getMessage());
             http_response_code(500);
