@@ -77,7 +77,7 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalha - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=battle-attack-stats-1">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=battle-viewport-fit-2">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
 <body class="battle-page">
@@ -449,21 +449,33 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
              style="width: 200px !important; height: auto;">
     </a>
     <script>
-        // Associa cada botão de ação ao painel correspondente de opções.
-        [
+        // Mantém apenas um painel de ação aberto por vez.
+        const menusAcao = [
             ['abrir-ataques', 'opcoes-ataques'],
             ['abrir-troca', 'opcoes-pokemon-troca'],
             ['abrir-itens', 'opcoes-itens'],
-        ].forEach(function ([idBotao, idPainel]) {
+        ].map(function ([idBotao, idPainel]) {
             const botao = document.getElementById(idBotao);
             const painel = document.getElementById(idPainel);
-            if (botao && painel) {
-                botao.addEventListener('click', function () {
-                    // O atributo hidden controla a exibição; aria-expanded informa leitores de tela.
-                    painel.hidden = !painel.hidden;
-                    botao.setAttribute('aria-expanded', painel.hidden ? 'false' : 'true');
+            return { botao: botao, painel: painel };
+        }).filter(function (menu) {
+            return menu.botao && menu.painel;
+        });
+
+        menusAcao.forEach(function (menuSelecionado) {
+            menuSelecionado.botao.addEventListener('click', function () {
+                const deveAbrir = menuSelecionado.painel.hidden;
+
+                menusAcao.forEach(function (menu) {
+                    menu.painel.hidden = true;
+                    menu.botao.setAttribute('aria-expanded', 'false');
                 });
-            }
+
+                if (deveAbrir) {
+                    menuSelecionado.painel.hidden = false;
+                    menuSelecionado.botao.setAttribute('aria-expanded', 'true');
+                }
+            });
         });
 
         const botaoFugir = document.getElementById('abrir-confirmacao-fuga');
