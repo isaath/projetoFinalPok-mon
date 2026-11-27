@@ -53,6 +53,10 @@ O projeto foi preparado para o ambiente local XAMPP.
 
    [http://localhost/projetoFinalPok-mon/public/index.php](http://localhost/projetoFinalPok-mon/public/index.php)
 
+Ao abrir esse endereço, o jogo apresenta primeiro a tela inicial. O catálogo completo continua disponível em:
+
+[http://localhost/projetoFinalPok-mon/public/index.php?rota=pokemons](http://localhost/projetoFinalPok-mon/public/index.php?rota=pokemons)
+
 ### Configuração padrão do banco
 
 O projeto está configurado em `config/config.php` com:

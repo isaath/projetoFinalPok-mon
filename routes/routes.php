@@ -4,8 +4,8 @@
 // Cada chave é o nome da rota acessada pela URL, e cada valor aponta para o
 // Controller e para o método que deve responder à requisição.
 return [
-    // Rota principal: ao abrir a home, exibe a listagem de Pokémon.
-    '' => [PokemonController::class, 'listarPokemons'],
+    // Rota principal: ao abrir o index, exibe a tela inicial do jogo.
+    '' => [PaginaController::class, 'inicio'],
 
     // Lista de Pokémon também pode ser acessada pela URL /pokemons.
     'pokemons' => [PokemonController::class, 'listarPokemons'],
