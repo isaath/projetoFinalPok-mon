@@ -1,4 +1,6 @@
-// Envia as compras da loja por JSON e atualiza os dados sem recarregar a página.
+// Na apresentação: encontra os formulários data-compra-item de bolicho.php,
+// envia JSON à rota atendida por BolichoController e atualiza saldo/estoque.
+// O servidor e o Model Loja continuam responsáveis por validar e efetivar a compra.
 class CompradorBolicho {
     constructor() {
         this.saldo = document.querySelector('[data-saldo-pokepila]');

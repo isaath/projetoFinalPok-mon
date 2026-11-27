@@ -1,5 +1,6 @@
 <?php
-// Tela inicial do projeto: oferece acesso ao login como ponto de entrada da aplicação.
+// Na apresentação: PaginaController carrega esta tela pública; o botão aponta
+// para a rota de login, que será tratada por UsuarioController.
 ?><!DOCTYPE html>
 <html lang="pt-br">
 <head>

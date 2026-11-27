@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: TimeController consulta TimeInicial e entrega as opções;
+// o formulário envia as três escolhas de volta à rota "escolher_time".
 // A View só é renderizada quando recebe as opções e o token preparados pelo Controller.
 if (!isset($pokemons, $token) || !is_array($pokemons)) {
     http_response_code(404);

@@ -4,6 +4,8 @@
 -- As tabelas são criadas antes de suas dependências por causa das chaves estrangeiras.
 -- O mecanismo InnoDB permite aplicar essas relações e usar transações nas operações do jogo.
 -- IF NOT EXISTS, NOT EXISTS e INSERT IGNORE evitam duplicações em vários cadastros iniciais.
+-- Na apresentação: as Models usam PDO para consultar e atualizar estas tabelas;
+-- as três Views abaixo resumem o catálogo, os times e o progresso dos treinadores.
 
 CREATE DATABASE IF NOT EXISTS bancodedados_pokefish
     CHARACTER SET utf8mb4
@@ -17,6 +19,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     senha VARCHAR(255) NOT NULL,
+    foto_caminho VARCHAR(255) NULL,
+    -- Campos legados: preservam fotos já cadastradas; novos cadastros não os preenchem.
     foto MEDIUMBLOB NULL,
     tipo_foto VARCHAR(20) NULL,
     dinheiro INT UNSIGNED NOT NULL DEFAULT 120,
@@ -50,6 +54,7 @@ CREATE TABLE IF NOT EXISTS pokemons (
     experiencia INT UNSIGNED NOT NULL DEFAULT 0,
     id_tipo INT UNSIGNED NULL,
     PRIMARY KEY (id_pokemon),
+    UNIQUE KEY uq_pokemons_nome (nome),
     KEY idx_pokemons_tipo (id_tipo),
     CONSTRAINT fk_pokemons_tipo
         FOREIGN KEY (id_tipo) REFERENCES tipos (id_tipo)
@@ -181,7 +186,8 @@ CREATE TABLE IF NOT EXISTS itens_loja (
     preco INT UNSIGNED NOT NULL DEFAULT 0,
     descricao VARCHAR(255) NULL,
     valor_efeito INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (id_item)
+    PRIMARY KEY (id_item),
+    UNIQUE KEY uq_itens_loja_nome (nome)
 ) ENGINE=InnoDB;
 
 -- Preços aprovados para os itens obrigatórios. A consulta evita duplicá-los ao reexecutar o script.
@@ -255,6 +261,20 @@ CREATE TABLE IF NOT EXISTS inventario (
         FOREIGN KEY (id_item) REFERENCES itens_loja (id_item)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Registra o resultado e impede reutilizar cada ponto de exploração do mapa.
+CREATE TABLE IF NOT EXISTS mapa_eventos (
+    id_usuario INT UNSIGNED NOT NULL,
+    id_ponto TINYINT UNSIGNED NOT NULL,
+    tipo_evento VARCHAR(32) NOT NULL,
+    mensagem VARCHAR(500) NOT NULL,
+    data_evento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_usuario, id_ponto),
+    CONSTRAINT fk_mapa_eventos_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Histórico de compras feitas pelos usuários.
@@ -426,7 +446,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM movimentos AS existente WHERE existente.nome = catalogo.nome
 );
 
--- Cinco opções iniciais aprovadas: são os menores totais de atributos base entre os nove nomes do PokeApiService.
+-- Cinco opções iniciais aprovadas após comparar os atributos base de nove candidatos.
 INSERT INTO pokemons
     (nivel, nome, hp, hp_maximo, forca_ataque, defesa, ataque_especial, defesa_especial, velocidade, id_tipo)
 SELECT 1, 'Vulpix', 38, 38, 41, 40, 50, 65, 65, tipos.id_tipo
@@ -807,7 +827,7 @@ CREATE TABLE IF NOT EXISTS treinadores (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- Guarda os três Pokémon de cada líder, sua posição na batalha e a ordem de
+-- Guarda os Pokémon de cada líder, sua posição na batalha e a ordem de
 -- liberação para captura (do menor ao maior total de atributos base).
 CREATE TABLE IF NOT EXISTS treinador_pokemons (
     id_treinador INT UNSIGNED NOT NULL,
@@ -886,7 +906,7 @@ CREATE TABLE IF NOT EXISTS capturas_treinadores (
 ) ENGINE=InnoDB;
 
 -- Guarda a tentativa aleatória feita após cada vitória, inclusive as falhas.
--- O histórico permite aumentar a chance sem sortear novamente ao recarregar a tela.
+-- A chance registrada é fixa; o histórico impede novo sorteio ao recarregar a tela.
 CREATE TABLE IF NOT EXISTS batalhas_capturas (
     id_batalha INT UNSIGNED NOT NULL,
     id_usuario INT UNSIGNED NOT NULL,

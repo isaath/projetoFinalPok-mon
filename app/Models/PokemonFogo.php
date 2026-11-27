@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Traits\fogoTrait;
 
-// Classe específica para Pokémon do tipo Fogo.
-// Ela reutiliza a lógica base da classe Pokemon e adiciona os comportamentos do tipo Fogo.
+/**
+ * Subclasse do tipo Fogo usada por PokemonTipoFactory.
+ * Na apresentação, diferencie herança de Pokemon e reutilização de getTipo()
+ * pela trait; os multiplicadores de batalha são calculados em BatalhaEngine.
+ */
 class PokemonFogo extends Pokemon
 {
     use fogoTrait;

@@ -5,7 +5,9 @@ use App\Models\TimePokemon;
 
 
 /**
- * Recebe ações das telas de time e coordena validações, Models e Views.
+ * Na apresentação: coordena a escolha inicial e a tela Meu time. Usa
+ * TimeInicial para criar a jornada e TimePokemon para listar/reorganizar
+ * membros; as Views só recebem os dados e tokens já preparados.
  */
 class TimeController
 {

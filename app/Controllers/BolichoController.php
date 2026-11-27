@@ -3,7 +3,10 @@
 use App\Exceptions\SaldoInsuficienteException;
 use App\Models\Loja;
 
-/** Coordena a exibição da loja e o envio de solicitações de compra. */
+/**
+ * Na apresentação: recebe o formulário ou JSON enviado por bolicho_compras.js,
+ * valida sessão/CSRF e delega saldo, catálogo e compra ao Model Loja.
+ */
 class BolichoController
 {
     // A conexão é compartilhada com o Model da loja.

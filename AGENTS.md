@@ -596,7 +596,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 - Após o login, o sistema deve verificar se o usuário já iniciou sua jornada, consultando os dados persistidos do jogo.
 - Na primeira vez, o usuário escolhe 3 Pokémon entre 5 Pokémon iniciais fracos que já existem no banco de dados.
-- Os cinco iniciais aprovados são Vulpix, Bellsprout, Charmander, Squirtle e Bulbasaur: os cinco menores totais de atributos base entre os nove nomes configurados no serviço da PokeAPI.
+- Os cinco iniciais aprovados são Vulpix, Bellsprout, Charmander, Squirtle e Bulbasaur. Seus atributos base foram comparados com os de outros quatro candidatos; a aplicação carrega as opções já cadastradas no banco.
 - A seleção deve ser salva para que o usuário não precise fazê-la novamente.
 - Após salvar o time inicial, o usuário é direcionado ao `painel_jogar.php`.
 - Usuários que já iniciaram o jogo também são direcionados ao `painel_jogar.php`.
@@ -673,21 +673,26 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 - A referência de efetividade é o gráfico das Gerações II a V, usado em FireRed/LeafGreen: 17 tipos, sem Fada. A tipagem das espécies do projeto permanece conforme a Geração I, como aprovado pelos desenvolvedores; por isso não se deve aplicar Aço ou Fada a Magnemite ou Mr. Mime.
 - A ordem de ação e os multiplicadores de tipo acima estão aprovados. Status são temporários e removidos ao final da batalha: queimadura reduz dano físico pela metade e causa 1/8 do HP máximo ao fim do turno; veneno causa 1/8; Toxic aumenta esse dano em 1/8 por turno; paralisia reduz Velocidade pela metade e dá 25% de chance de perder a ação; sono impede de agir por 1 ou 2 turnos; congelamento impede de agir até descongelar (20% de chance por ação); confusão dura 2 ações, com 50% de chance de causar 1/8 do HP máximo ao próprio Pokémon e perder a ação. Um Pokémon só pode ter uma dessas condições principais por vez.
 - A quantidade de movimentos disponíveis para cada Pokémon acompanha sua evolução: dois no estágio inicial, três no segundo estágio e quatro no estágio final. Espécies sem evolução ou com menos estágios devem ser avaliadas individualmente, usando movimentos de FireRed/LeafGreen como referência e ajustando a seleção para manter o combate balanceado.
-- Os movimentos estão cadastrados em `movimentos` e associados às espécies por `pokemon_movimentos`. A categoria física/especial segue a divisão de tipos da Geração III; os movimentos status não causam dano direto. Precisão e chance de efeito são verificadas no servidor.
+- Os movimentos estão cadastrados em `movimentos` e associados às espécies por `pokemon_movimentos`. A categoria física/especial segue a divisão de tipos da Geração III; os movimentos status não causam dano direto. Precisão e chance de efeito são verificadas no servidor. Ataques com dano acima de 40 de potência perdem 0,2 ponto percentual de precisão por ponto excedente, com desconto máximo de 12 pontos e sem reduzir a precisão-base abaixo de 70%; a penalidade não afeta movimentos de status e é aplicada tanto ao jogador quanto ao adversário. A chance efetiva não é exibida nos botões de ataque, e a escolha de golpe do adversário considera dano esperado pela precisão.
 - A fórmula adaptada de dano é `potência × ataque ÷ (4 × defesa) × STAB × efetividade`, arredondada ao inteiro mais próximo, com mínimo de 1 e limite de metade do HP máximo do alvo por golpe. Golpes imunes causam 0. A categoria do golpe define quais atributos de ataque e defesa são usados.
 - Status de stat usam estágios limitados a -2 e +2; cada estágio positivo multiplica o atributo por 1,25 e cada estágio negativo divide por `1 + 0,25 × |estágio|`. Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha; Protect também só pode ser usado uma vez por Pokémon por batalha, já que o projeto não controla PP.
-- A batalha recebe apenas a escolha do movimento pelo formulário. O servidor valida o movimento, escolhe a ação adversária e processa o turno; o estado temporário fica na sessão PHP. Ao terminar, o HP do jogador, o log, as vitórias, as capturas liberadas e a recompensa são gravados no banco em transação. Um token único por batalha impede que uma repetição da finalização gere outro log ou credite a recompensa novamente. O HP global dos Pokémon adversários nunca é alterado.
-- Durante a batalha, o jogador escolhe movimentos até uma equipe ser derrotada; não há troca manual, uso de itens ou tentativa de captura durante o combate. A captura acontece separadamente, na tela pós-vitória.
+- O formulário da batalha permite escolher um movimento, trocar um Pokémon, usar um item compatível ou fugir. O servidor valida a ação; trocar ou usar item consome o turno e permite a resposta do adversário. Fugir encerra o combate como derrota, sem recompensa ou tentativa de captura.
+- O estado temporário fica na sessão PHP. Ao terminar, o HP do jogador e o resultado são gravados no banco; vitórias, capturas liberadas e recompensa são persistidas em transação. Um token único por batalha impede que uma repetição da finalização gere outro log ou credite a recompensa novamente. O HP global dos Pokémon adversários nunca é alterado.
+- A captura acontece separadamente, na tela pós-vitória; não é possível tentar capturar durante os turnos.
 - Os treinadores dos níveis 1 a 4 possuem três Pokémon; os dos níveis 5 a 8 possuem quatro.
 - Cada vitória libera uma nova posição da sequência de captura, cadastrada do menor para o maior total de atributos base. A tela tenta o primeiro Pokémon liberado que o jogador ainda não possui; espécies já possuídas são puladas sem sorteio, permitindo tentar a próxima. Os níveis 1 a 4 têm três Pokémon e os níveis 5 a 8 têm quatro.
-- A primeira tentativa para cada Pokémon tem 30% de chance. Cada falha aumenta a chance em 20 pontos percentuais, até o limite de 90%; após capturar um Pokémon, a sequência avança e a chance reinicia em 30% para o próximo.
+- Cada tentativa de captura tem chance fixa de 50%, independentemente do Pokémon e do número de tentativas. Uma falha mantém o Pokémon atual na sequência; após capturá-lo, a sequência avança.
 - Uma falha não avança a sequência: o jogador precisa vencer novamente o mesmo líder para tentar capturar o mesmo Pokémon. Se já possuir a espécie, ela é pulada sem novo sorteio e o próximo Pokémon liberado pode ser tentado.
 - Após vencer a batalha, uma tela apresenta o resultado do sorteio. O resultado e o número da tentativa são persistidos para que recarregar a página não faça outro sorteio.
 - Em caso de sucesso, uma cópia da espécie é adicionada à reserva do jogador com HP completo; o Pokémon do treinador permanece na equipe adversária. Se o jogador já possuir todos os Pokémon liberados daquele treinador, a tela informa que todos já foram capturados e oferece a opção de continuar.
 - O progresso, as tentativas e as capturas são individuais por usuário. Resultado da batalha, recompensa, HP e tentativa/captura são gravados na mesma transação.
-- Além dos 8 locais de batalha, o mapa terá locais de interação entre níveis.
-- Ao interagir com esses locais, o sistema pode sortear eventos positivos ou negativos, por exemplo: capturar um Pokémon, encontrar um item, ganhar moedas ou perder moedas.
-- O efeito do evento deve ser aplicado aos dados do usuário e apresentado claramente na interface.
+- A implementação atual do mapa possui cinco pontos de exploração `?`, cada um utilizável uma vez por usuário. A lista, a frequência e a distribuição dos eventos ainda aguardam confirmação dos desenvolvedores; os valores abaixo descrevem o código atual, não regras aprovadas.
+- No código atual, os pontos só são liberados após vencer o líder anterior na trilha: ponto 1 após Misty (nível 2), ponto 2 após Lt. Surge (nível 3), ponto 3 após Erika (nível 4), ponto 4 após Koga (nível 5) e ponto 5 após Sabrina (nível 6). O bloqueio existe na interface e é validado no servidor.
+- O sorteio atualmente tem 10% de chance de conceder um Pokémon ainda não possuído e 15% para cada um dos outros seis resultados: item comum, ganhar 15 PokePila, perder até 15 PokePila, ataque selvagem, cura parcial ou local vazio.
+- O item encontrado atualmente é um consumível comum aleatório, em quantidade de 1 ou 2; o Item Evolutivo não é sorteado.
+- O ataque selvagem atualmente reduz 10% do HP máximo de cada Pokémon sem desmaiá-lo. A cura recupera 15% do HP máximo dos Pokémon vivos e não revive os desmaiados.
+- O Pokémon encontrado atualmente entra na reserva com HP completo. Se o jogador já possui todas as espécies do catálogo, o evento informa que não há Pokémon novo disponível.
+- O código persiste o evento e seu efeito juntos em uma transação; recarregar ou reenviar a solicitação não deve repetir o sorteio nem reaplicar a recompensa.
 - O resultado das batalhas deve ser registrado e integrado ao progresso e às recompensas do usuário.
 - O sistema de turnos, dano, condições temporárias, troca automática, HP do jogador, registro, progresso, recompensas e tentativas aleatórias de captura pós-batalha está implementado.
 
@@ -730,11 +735,7 @@ Use esta seção como referência permanente ao explicar, revisar ou implementar
 
 ## 19.8. Decisões ainda pendentes
 
-Não invente nem fixe sem confirmação dos desenvolvedores:
-
-- a lista, frequência e distribuição dos eventos aleatórios;
-
-Ao trabalhar nesses pontos, apresente alternativas de forma didática e obtenha a decisão dos desenvolvedores antes de consolidá-los como regra. As regras do Item Evolutivo estão definidas na seção 19.6. O equilíbrio dos oito níveis ainda deve ser acompanhado em testes de jogo com capturas e evoluções.
+O equilíbrio dos oito níveis ainda deve ser acompanhado em testes de jogo com capturas e evoluções. A lista, a frequência e a distribuição dos eventos aleatórios do mapa ainda aguardam confirmação dos desenvolvedores. Até essa decisão, trate os detalhes da seção 19.5 como descrição da implementação atual, não como regras aprovadas; não os altere nem os consolide como requisito sem consultar Henrique e Isadora.
 
 **Referências consultadas para as regras de batalha:**
 

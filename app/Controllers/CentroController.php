@@ -2,7 +2,10 @@
 
 use App\Models\CentroPokemon;
 
-/** Valida o acesso ao Pokecenter e prepara a recuperação para a interface. */
+/**
+ * Na apresentação: protege a rota, valida o pedido de cura e encaminha a
+ * operação ao Model CentroPokemon antes de carregar a View do Pokecenter.
+ */
 class CentroController
 {
     private PDO $db;

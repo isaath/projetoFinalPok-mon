@@ -4,7 +4,10 @@ namespace App\Models;
 
 use UnexpectedValueException;
 
-/** Cria o subtipo de Pokémon correspondente ao tipo principal do registro. */
+/**
+ * Na apresentação: converte a linha da View vw_catalogo_pokemon em um objeto
+ * da subclasse adequada. Isso mostra herança e despacho polimórfico de getTipo().
+ */
 class PokemonTipoFactory
 {
     /** @var array<string, class-string<Pokemon>> */

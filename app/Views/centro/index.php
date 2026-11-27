@@ -1,3 +1,5 @@
+<!-- Na apresentação: CentroController entrega saldo, custo, mensagens e Pokémon
+     consultados pelo Model CentroPokemon; o POST solicita uma cura ao servidor. -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

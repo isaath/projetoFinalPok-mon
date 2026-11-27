@@ -1,5 +1,16 @@
 <?php
 
+// Configura o cookie da sessão antes de iniciá-la.
+ini_set('session.use_only_cookies', '1');
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 // Inicia a sessão do usuário para permitir armazenamento de dados como login e perfil.
 session_start();
 
@@ -9,6 +20,7 @@ require __DIR__ . '/../app/Models/autoload.php';
 require __DIR__ . '/../app/Services/PokeApiService.php';
 require __DIR__ . '/../app/Controllers/PokemonController.php';
 require __DIR__ . '/../app/Controllers/UsuarioController.php';
+require __DIR__ . '/../app/Controllers/LogoutController.php';
 require __DIR__ . '/../app/Controllers/BolichoController.php';
 require __DIR__ . '/../app/Controllers/CentroController.php';
 require __DIR__ . '/../app/Controllers/TimeController.php';

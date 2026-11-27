@@ -31,8 +31,10 @@ function getConnection(): PDO
             $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
-            // Se a conexão falhar, a aplicação encerra imediatamente com uma mensagem útil.
-            die("Erro na conexão com o banco de dados: " . $e->getMessage());
+            // Registra o detalhe técnico no servidor, sem expor dados internos na página.
+            error_log('Falha ao conectar ao banco de dados: ' . $e->getMessage());
+            http_response_code(500);
+            die('Não foi possível conectar ao banco de dados. Verifique a configuração local.');
         }
     }
 

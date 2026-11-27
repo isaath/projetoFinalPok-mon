@@ -6,7 +6,10 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
-/** Consulta Pokémon do usuário e aplica o serviço de recuperação do Pokecenter. */
+/**
+ * Na apresentação: consulta HP individual pela View SQL vw_time_pokemons e
+ * atualiza saldo/HP em transação; CentroController chama este Model.
+ */
 class CentroPokemon
 {
     // Valor descontado uma vez quando há pelo menos um Pokémon ferido.
@@ -110,12 +113,13 @@ class CentroPokemon
             // Condição no UPDATE protege o saldo caso ele mude antes da cobrança.
             $cobrar = $this->db->prepare(
                 'UPDATE usuarios
-                 SET dinheiro = dinheiro - :custo
-                 WHERE id_usuario = :id_usuario AND dinheiro >= :custo'
+                 SET dinheiro = dinheiro - :custo_debito
+                 WHERE id_usuario = :id_usuario AND dinheiro >= :custo_verificacao'
             );
             $cobrar->execute([
-                'custo' => self::CUSTO_VISITA,
+                'custo_debito' => self::CUSTO_VISITA,
                 'id_usuario' => $idUsuario,
+                'custo_verificacao' => self::CUSTO_VISITA,
             ]);
 
             if ($cobrar->rowCount() !== 1) {

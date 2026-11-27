@@ -1,4 +1,5 @@
-// Carrega imagens da PokeAPI para todos os elementos marcados na tela.
+// Na apresentação: Views PHP marcam as imagens com data-nome; este script
+// consulta a PokeAPI e atualiza somente a apresentação, sem gravar no banco.
 class CarregadorImagensPokemon {
     // Guarda os elementos com nome definido em data-nome para processá-los depois.
     constructor() {

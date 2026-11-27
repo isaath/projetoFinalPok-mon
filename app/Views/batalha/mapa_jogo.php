@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: MapaController entrega progresso e eventos ao mapa. Links
+// levam à rota "batalha"; os formulários POST de exploração voltam à rota "mapa".
 // Associa o número de cada nível à classe CSS que posiciona seu botão no mapa.
 $classesDosNiveis = [
     1 => 'brock',
@@ -17,7 +19,7 @@ $classesDosNiveis = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa do Jogo - Pokebagual</title>
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/mapa_jogo.css">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/mapa_jogo.css?v=map-events-3">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
 </head>
@@ -68,6 +70,58 @@ $classesDosNiveis = [
                     ></span>
                 <?php endif; ?>
             <?php endforeach; ?>
+
+            <!-- Os cinco pontos entre ginásios são exploráveis uma única vez por jogador. -->
+            <?php for ($idPonto = 1; $idPonto <= 5; $idPonto++): ?>
+                <?php
+                $pontoUsado = isset($eventosMapa[$idPonto]);
+                $nivelNecessario = $niveisRequeridosPorPonto[$idPonto];
+                $nomeLiderNecessario = $progressoNiveis[$nivelNecessario]['nome'];
+                $pontoBloqueado = !$pontoUsado
+                    && $progressoNiveis[$nivelNecessario]['vitorias'] < 1;
+                $classeDisponibilidade = $pontoUsado
+                    ? 'usado'
+                    : ($pontoBloqueado ? 'bloqueado' : '');
+                $rotuloPonto = $pontoUsado
+                    ? 'Ponto de exploração já utilizado'
+                    : ($pontoBloqueado
+                        ? 'Bloqueado: vença ' . $nomeLiderNecessario . ' para liberar'
+                        : 'Explorar ponto de interrogação ' . $idPonto);
+                $tituloPonto = $pontoUsado
+                    ? 'Este ponto já foi explorado'
+                    : ($pontoBloqueado
+                        ? 'Vença ' . $nomeLiderNecessario . ' para liberar este ponto'
+                        : 'Explorar');
+                ?>
+                <form
+                    class="evento-mapa evento-ponto-<?= $idPonto ?> <?= $classeDisponibilidade ?>"
+                    method="post"
+                    action="/projetoFinalPok-mon/public/index.php?rota=mapa"
+                >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars($csrfMapa, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                    <input type="hidden" name="id_ponto" value="<?= $idPonto ?>">
+                    <button
+                        type="submit"
+                        <?= $pontoUsado || $pontoBloqueado ? 'disabled' : '' ?>
+                        aria-label="<?= htmlspecialchars($rotuloPonto, ENT_QUOTES, 'UTF-8') ?>"
+                        title="<?= htmlspecialchars($tituloPonto, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                        <span class="sr-only">
+                            <?= htmlspecialchars($rotuloPonto, ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                    </button>
+                </form>
+            <?php endfor; ?>
+
+            <?php if ($resultadoEvento !== null): ?>
+                <p class="resultado-evento" role="status">
+                    <?= htmlspecialchars($resultadoEvento['mensagem'], ENT_QUOTES, 'UTF-8') ?>
+                </p>
+            <?php endif; ?>
         <?php endif; ?>
 
     </main>

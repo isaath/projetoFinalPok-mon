@@ -8,10 +8,10 @@ O projeto está sendo desenvolvido como parte de um trabalho acadêmico interdis
 
 ## Funcionalidades
 
-* **Gerenciamento de usuários:** cadastro, login e gerenciamento de perfil.
+* **Gerenciamento de usuários:** cadastro, login, saída protegida por CSRF e gerenciamento de perfil.
 * **Perfil do jogador:** exibição das insígnias conquistadas por aquele usuário e do título “Mestre Pokémon” ao vencer os oito ginásios.
 * **Montagem de equipes:** seleção e organização dos Pokémon para as batalhas.
-* **Sistema de batalhas:** turnos, escolha de movimentos, dano, condições temporárias, troca automática dos Pokémon desmaiados, HP persistente, progresso, recompensas e registro. Após uma vitória há uma tentativa de captura com chance inicial de 30%, que aumenta 20 pontos percentuais após cada falha até 90%; espécies já possuídas são puladas, e uma captura bem-sucedida adiciona o Pokémon à reserva sem removê-lo da equipe do líder.
+* **Sistema de batalhas:** turnos, movimentos, dano, condições temporárias, troca automática e manual, uso de itens, fuga, HP persistente, progresso, recompensas e registro. Após uma vitória há uma tentativa de captura com chance fixa de 50%; espécies já possuídas são puladas, e uma captura bem-sucedida adiciona o Pokémon à reserva sem removê-lo da equipe do líder.
 * **Tipos de Pokémon:** cada espécie é instanciada como uma subclasse de `Pokemon` correspondente ao tipo principal; tipos secundários continuam associados pelos dados de `pokemon_tipos`. As regras aprovadas usam a efetividade de tipos da Geração III como referência, mas mantêm as tipagens das espécies da Geração I.
 * **Loja:** compra de itens para recuperação, tratamento de condições e evolução dos Pokémon.
 * **Compras assíncronas:** o Bolicho envia as compras do navegador ao PHP em JSON e atualiza saldo e inventário sem recarregar a página; a validação de sessão, CSRF, preço e saldo continua no servidor.
@@ -40,6 +40,8 @@ As espécies do projeto mantêm as tipagens da Geração I, por decisão dos des
 
 As espécies mantêm os tipos da Geração I. Os golpes usam a categoria física/especial da Geração III e movimentos, potência, precisão e efeitos ficam cadastrados no banco.
 
+Para deixar os golpes fortes mais arriscados sem torná-los imprevisíveis, ataques com dano acima de 40 de potência perdem 0,2 ponto percentual de precisão por ponto excedente, até 12 pontos. A penalidade não reduz a precisão-base abaixo de 70%; a precisão cadastrada e os estágios de precisão continuam valendo. Movimentos de status não recebem essa penalidade. O servidor aplica a regra aos dois lados; a chance final não é exibida nos botões de ataque.
+
 ### Fórmula de dano e status
 
 O cálculo é intencionalmente curto para ser explicado na apresentação:
@@ -52,7 +54,7 @@ Queimadura reduz pela metade o dano físico e, assim como veneno, causa 1/8 do H
 
 Recover e Synthesis recuperam metade do HP máximo uma vez por Pokémon por batalha. Protect também pode ser usado uma vez por Pokémon por batalha; o projeto não controla PP dos movimentos.
 
-O estado dos turnos fica na sessão PHP. No fim, o servidor salva o HP dos Pokémon do jogador, o log, as vitórias e a recompensa em uma transação. Após uma vitória, uma tentativa de captura é sorteada e exibida em uma tela pós-batalha. A chance começa em 30%, aumenta 20 pontos percentuais após cada falha e para em 90%; vencer novamente tenta o mesmo Pokémon até o sucesso. A sequência avança apenas depois de uma captura bem-sucedida, e a chance reinicia para o próximo Pokémon. Um token único por batalha e o registro persistente da tentativa impedem duplicar a recompensa ou sortear de novo ao recarregar a tela. No sucesso, uma cópia entra na reserva com HP completo; o Pokémon do treinador permanece na equipe adversária. Não se salva dano no cadastro global das espécies. Também não há troca manual nem uso de itens durante os turnos.
+O estado dos turnos fica na sessão PHP. O jogador pode escolher um movimento, trocar um Pokémon, usar um item compatível ou fugir. Trocas e itens consomem um turno e permitem a resposta do adversário; fugir encerra a batalha como derrota, sem recompensa nem tentativa de captura. No fim, o servidor salva o HP dos Pokémon do jogador e o resultado; vitórias, progresso e recompensas são gravados em transação. Após uma vitória, uma tentativa de captura é sorteada e exibida em uma tela pós-batalha, sempre com chance fixa de 50%, independentemente do número de tentativas. Uma falha permite tentar o mesmo Pokémon após vencer novamente o líder; a sequência avança após a captura bem-sucedida. Um token único por batalha e o registro persistente da tentativa impedem duplicar a recompensa ou sortear de novo ao recarregar a tela. No sucesso, uma cópia entra na reserva com HP completo; o Pokémon do treinador permanece na equipe adversária. Não se salva dano no cadastro global das espécies.
 
 ### Movimentos por estágio de evolução
 
@@ -85,7 +87,7 @@ O projeto utiliza o padrão arquitetural **MVC (Model-View-Controller)**, com o 
 * **View:** responsável pela apresentação das informações ao usuário.
 * **Controller:** recebe as requisições, coordena as ações e conecta os modelos às visualizações.
 
-Também são aplicados conceitos de programação orientada a objetos, como encapsulamento, herança, polimorfismo, associação, agregação e composição.
+O código demonstra encapsulamento nos atributos privados de `Pokemon`, herança nas subclasses dos tipos principais e polimorfismo no método `getTipo()` usado na listagem do catálogo. Controllers também se associam a Models para coordenar as operações. A engine de batalha trabalha principalmente com arrays; por isso, composição e agregação entre objetos de domínio ainda não estão demonstradas com clareza e não devem ser apresentadas como requisitos concluídos.
 
 ## Banco de Dados
 
@@ -93,16 +95,20 @@ O banco armazena usuários, Pokémon, equipes, itens e batalhas. Para criar as t
 
 1. Inicie o **MySQL** no XAMPP.
 2. Abra `database/schema.sql` no DBeaver e conecte-se ao servidor MySQL local.
-3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. Este é o único script necessário para uma instalação nova: cria o banco `bancodedados_pokefish`, as tabelas (incluindo os campos de foto de perfil), os tipos, os Pokémon e evoluções cadastrados e as equipes dos oito ginásios de Kanto. Não há migração adicional para executar em um banco novo.
+3. Execute o **script completo** pela opção **Execute SQL Script** do DBeaver. Executar apenas a instrução atual não roda o arquivo inteiro. Este é o único script necessário para uma instalação nova: cria o banco `bancodedados_pokefish`, as tabelas (incluindo o caminho da foto de perfil), os tipos, os Pokémon e evoluções cadastrados e as equipes dos oito ginásios de Kanto.
 4. A conexão da aplicação está configurada em `config/config.php` para `localhost`, banco `bancodedados_pokefish`, usuário `root` e senha vazia. Ajuste esses dados caso sua instalação use outras credenciais.
 
-O `bd.erd` é um diagrama visual de referência e não gera o banco automaticamente. Para a estrutura simplificada e oficial do projeto, use `database/schema.sql` no DBeaver. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
+Em bancos já existentes, faça backup e execute o `database/schema.sql` completo para criar tabelas e Views que ainda não existam. `CREATE TABLE IF NOT EXISTS` não altera a estrutura de tabelas já criadas. Antes de testar a aplicação, confirme também que o banco contém `batalha_treinadores`, usada no registro das batalhas, e a coluna `foto_caminho`, usada no cadastro e no perfil. Se o banco ainda não tiver `foto_caminho`, execute também `database/migrar_foto_perfil.sql`; para adicionar as restrições de nomes únicos em um banco anterior a esta versão, confira primeiro as duplicatas e execute uma vez `database/migrar_chaves_unicas.sql`. Se as consultas de duplicatas retornarem linhas, resolva-as antes da migração. Não execute essa migração em uma instalação criada pelo schema atual, pois os índices já estarão presentes.
+
+A migração da foto preserva colunas antigas e fotos BLOB existentes; novas imagens são gravadas em arquivo e a aplicação usa o caminho salvo em `foto_caminho`. Fotos antigas continuam sendo exibidas como alternativa.
+
+O `bd.erd` é uma versão antiga e não representa todas as tabelas atuais. Consulte `database/modelo_relacional.mmd` para o diagrama relacional atualizado e use `database/schema.sql` como fonte executável do banco. Os nomes de tabelas, colunas e tipos cadastrados no script não usam acentos.
 
 ### Decisões de jogo aprovadas
 
-As regras abaixo foram decididas por Henrique e Isadora. Mantenha código e documentação alinhados com elas; não mude esses valores sem consultar os desenvolvedores. O documento de referência para regras do agente é `AGENTS.md`, seções 19.1, 19.4 e 19.6.
+As regras abaixo foram decididas por Henrique e Isadora. Mantenha código e documentação alinhados com elas; não mude esses valores sem consultar os desenvolvedores. O documento de referência para regras do agente é `AGENTS.md`, seções 19.1, 19.4, 19.5 (regras de batalha) e 19.6. A distribuição dos eventos de exploração descrita separadamente ainda aguarda confirmação.
 
-**Escolha do time inicial:** no primeiro login, o jogador escolhe três entre os cinco Pokémon com menor soma dos atributos base entre os nove nomes de `PokeApiService`:
+**Escolha do time inicial:** no primeiro login, o jogador escolhe três entre as cinco opções aprovadas, definidas após comparar os atributos base de nove candidatos:
 
 | Pokémon | Soma dos atributos base |
 |---|---:|
@@ -135,7 +141,7 @@ A primeira campanha completa rende 960 PokePila em recompensas de primeira vitó
 
 O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível desbloqueado e a batalha carrega a equipe correspondente. Inicia o primeiro Pokémon ativo da equipe que ainda tenha HP, respeitando a ordem das posições, contra o primeiro Pokémon do líder.
 
-**Capturas dos líderes:** após cada vitória, o jogador tenta capturar o próximo Pokémon da ordem do líder, do mais fraco ao mais forte. A chance começa em 30%, sobe 20 pontos após cada falha e tem limite de 90%. Uma falha repete a tentativa contra o mesmo Pokémon na próxima vitória; só após o sucesso a sequência avança. A chance reinicia em 30% para cada novo Pokémon. O sorteio aparece em uma tela própria depois da batalha. No sucesso, uma cópia vai para a reserva e o Pokémon do líder continua disponível em sua equipe.
+**Capturas dos líderes:** após cada vitória, o jogador tenta capturar o próximo Pokémon da ordem do líder, do mais fraco ao mais forte. Cada tentativa tem chance fixa de 50%. Uma falha repete a tentativa contra o mesmo Pokémon na próxima vitória; só após o sucesso a sequência avança. O sorteio aparece em uma tela própria depois da batalha. No sucesso, uma cópia vai para a reserva e o Pokémon do líder continua disponível em sua equipe.
 
 **Pokecenter:** restaura o HP de todos os Pokémon associados aos times do jogador, inclusive os desmaiados, até o máximo. Cobra 40 PokePila uma única vez por visita, somente se houver HP a recuperar. O HP individual deve ser persistido sem alterar o cadastro global do Pokémon.
 
@@ -159,21 +165,33 @@ O botão **Jogar** abre o mapa dos oito ginásios. O jogador escolhe um nível d
 
 O Item Evolutivo é o item mais caro da loja. Ele evolui o Pokémon em um estágio direto cadastrado no banco; atualmente há 15 relações possíveis entre as espécies do catálogo. Ao usar o item, o sistema consulta os atributos e tipos da espécie evoluída na PokeAPI, atualiza os dados dessa espécie e restaura o HP individual do Pokémon ao novo máximo. A operação consome uma unidade do item e é persistida em transação. Se o time já possuir a espécie de destino, a evolução é recusada sem consumir o item.
 
-Esses itens são cadastrados por `database/schema.sql`. **Ainda pendente:** definir os eventos aleatórios e testar o equilíbrio da jornada com capturas e evoluções. A fórmula, os efeitos dos status, a lista de movimentos por espécie, a ordem de ação, as recompensas e as tentativas de captura pós-batalha estão implementados conforme as regras acima.
+Esses itens são cadastrados por `database/schema.sql`.
 
-## Objetivos Acadêmicos
+### Eventos de exploração do mapa — implementação atual
 
-O desenvolvimento do PokeBagual tem como objetivo aplicar, de forma integrada, os conhecimentos adquiridos nas disciplinas envolvidas, incluindo:
+O código atual implementa cinco pontos `?`, cada um utilizável uma vez por jogador e liberado após vencer um líder específico: Misty, Lt. Surge, Erika, Koga e Sabrina, respectivamente. O servidor valida o desbloqueio. O código sorteia um Pokémon ainda não possuído com 10% de chance e cada um dos outros seis resultados com 15%: item comum, ganhar 15 PokePila, perder até 15 PokePila, ataque selvagem, cura parcial ou local vazio. Itens encontrados são consumíveis comuns, em quantidade de 1 ou 2; o Item Evolutivo não é sorteado. O ataque reduz 10% do HP máximo sem desmaiar a equipe; a cura recupera 15% dos Pokémon vivos. Um Pokémon encontrado entra na reserva com HP completo.
 
-* Programação orientada a objetos em PHP e JavaScript.
-* Organização de aplicações utilizando MVC.
-* Persistência de dados com PDO.
-* Modelagem e implementação de banco de dados relacional.
-* Utilização de operações SQL para manipulação e consulta de dados.
-* Comunicação assíncrona com Fetch API e JSON.
-* Integração com APIs externas.
-* Desenvolvimento de interfaces web interativas.
-* Utilização do Git e GitHub para controle de versão.
+**Atenção:** a lista, as probabilidades e a distribuição desses resultados ainda aguardam confirmação dos desenvolvedores. Os números acima descrevem o código atual, não uma regra de jogo aprovada; não os altere nem os trate como definitivos sem essa confirmação.
+
+O evento e seu efeito são gravados juntos em uma transação. Assim, recarregar ou reenviar a solicitação não sorteia outro resultado nem repete a recompensa. Para bancos já instalados, aplique o DDL de `mapa_eventos` descrito acima. Ainda é necessário testar o equilíbrio geral da jornada com capturas e evoluções.
+
+## Requisitos acadêmicos — situação verificada
+
+O projeto usa PHP orientado a objetos, MVC, PDO, prepared statements, autoload, SQL relacional, Fetch/JSON e a PokeAPI. O JavaScript orientado a objetos é opcional no enunciado; o requisito de orientação a objetos se aplica obrigatoriamente ao PHP.
+
+| Requisito | Situação observada no código |
+|---|---|
+| Login, sessão e proteção de rotas | Implementados. Cadastro e autenticação usam hash de senha; o logout é por POST e valida CSRF. |
+| Troca de perfis/usuários | Parcial. É possível sair e entrar com outra conta, mas não foi encontrado um fluxo dedicado de troca de perfil ou papéis de usuário. |
+| Team Builder, batalha, loja e Pokecenter | Implementados nos fluxos descritos acima; a validação completa depende de executar os testes com o banco atualizado. |
+| Encapsulamento, herança e polimorfismo | Demonstrados em `Pokemon` e nas subclasses de tipos. O polimorfismo de tipo aparece no catálogo; a engine de batalha usa arrays, não uma hierarquia polimórfica de Pokémon. |
+| Associação, agregação e composição | Associação entre Controllers e Models é visível. Composição e agregação entre objetos do domínio ainda não estão demonstradas de modo claro. |
+| Exceções | Há várias exceções nativas lançadas e tratadas, além de `SaldoInsuficienteException`. Se a avaliação exigir três classes personalizadas, isso ainda precisa ser confirmado e atendido. |
+| Sobrecarga de métodos | Não foi identificada uma demonstração explícita no código. A necessidade consta nas instruções acadêmicas do projeto; PHP não sobrecarrega métodos por assinatura como Java. |
+| Banco de dados | O schema define tabelas, chaves, relações e três Views. As operações de várias etapas usam transações PDO; triggers são opcionais no enunciado. |
+| Testes | `tests/BatalhaEngineTest.php` cobre dano mínimo, limite de dano e imunidade. Isso não substitui testes completos de cadastro, batalha, compras e evolução. |
+
+O diagrama atualizado em `database/modelo_relacional.mmd` descreve o modelo relacional; `bd.erd` é antigo. O enunciado fornecido não exige um DER conceitual, mas o diagrama antigo não deve ser apresentado como representação atual do banco.
 
 ## Desenvolvedores
 
@@ -184,7 +202,7 @@ O desenvolvimento do PokeBagual tem como objetivo aplicar, de forma integrada, o
 
 ## Status do Projeto
 
-O projeto está em desenvolvimento. As funcionalidades descritas representam os objetivos planejados e poderão ser atualizadas conforme a implementação avançar.
+O código contém os fluxos centrais de jornada, batalhas, capturas, loja, evolução, equipe e exploração. Ainda há requisitos acadêmicos a demonstrar — especialmente troca de perfis, composição/agregação e sobrecarga — e o equilíbrio da campanha precisa de testes. Em uma revisão do banco local, foram encontradas diferenças em relação ao schema atual; siga as instruções de migração acima antes de validar o jogo nesse banco. A existência de código ou de uma tabela, isoladamente, não comprova que todo o fluxo está testado.
 
 ## Apoio do agente personalizado Professor PokeBagual
 

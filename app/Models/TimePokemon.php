@@ -7,7 +7,11 @@ use RuntimeException;
 use Throwable;
 use UnexpectedValueException;
 
-/** Consulta e reorganiza os Pokémon que pertencem aos times do jogador. */
+/**
+ * Na apresentação: lista ativos/reservas e controla posições, trocas e
+ * evolução dos membros. TimeController chama este Model; a View não altera
+ * diretamente o banco.
+ */
 class TimePokemon
 {
     private PDO $db;

@@ -1,11 +1,26 @@
 <?php
-// Prepara a foto somente se o conteúdo salvo e o tipo MIME forem permitidos.
-$foto = $perfil['foto'] ?? null;
-$tipoFoto = $perfil['tipo_foto'] ?? '';
-$fotoPermitida = in_array($tipoFoto, ['image/jpeg', 'image/png'], true);
-$fotoSrc = is_string($foto) && $foto !== '' && $fotoPermitida
-    ? 'data:' . $tipoFoto . ';base64,' . base64_encode($foto)
+// Na apresentação: UsuarioController consulta Usuario e fornece $perfil; esta
+// View prepara os dados da foto e apresenta formulários sem consultar o banco.
+// Aceita somente caminhos gerados pela aplicação para a pasta de fotos.
+$fotoCaminho = $perfil['foto_caminho'] ?? null;
+$fotoCaminhoValido = is_string($fotoCaminho)
+    && preg_match(
+        '~\Apublic/uploads/perfil/[a-f0-9]{32}\.(?:jpg|png)\z~',
+        $fotoCaminho
+    ) === 1;
+$fotoSrc = $fotoCaminhoValido
+    ? '/projetoFinalPok-mon/' . $fotoCaminho
     : null;
+$fotoAntiga = $perfil['foto'] ?? null;
+$tipoFotoAntiga = $perfil['tipo_foto'] ?? '';
+if (
+    $fotoSrc === null
+    && is_string($fotoAntiga)
+    && $fotoAntiga !== ''
+    && in_array($tipoFotoAntiga, ['image/jpeg', 'image/png'], true)
+) {
+    $fotoSrc = 'data:' . $tipoFotoAntiga . ';base64,' . base64_encode($fotoAntiga);
+}
 $nomePerfil = (string) ($perfil['nome'] ?? '');
 $quantidadeInsignias = count($insignias);
 $mestrePokemon = $quantidadeInsignias === 8;

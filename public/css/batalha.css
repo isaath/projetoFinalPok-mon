@@ -153,13 +153,13 @@ body.battle-page {
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: 150px;
-    height: 150px;
+    width: 175px;
+    height: 175px;
 }
 
 .combatant-image {
-    width: 150px;
-    height: 150px;
+    width: 175px;
+    height: 175px;
     object-fit: contain;
     image-rendering: pixelated;
     filter: drop-shadow(4px 5px 0 rgb(23 36 59 / 25%));
@@ -179,6 +179,14 @@ body.battle-page {
     background: #fff;
     box-shadow: 4px 4px 0 rgb(52 68 93 / 55%);
     z-index: 5;
+}
+
+.combatant-player .combatant-copy {
+    transform: translateX(-18px);
+}
+
+.combatant-opponent .combatant-copy {
+    transform: translateX(18px);
 }
 
 .combatant-copy h2 {
@@ -340,8 +348,8 @@ body.battle-page {
 .battle-actions .btn-atacar-principal img,
 .battle-actions .battle-menu-button img,
 .battle-actions > button[name="acao"] img {
-    width: 145px;
-    max-height: 52px;
+    width: 165px;
+    max-height: 60px;
     object-fit: contain;
 }
 
@@ -443,8 +451,21 @@ body.battle-page {
 }
 
 .item-choice {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.item-choice > .imagem-item {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.item-choice-copy {
     display: grid;
-    justify-content: stretch;
+    gap: 4px;
 }
 
 .opcoes-ataques {
@@ -702,8 +723,23 @@ body.battle-page {
 
     .combatant-image,
     .combatant-portrait {
-        width: 130px;
-        height: 130px;
+        width: 145px;
+        height: 145px;
+    }
+
+    .combatant-player .combatant-copy {
+        transform: translateX(-8px);
+    }
+
+    .combatant-opponent .combatant-copy {
+        transform: translateX(8px);
+    }
+
+    .battle-actions .btn-atacar-principal img,
+    .battle-actions .battle-menu-button img,
+    .battle-actions > button[name="acao"] img {
+        width: 155px;
+        max-height: 56px;
     }
 
     .battle-log {

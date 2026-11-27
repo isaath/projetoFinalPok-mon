@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: TimeController prepara ativos, reservas e token CSRF a
+// partir do Model TimePokemon. Os formulários voltam à rota "meu_time".
 // Evita renderizar a tela sem os dados já separados pelo Controller.
 if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reservas)) {
     http_response_code(404);

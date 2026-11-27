@@ -4,7 +4,10 @@ use App\Models\TimeInicial;
 // Carrega o modelo de usuário para autenticação e cadastro.
 require __DIR__ . '/../Models/Usuario.php';
 
-// Controller responsável pelas ações de login e cadastro de usuários.
+/**
+ * Na apresentação: trata login, cadastro, painel e perfil; valida formulários,
+ * sessão e CSRF e delega persistência/autenticação ao Model Usuario.
+ */
 class UsuarioController
 {
     // Conexão com o banco para manipular dados de usuários.
@@ -28,9 +31,16 @@ class UsuarioController
         $erro = null;
         $email = '';
         $sucesso = isset($_GET['cadastro']) && $_GET['cadastro'] === 'sucesso';
+        $csrfAutenticacao = $this->obterTokenCsrf();
 
         // Verifica se a requisição foi enviada por formulário (POST).
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (
+            $_SERVER['REQUEST_METHOD'] === 'POST'
+            && !$this->validarTokenCsrf($_POST['csrf_token'] ?? null)
+        ) {
+            http_response_code(403);
+            $erro = 'O formulário expirou. Atualize a página e tente novamente.';
+        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lê os dados enviados.
             $emailInformado = $_POST['email'] ?? '';
             $senha = $_POST['senha'] ?? '';
@@ -123,6 +133,7 @@ class UsuarioController
             exit;
         }
 
+        $csrfAutenticacao = $this->obterTokenCsrf();
         require __DIR__ . '/../Views/layouts/painel_jogar.php';
     }
 
@@ -173,40 +184,70 @@ class UsuarioController
         $erro = null;
         $nome = '';
         $email = '';
+        $csrfAutenticacao = $this->obterTokenCsrf();
 
         // Processa o formulário quando a requisição for POST.
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (
+            $_SERVER['REQUEST_METHOD'] === 'POST'
+            && !$this->validarTokenCsrf($_POST['csrf_token'] ?? null)
+        ) {
+            http_response_code(403);
+            $erro = 'O formulário expirou. Atualize a página e tente novamente.';
+        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lê os campos do formulário.
             $nomeInformado = $_POST['nome'] ?? '';
             $emailInformado = $_POST['email'] ?? '';
             $senha = $_POST['senha'] ?? '';
             $confirmacaoSenha = $_POST['confirmar_senha'] ?? '';
             $foto = null;
-            $tipoFoto = null;
             $erroFoto = null;
+            $arquivoFotoTemporario = null;
+            $extensaoFoto = null;
 
-            // A imagem é validada pelo conteúdo MIME e pelo tamanho, não apenas pelo nome do arquivo.
-            if (!empty($_FILES['foto']['tmp_name'])) {
-                $informacoesImagem = @getimagesize($_FILES['foto']['tmp_name']);
-
-                if (
-                    $_FILES['foto']['size'] > 2 * 1024 * 1024
-                    || $informacoesImagem === false
-                    || !in_array(
-                        $informacoesImagem['mime'] ?? '',
-                        ['image/jpeg', 'image/png'],
-                        true
-                    )
-                ) {
-                    $erroFoto = 'A foto deve ser uma imagem de até 2MB.';
-                } else {
-                    $conteudoFoto = file_get_contents($_FILES['foto']['tmp_name']);
-
-                    if ($conteudoFoto === false) {
-                        $erroFoto = 'Não foi possível ler a foto enviada.';
+            // Valida o envio antes de mover o arquivo para a pasta pública.
+            $arquivoEnviado = $_FILES['foto'] ?? null;
+            if ($arquivoEnviado !== null) {
+                if (!is_array($arquivoEnviado) || !isset($arquivoEnviado['error'])) {
+                    $erroFoto = 'Não foi possível receber a foto enviada.';
+                } elseif ((int) $arquivoEnviado['error'] !== UPLOAD_ERR_NO_FILE) {
+                    $erroEnvio = (int) $arquivoEnviado['error'];
+                    if ($erroEnvio !== UPLOAD_ERR_OK) {
+                        $erroFoto = in_array(
+                            $erroEnvio,
+                            [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE],
+                            true
+                        )
+                            ? 'A foto deve ter no máximo 2MB.'
+                            : 'Não foi possível enviar a foto. Tente novamente.';
                     } else {
-                        $foto = $conteudoFoto;
-                        $tipoFoto = $informacoesImagem['mime'];
+                        $arquivoTemporario = $arquivoEnviado['tmp_name'] ?? null;
+                        $arquivoTemporarioValido = is_string($arquivoTemporario)
+                            && is_file($arquivoTemporario);
+                        $tamanhoFoto = $arquivoTemporarioValido
+                            ? filesize($arquivoTemporario)
+                            : false;
+                        $informacoesImagem = $arquivoTemporarioValido
+                            ? @getimagesize($arquivoTemporario)
+                            : false;
+                        $extensoesPermitidas = [
+                            'image/jpeg' => 'jpg',
+                            'image/png' => 'png',
+                        ];
+                        $mimeFoto = is_array($informacoesImagem)
+                            ? ($informacoesImagem['mime'] ?? '')
+                            : '';
+
+                        if (
+                            $tamanhoFoto === false
+                            || $tamanhoFoto < 1
+                            || $tamanhoFoto > 2 * 1024 * 1024
+                            || !isset($extensoesPermitidas[$mimeFoto])
+                        ) {
+                            $erroFoto = 'Escolha uma imagem JPEG ou PNG de até 2MB.';
+                        } else {
+                            $arquivoFotoTemporario = $arquivoTemporario;
+                            $extensaoFoto = $extensoesPermitidas[$mimeFoto];
+                        }
                     }
                 }
             }
@@ -241,36 +282,68 @@ class UsuarioController
                 } elseif ($erroFoto !== null) {
                     $erro = $erroFoto;
                 } else {
-                    try {
-                        // Tenta cadastrar o usuário no banco.
-                        $cadastrado = (new Usuario($this->db))->cadastrar(
-                            $nome,
-                            $email,
-                            $senha,
-                            $foto,
-                            $tipoFoto
-                        );
+                    $arquivoFotoSalvo = null;
 
-                        // Se já existir e-mail duplicado, mostra erro.
-                        if (!$cadastrado) {
-                            $erro = 'Este e-mail já está cadastrado.';
-                        } else {
-                            // Redireciona para a tela de login com mensagem de sucesso.
-                            header('Location: index.php?rota=login&cadastro=sucesso');
-                            exit;
-                        }
+                    // A imagem só é gravada depois que os outros campos passam pela validação.
+                    if ($arquivoFotoTemporario !== null && $extensaoFoto !== null) {
+                        $diretorioFotos = dirname(__DIR__, 2)
+                            . DIRECTORY_SEPARATOR . 'public'
+                            . DIRECTORY_SEPARATOR . 'uploads'
+                            . DIRECTORY_SEPARATOR . 'perfil';
 
-                    } catch (PDOException $exception) {
-                        // Trata erro de e-mail duplicado no banco.
                         if (
-                            $exception->getCode() === '23000'
-                            && (int) ($exception->errorInfo[1] ?? 0) === 1062
+                            !is_dir($diretorioFotos)
+                            && !@mkdir($diretorioFotos, 0755, true)
+                            && !is_dir($diretorioFotos)
                         ) {
-                            $erro = 'Este e-mail já está cadastrado.';
+                            error_log('Não foi possível criar a pasta de fotos de perfil.');
+                            $erro = 'Não foi possível salvar a foto. Tente novamente.';
                         } else {
-                            // Caso seja outro problema, registra no log e mostra mensagem genérica.
-                            error_log('Erro ao cadastrar usuário: ' . $exception->getMessage());
-                            $erro = 'Não foi possível concluir o cadastro. Tente novamente.';
+                            $nomeArquivoFoto = bin2hex(random_bytes(16))
+                                . '.' . $extensaoFoto;
+                            $arquivoFotoSalvo = $diretorioFotos
+                                . DIRECTORY_SEPARATOR . $nomeArquivoFoto;
+
+                            if (!move_uploaded_file($arquivoFotoTemporario, $arquivoFotoSalvo)) {
+                                error_log('Não foi possível mover o arquivo da foto de perfil.');
+                                $arquivoFotoSalvo = null;
+                                $erro = 'Não foi possível salvar a foto. Tente novamente.';
+                            } else {
+                                $foto = 'public/uploads/perfil/' . $nomeArquivoFoto;
+                            }
+                        }
+                    }
+
+                    if ($erro === null) {
+                        try {
+                            // O banco recebe o caminho; o arquivo fica na pasta pública.
+                            $cadastrado = (new Usuario($this->db))->cadastrar(
+                                $nome,
+                                $email,
+                                $senha,
+                                $foto
+                            );
+
+                            if (!$cadastrado) {
+                                $this->removerFotoEnviada($arquivoFotoSalvo);
+                                $erro = 'Este e-mail já está cadastrado.';
+                            } else {
+                                header('Location: index.php?rota=login&cadastro=sucesso');
+                                exit;
+                            }
+
+                        } catch (PDOException $exception) {
+                            $this->removerFotoEnviada($arquivoFotoSalvo);
+
+                            if (
+                                $exception->getCode() === '23000'
+                                && (int) ($exception->errorInfo[1] ?? 0) === 1062
+                            ) {
+                                $erro = 'Este e-mail já está cadastrado.';
+                            } else {
+                                error_log('Erro ao cadastrar usuário: ' . $exception->getMessage());
+                                $erro = 'Não foi possível concluir o cadastro. Tente novamente.';
+                            }
                         }
                     }
                 }
@@ -279,6 +352,37 @@ class UsuarioController
 
         // Carrega a View de cadastro para exibir o formulário.
         require __DIR__ . '/../Views/usuario/registrar.php';
+    }
+
+    /** Cria um token imprevisível para proteger login, cadastro e logout. */
+    private function obterTokenCsrf(): string
+    {
+        if (
+            !is_string($_SESSION['csrf_usuario'] ?? null)
+            || preg_match('/\A[a-f0-9]{64}\z/', $_SESSION['csrf_usuario']) !== 1
+        ) {
+            $_SESSION['csrf_usuario'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['csrf_usuario'];
+    }
+
+    /** Compara o token recebido com o token da sessão de forma segura. */
+    private function validarTokenCsrf(mixed $tokenRecebido): bool
+    {
+        $tokenSessao = $_SESSION['csrf_usuario'] ?? null;
+
+        return is_string($tokenSessao)
+            && is_string($tokenRecebido)
+            && hash_equals($tokenSessao, $tokenRecebido);
+    }
+
+    /** Remove a imagem se o cadastro no banco não for concluído. */
+    private function removerFotoEnviada(?string $caminho): void
+    {
+        if ($caminho !== null && is_file($caminho) && !@unlink($caminho)) {
+            error_log('Não foi possível remover uma foto de perfil sem cadastro associado.');
+        }
     }
 
 }

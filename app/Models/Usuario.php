@@ -1,6 +1,10 @@
 <?php
 
-// Modelo responsável por regras relacionadas a usuários do sistema.
+/**
+ * Na apresentação: autentica com password_verify, cadastra com password_hash
+ * e consulta perfil/insígnias por PDO; UsuarioController mantém a sessão e
+ * escolhe as Views correspondentes.
+ */
 class Usuario
 {
     // Armazena a conexão com o banco para executar consultas SQL.
@@ -51,7 +55,7 @@ class Usuario
     public function buscarPerfil(int $idUsuario): ?array
     {
         $consulta = $this->db->prepare(
-            'SELECT nome, foto, tipo_foto
+            'SELECT nome, foto_caminho, foto, tipo_foto
              FROM usuarios
              WHERE id_usuario = :id_usuario
              LIMIT 1'
@@ -92,8 +96,7 @@ class Usuario
         string $nome,
         string $email,
         string $senha,
-        ?string $foto = null,
-        ?string $tipoFoto = null
+        ?string $fotoCaminho = null
     ): bool
     {
         // Busca se já existe algum usuário com esse e-mail.
@@ -113,25 +116,20 @@ class Usuario
         // Criptografa a senha usando password_hash, nunca gravando texto puro.
         $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
-        // Salva também a foto opcional e seu tipo MIME para exibi-la depois.
+        // Armazena o caminho da foto; os bytes do arquivo ficam no servidor.
         $insercao = $this->db->prepare(
             'INSERT INTO usuarios
-                (nome, email, senha, dinheiro, data_cadastro, foto, tipo_foto)
+                (nome, email, senha, dinheiro, data_cadastro, foto_caminho)
              VALUES
-                (:nome, :email, :senha, 120, CURRENT_TIMESTAMP, :foto, :tipo_foto)'
+                (:nome, :email, :senha, 120, CURRENT_TIMESTAMP, :foto_caminho)'
         );
         $insercao->bindValue(':nome', $nome);
         $insercao->bindValue(':email', $email);
         $insercao->bindValue(':senha', $hashSenha);
         $insercao->bindValue(
-            ':foto',
-            $foto,
-            $foto === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
-        );
-        $insercao->bindValue(
-            ':tipo_foto',
-            $tipoFoto,
-            $tipoFoto === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+            ':foto_caminho',
+            $fotoCaminho,
+            $fotoCaminho === null ? PDO::PARAM_NULL : PDO::PARAM_STR
         );
         $insercao->execute();
 

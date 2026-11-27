@@ -1,5 +1,6 @@
 <?php
-// Mantém os valores já digitados pelo usuário em caso de erro de validação.
+// Na apresentação: UsuarioController valida o POST e usa Usuario para gravar a
+// conta; em caso de erro, devolve estes valores para não perder o preenchimento.
 $erro = $erro ?? null;
 $nome = $nome ?? '';
 $email = $email ?? '';
@@ -29,14 +30,25 @@ $email = $email ?? '';
             
         <!-- Envia os dados do formulário ao Controller de cadastro. -->
         <form action="index.php?rota=registrar" method="POST" class="form-login" enctype="multipart/form-data">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($csrfAutenticacao, ENT_QUOTES, 'UTF-8') ?>"
+            >
             <div class="corpo_cartao">
-                <div class="box_foto_usr">
-    <label for="foto">
-        <img src="/projetoFinalPok-mon/public/css/img/foto_perfil.png" alt="Escolher foto de perfil" class="img-avatar" id="preview-foto">
-    </label>
-    <input type="file" id="foto" name="foto" accept="image/jpeg,image/png" hidden>
-</div>
                 <div class="box_inputs">
+                    <!-- Campo visível para selecionar foto por mouse ou teclado. -->
+                    <div class="campo-grupo">
+                        <label for="foto">FOTO DE PERFIL (OPCIONAL):</label>
+                        <input
+                            type="file"
+                            id="foto"
+                            name="foto"
+                            accept="image/jpeg,image/png"
+                        >
+                        <small>JPG ou PNG, com até 2 MB.</small>
+                    </div>
+
                     <!-- Nome público da nova conta. -->
                     <div class="campo-grupo">
 

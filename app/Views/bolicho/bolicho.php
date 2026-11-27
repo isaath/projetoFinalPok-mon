@@ -1,3 +1,5 @@
+<!-- Na apresentação: BolichoController consulta Loja e fornece itens/saldo.
+     bolicho_compras.js envia o formulário como JSON; pocoes_images.js busca os ícones. -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>

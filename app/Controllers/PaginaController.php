@@ -1,6 +1,9 @@
 <?php
 
-/** Carrega as telas públicas de apresentação do projeto. */
+/**
+ * Na apresentação: Controller simples de páginas públicas; apenas seleciona
+ * a View de início ou a página "Sobre", sem consultar Models ou o banco.
+ */
 class PaginaController
 {
     /** Exibe a página inicial antes do acesso à área autenticada. */

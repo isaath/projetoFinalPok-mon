@@ -3,7 +3,11 @@
 use App\Models\Batalha;
 use App\Services\BatalhaEngine;
 
-
+/**
+ * Na apresentação: este Controller valida a requisição, chama BatalhaEngine
+ * para as regras de turno e usa Batalha para carregar/gravar dados no banco.
+ * Por fim, entrega o estado à View de batalha, captura ou campeão.
+ */
 class BatalhaController
 {
     private PDO $db;
@@ -616,28 +620,19 @@ class BatalhaController
     /** Desconta uma unidade do item usado após a validação do inventário. */
     private function consumirItem(int $idUsuario, int $idItem): void
     {
-        $this->db->beginTransaction();
-        try {
-            $consulta = $this->db->prepare(
-                'UPDATE inventario
-                 SET quantidade = quantidade - 1
-                 WHERE id_usuario = :id_usuario
-                   AND id_item = :id_item
-                   AND quantidade > 0'
-            );
-            $consulta->execute([
-                'id_usuario' => $idUsuario,
-                'id_item' => $idItem,
-            ]);
-            if ($consulta->rowCount() !== 1) {
-                throw new InvalidArgumentException('Não foi possível consumir o item.');
-            }
-            $this->db->commit();
-        } catch (Throwable $exception) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
-            throw $exception;
+        $consulta = $this->db->prepare(
+            'UPDATE inventario
+             SET quantidade = quantidade - 1
+             WHERE id_usuario = :id_usuario
+               AND id_item = :id_item
+               AND quantidade > 0'
+        );
+        $consulta->execute([
+            'id_usuario' => $idUsuario,
+            'id_item' => $idItem,
+        ]);
+        if ($consulta->rowCount() !== 1) {
+            throw new InvalidArgumentException('Não foi possível consumir o item.');
         }
     }
 }

@@ -12,7 +12,7 @@ body {
     background-position: center center;
     background-repeat: no-repeat;
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -54,25 +54,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* Moldura do avatar do usuário. */
-.box_foto_usr {
-    width: 120px;
-    height: 130px;
-    background-color: #cbd5e1;
-    border: 3px solid #0f172a;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: inset 0 2px 0 #ffffff;
-}
-
-.img-avatar {
-    /* Mantém o avatar dentro da moldura sem deformar sua altura. */
-    width: 90%;
-    height: auto;
-}
-
 /* Agrupa os campos do formulário em coluna. */
 .box_inputs {
     flex: 1;
@@ -85,7 +66,7 @@ body {
 .campo-grupo label {
     /* Faz cada rótulo ocupar uma linha acima do respectivo campo. */
     display: block;
-    font-size: 9px;
+    font-size: 11px;
     color: #000000;
     margin-bottom: 5px;
     line-height: 1.4;
@@ -96,11 +77,10 @@ body {
     width: 100%;
     box-sizing: border-box;
     padding: 8px 12px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
     border: 2px solid #0f172a;
     border-radius: 15px;
-    outline: none;
     background-color: #ffffff;
 }
 
@@ -149,10 +129,4 @@ body {
         height: 48px;
     }
 
-}
-.box_foto_usr label {
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }

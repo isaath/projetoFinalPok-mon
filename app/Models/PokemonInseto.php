@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
-/** Pokémon cuja classe herda e identifica o tipo Inseto principal. */
+/**
+ * Subclasse do tipo Inseto usada por PokemonTipoFactory.
+ * A sobrescrita de getTipo() permite que a listagem trate subclasses pela
+ * mesma interface; o gráfico de efetividade está em BatalhaEngine.
+ */
 class PokemonInseto extends Pokemon
 {
     public function getTipo(): string

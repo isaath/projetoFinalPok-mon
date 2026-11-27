@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: após a vitória, BatalhaController entrega o resultado já
+// persistido; os formulários pedem a tentativa de captura ou a próxima ação.
 if (!defined('POKEBAGUAL_CAPTURA_VIEW')) {
     http_response_code(404);
     exit;
@@ -125,14 +127,16 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
                     </svg>
                     <div>
                         <?php if ($resultadoCaptura === 'capturado'): ?>
-                            <h2><?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?> foi capturado!</h2>
-                            <p>O Pokémon foi adicionado à sua reserva com HP completo.</p>
+                            <h2>
+                                Pokémon capturado.
+                                <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?>
+                                está na reserva do seu time!
+                            </h2>
                         <?php elseif ($resultadoCaptura === 'ja_possuia'): ?>
                             <h2>Você já tinha <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?>!</h2>
                             <p>Não foi criada uma cópia; ele continua disponível na sua equipe.</p>
                         <?php else: ?>
-                            <h2><?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?> escapou!</h2>
-                            <p>Vença este líder novamente para tentar outra vez.</p>
+                            <h2>O Pokémon escapou e não foi capturado, tente na próxima!</h2>
                         <?php endif; ?>
                         <p>
                             Tentativa <?= (int) $captura['numero_tentativa'] ?>,

@@ -27,6 +27,12 @@ body {
     gap: 2vh;
 }
 
+.form-sair {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+}
+
 .btn_jogar {
     /* Posiciona o botão principal de jogo abaixo do centro da tela. */
     display: inline-block;

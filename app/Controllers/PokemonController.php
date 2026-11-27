@@ -2,7 +2,10 @@
 
 use App\Models\Pokemon;
 
-/** Coordena a consulta dos Pokémon cadastrados e a exibição da listagem. */
+/**
+ * Na apresentação: pede o catálogo ao Model Pokemon, trata falhas de consulta
+ * e passa a lista pronta à View pokemon/listar.php.
+ */
 class PokemonController
 {
     // O Model usa esta conexão para consultar os dados persistidos.

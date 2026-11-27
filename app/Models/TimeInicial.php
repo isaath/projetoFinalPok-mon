@@ -6,7 +6,11 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
-/** Persiste a primeira equipe do jogador e consulta as opções iniciais permitidas. */
+/**
+ * Na apresentação: verifica se a jornada começou, lista as cinco opções
+ * cadastradas e salva as três escolhidas em uma transação; TimeController usa
+ * o Model para controlar o redirecionamento e a View de escolha.
+ */
 class TimeInicial
 {
     // Lista fechada de espécies que podem ser escolhidas no começo da jornada.

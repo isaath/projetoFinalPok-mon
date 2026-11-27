@@ -20,6 +20,9 @@ return [
     // Rota para cadastro de usuário.
     'registrar' => [UsuarioController::class, 'registrar'],
 
+    // Encerra a sessão autenticada por uma requisição POST protegida por CSRF.
+    'sair' => [LogoutController::class, 'sair'],
+
     // Rota para o painel de jogo após o usuário entrar.
     'jogar' => [UsuarioController::class, 'painel_jogar'],
 

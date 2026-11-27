@@ -1,6 +1,6 @@
 <?php
-// A View espera receber duas variáveis vindas do Controller:
-// $erro para mensagens de erro e $pokemons para a lista dos monstros.
+// Na apresentação: PokemonController obtém os objetos do Model Pokemon e
+// entrega $pokemons/$erro; pokemon_images.js completa os sprites pela PokeAPI.
 ?><!DOCTYPE html>
 <html lang="pt-BR">
 <head>

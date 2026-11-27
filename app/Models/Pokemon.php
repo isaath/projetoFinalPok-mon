@@ -5,7 +5,9 @@ namespace App\Models;
 use PDO;
 
 /**
- * Representa um Pokémon e reúne seus dados, operações no banco e ações de batalha.
+ * Na apresentação: classe-base com dados privados e métodos de acesso. O
+ * catálogo usa PokemonTipoFactory para criar uma subclasse por tipo principal;
+ * a engine de batalha, por sua vez, recebe arrays de estado.
  */
 class Pokemon
 {

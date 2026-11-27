@@ -4,8 +4,11 @@ namespace App\Models;
 
 use App\Traits\aguaTrait;
 
-// Classe específica para Pokémon do tipo Água.
-// Ela herda as características gerais da classe Pokemon e incorpora a trait de Água.
+/**
+ * Subclasse do tipo Água usada por PokemonTipoFactory.
+ * Na apresentação, explique que AguaTrait sobrescreve getTipo(); a efetividade
+ * dos golpes não fica aqui, mas centralizada em BatalhaEngine.
+ */
 class PokemonAgua extends Pokemon
 {
     use aguaTrait;

@@ -74,6 +74,103 @@ body {
     cursor: not-allowed;
 }
 
+/* Os formulários transparentes alinham os cliques aos cinco ícones ? da arte. */
+.evento-mapa {
+    position: absolute;
+    z-index: 3;
+    width: 13%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+}
+
+.evento-mapa button {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 50%;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.evento-mapa:not(.usado):not(.bloqueado) button {
+    cursor: pointer;
+}
+
+.evento-mapa:not(.usado):not(.bloqueado) button:hover,
+.evento-mapa:not(.usado):not(.bloqueado) button:focus-visible {
+    background: rgb(255 215 0 / 20%) !important;
+    outline: 3px solid #fff;
+}
+
+.evento-mapa.bloqueado button {
+    cursor: not-allowed;
+    background: rgb(23 36 59 / 24%) !important;
+}
+
+.evento-mapa.usado button {
+    cursor: not-allowed;
+    background: rgb(35 101 79 / 38%) !important;
+}
+
+.evento-mapa.usado button::after,
+.ponto-mapa.vencido::after {
+    content: "✓";
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid #17243b;
+    border-radius: 50%;
+    background: #23654f;
+    color: #fff;
+    font: 700 18px/1 Arial, sans-serif;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Os centros foram conferidos na imagem do mapa (981 x 1603 px). */
+.evento-ponto-1 {
+    left: 27.8%;
+    top: 71.3%;
+}
+
+.evento-ponto-2 {
+    left: 73.4%;
+    top: 59.5%;
+}
+
+.evento-ponto-3 {
+    left: 27.8%;
+    top: 46.5%;
+}
+
+.evento-ponto-4 {
+    left: 75.9%;
+    top: 34.4%;
+}
+
+.evento-ponto-5 {
+    left: 27.8%;
+    top: 20.4%;
+}
+
 /* Diferencia os níveis já vencidos, que continuam liberados para repetição. */
 .ponto-mapa.vencido {
     /* background: rgb(35 101 79 / 28%);
@@ -133,13 +230,35 @@ body {
     top: 10%;
 }
 
-/* Mostra falhas ao carregar o progresso sem ocultá-las silenciosamente. */
+.resultado-evento,
 .erro-mapa {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    z-index: 3;
-    padding: 8px;
-    background: #fff;
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    z-index: 5;
+    box-sizing: border-box;
+    width: min(520px, calc(100vw - 32px));
+    margin: 0;
+    padding: 10px 14px;
+    border: 3px solid #17243b;
+    background: rgb(255 253 241 / 98%);
+    box-shadow: 4px 4px 0 #34445d;
+    line-height: 1.6;
+}
+
+.resultado-evento {
+    color: #17243b;
+}
+
+.erro-mapa {
     color: #8e2525;
+}
+
+@media (max-width: 760px) {
+    .resultado-evento,
+    .erro-mapa {
+        bottom: 84px;
+        left: 12px;
+        width: calc(100vw - 24px);
+    }
 }

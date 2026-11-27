@@ -7,7 +7,9 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Coordena os dados persistentes da jornada e monta o estado usado pelo combate.
+ * Na apresentação: este Model carrega treinador, equipe e progresso do banco,
+ * depois grava resultado, HP, recompensa e captura em transação. As regras do
+ * turno ficam em BatalhaEngine; BatalhaController coordena o fluxo HTTP.
  *
  * A lógica de turnos fica em BatalhaEngine; esta classe consulta e atualiza o banco.
  */
@@ -18,6 +20,8 @@ class Batalha
         1 => [50, 20], 2 => [70, 25], 3 => [90, 30], 4 => [110, 35],
         5 => [130, 40], 6 => [150, 45], 7 => [170, 50], 8 => [190, 55],
     ];
+
+    private const CHANCE_CAPTURA = 50;
 
     private PDO $db;
 
@@ -746,7 +750,7 @@ class Batalha
     }
 
     /**
-     * Sorteia a chance progressiva e, no sucesso, adiciona o Pokémon à reserva com HP completo.
+     * Usa a chance fixa aprovada e, no sucesso, adiciona o Pokémon à reserva com HP completo.
      */
     private function registrarCapturaDaVitoria(
         int $idUsuario,
@@ -797,9 +801,9 @@ class Batalha
             'id_treinador' => $idTreinador,
             'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
         ]);
-        // A chance começa em 30%, aumenta 20 pontos por falha e não passa de 90%.
+        // A chance é fixa, mas o número da tentativa continua sendo registrado.
         $numeroTentativa = (int) $buscarTentativas->fetchColumn() + 1;
-        $chance = min(30 + (($numeroTentativa - 1) * 20), 90);
+        $chance = self::CHANCE_CAPTURA;
         $sucesso = random_int(1, 100) <= $chance;
         $resultado = 'falhou';
         $idCaptura = null;
@@ -922,7 +926,7 @@ class Batalha
             'resultado' => $resultado,
             'chance' => $chance,
             'numero_tentativa' => $numeroTentativa,
-            'proxima_chance' => min($chance + 20, 90),
+            'proxima_chance' => self::CHANCE_CAPTURA,
             'nova' => $resultado === 'capturado',
         ];
     }
@@ -942,7 +946,7 @@ class Batalha
             'resultado' => $resultado['resultado_captura'],
             'chance' => (int) $resultado['chance'],
             'numero_tentativa' => (int) $resultado['numero_tentativa'],
-            'proxima_chance' => min((int) $resultado['chance'] + 20, 90),
+            'proxima_chance' => self::CHANCE_CAPTURA,
             'nova' => $resultado['resultado_captura'] === 'capturado'
                 && $resultado['id_time_pokemon'] !== null,
         ];

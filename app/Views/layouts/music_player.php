@@ -1,4 +1,4 @@
-<!-- Componente reutilizável de áudio e controles, incluído pelas telas do jogo. -->
+<!-- Componente reutilizável incluído pelas Views; seus IDs são usados por music_player.js. -->
 <div class="music-player" aria-label="Controles da música do jogo">
     <!-- A faixa repete e pode começar a carregar antes de o usuário acionar os controles. -->
     <audio

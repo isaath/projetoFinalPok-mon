@@ -9,12 +9,13 @@ use RuntimeException;
  * Aplica as regras de combate sem acessar o banco de dados ou a sessão PHP.
  *
  * Recebe o estado da batalha, altera esse estado e devolve o resultado para
- * o controller persistir ou exibir.
+ * o BatalhaController persistir por meio de Batalha ou exibir na View.
+ * Na apresentação, destaque a separação: Engine calcula regras, Model persiste.
  */
 final class BatalhaEngine
 {
     /** Dano mínimo de um golpe que não seja imune ou exclusivamente de status. */
-    private const DANO_MINIMO_GOLPE = 8;
+    private const DANO_MINIMO_GOLPE = 1;
 
     /**
      * Para cada tipo defensor, lista os tipos de ataque que causam dano dobrado.
@@ -358,8 +359,8 @@ final class BatalhaEngine
     /**
      * Calcula o dano físico ou especial, aplicando estágios, queimadura, STAB e tipo.
      *
-     * O resultado respeita o mínimo de dano do projeto e usa como teto metade
-     * do HP máximo do alvo (com o mesmo limite mínimo de 8 HP).
+     * O resultado respeita o mínimo de 1 e usa como teto metade do HP máximo
+     * do alvo. Imunidades continuam causando zero.
      */
     public static function calcularDano(array $atacante, array $alvo, array $movimento): int
     {
@@ -670,14 +671,42 @@ final class BatalhaEngine
         return true;
     }
 
-    /** Sorteia o acerto usando a precisão do movimento e o estágio de precisão do atacante. */
+    /**
+     * Calcula a chance final de acerto, incluindo o ajuste de potência e os estágios.
+     *
+     * Golpes de dano acima de 40 de potência perdem 0,2 ponto percentual
+     * por ponto excedente, até 12 pontos, sem baixar a precisão-base de 70%.
+     * Movimentos de status mantêm a precisão cadastrada.
+     */
+    public static function calcularPrecisaoEficaz(
+        array $atacante,
+        array $movimento
+    ): int {
+        $precisaoBase = (int) $movimento['precisao'];
+        $potencia = (int) $movimento['potencia'];
+
+        if ($potencia > 40) {
+            $penalidadePotencia = min(
+                12.0,
+                max(0.0, ($potencia - 40) * 0.2),
+                max(0.0, $precisaoBase - 70)
+            );
+            $precisaoBase = (int) round($precisaoBase - $penalidadePotencia);
+        }
+
+        $precisaoComEstagios = $precisaoBase
+            * self::multiplicadorEstagio(
+                (int) $atacante['estagios']['precisao']
+            );
+
+        return max(1, min(100, (int) round($precisaoComEstagios)));
+    }
+
+    /** Sorteia o acerto usando a precisão efetiva do movimento. */
     private static function acertou(array $atacante, array $movimento): bool
     {
-        $precisao = (int) $movimento['precisao']
-            * self::multiplicadorEstagio((int) $atacante['estagios']['precisao']);
-        $precisao = max(1, min(100, (int) round($precisao)));
-
-        return random_int(1, 100) <= $precisao;
+        return random_int(1, 100)
+            <= self::calcularPrecisaoEficaz($atacante, $movimento);
     }
 
     /**
@@ -693,7 +722,9 @@ final class BatalhaEngine
         $melhorPontuacao = -1;
         foreach ($atacante['movimentos'] as $movimento) {
             if ((int) $movimento['potencia'] > 0) {
-                $pontuacao = self::calcularDano($atacante, $alvo, $movimento);
+                $pontuacao = self::calcularDano($atacante, $alvo, $movimento)
+                    * self::calcularPrecisaoEficaz($atacante, $movimento)
+                    / 100;
             } elseif (
                 $movimento['efeito'] === 'curar'
                 && empty($atacante['cura_usada'])

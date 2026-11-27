@@ -24,6 +24,7 @@
     let lastSavedSecond = -1;
     let volume = 0.4;
     let muted = false;
+    status.textContent = 'A música está pausada. Use “Ativar música” para reproduzir.';
 
     // Lê e valida volume/mudo salvos; valores fora do intervalo são ignorados.
     try {
@@ -109,13 +110,13 @@
         }
     }
 
-    // Tenta iniciar o áudio e apresenta uma instrução se o navegador bloquear autoplay.
+    // Inicia o áudio somente após uma ação explícita do usuário.
     function iniciarMusica() {
         audio.play().then(function () {
             status.textContent = audio.muted ? 'Música mutada.' : 'Música tocando.';
             atualizarControles();
         }).catch(function (error) {
-            console.warn('A reprodução automática da música foi bloqueada.', error);
+            console.error('Não foi possível reproduzir a música.', error);
             status.textContent = error.name === 'NotAllowedError'
                 ? 'Clique em “Ativar música” para começar.'
                 : 'Não foi possível carregar a música.';
@@ -123,8 +124,8 @@
         });
     }
 
-    // Aguarda os metadados para garantir que a posição salva esteja dentro da faixa.
-    function retomarPosicaoEIniciar() {
+    // Restaura a posição salva sem iniciar a reprodução automaticamente.
+    function restaurarPosicao() {
         if (
             savedTime > 0
             && Number.isFinite(audio.duration)
@@ -132,7 +133,6 @@
         ) {
             audio.currentTime = savedTime;
         }
-        iniciarMusica();
     }
 
     // O botão inicia a faixa pausada ou alterna o estado de mudo enquanto ela toca.
@@ -161,13 +161,10 @@
 
         guardarPreferencias();
         atualizarControles();
-        if (audio.paused && audio.volume > 0) {
-            iniciarMusica();
-        }
     });
 
-    // Só é possível validar currentTime contra a duração depois que os metadados carregam.
-    audio.addEventListener('loadedmetadata', retomarPosicaoEIniciar);
+    // A posição só pode ser validada depois que os metadados carregam.
+    audio.addEventListener('loadedmetadata', restaurarPosicao);
     audio.addEventListener('timeupdate', function () {
         const segundoAtual = Math.floor(audio.currentTime);
         // Salva no máximo uma vez por segundo para evitar gravações desnecessárias.
@@ -190,9 +187,9 @@
     window.addEventListener('pagehide', guardarPosicao);
     window.addEventListener('beforeunload', guardarPosicao);
 
-    // Sincroniza o estado visual e inicia/retoma assim que o áudio estiver pronto.
+    // Atualiza os controles e restaura a faixa, mas mantém o áudio pausado.
     atualizarControles();
     if (audio.readyState >= 1) {
-        retomarPosicaoEIniciar();
+        restaurarPosicao();
     }
 })();

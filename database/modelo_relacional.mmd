@@ -1,0 +1,239 @@
+erDiagram
+    USUARIOS {
+        int id_usuario PK
+        varchar nome
+        varchar email UK
+        varchar senha
+        varchar foto_caminho
+        mediumblob foto
+        varchar tipo_foto
+        int dinheiro
+        datetime data_cadastro
+    }
+
+    TIPOS {
+        int id_tipo PK
+        varchar nome UK
+    }
+
+    POKEMONS {
+        int id_pokemon PK
+        int nivel
+        varchar nome UK
+        int hp
+        int hp_maximo
+        int forca_ataque
+        int defesa
+        int ataque_especial
+        int defesa_especial
+        int velocidade
+        int prioridade
+        int experiencia
+        int id_tipo FK
+    }
+
+    %% UNIQUE composto: (id_pokemon, ordem)
+    POKEMON_TIPOS {
+        int id_pokemon PK, FK
+        int id_tipo PK, FK
+        int ordem
+    }
+
+    MOVIMENTOS {
+        int id_movimento PK
+        varchar nome UK
+        int id_tipo FK
+        varchar categoria
+        int potencia
+        int precisao
+        int prioridade
+        varchar efeito
+        int chance_efeito
+    }
+
+    %% UNIQUE composto: (id_pokemon, id_movimento)
+    POKEMON_MOVIMENTOS {
+        int id_pokemon PK, FK
+        int ordem PK
+        int id_movimento FK
+    }
+
+    POKEMON_EVOLUCOES {
+        int id_pokemon_origem PK, FK
+        int id_pokemon_destino UK, FK
+    }
+
+    TIMES {
+        int id_time PK
+        varchar nome
+        int id_usuario FK
+    }
+
+    %% UNIQUE compostos: (id_time, posicao) e (id_time, id_pokemon)
+    TIME_POKEMONS {
+        int id_time_pokemon PK
+        int posicao
+        int id_time FK
+        int id_pokemon FK
+    }
+
+    TIME_POKEMONS_ESTADO {
+        int id_time_pokemon PK, FK
+        int hp_atual
+    }
+
+    ITENS_LOJA {
+        int id_item PK
+        varchar nome UK
+        varchar tipo
+        int preco
+        varchar descricao
+        int valor_efeito
+    }
+
+    %% UNIQUE composto: (id_usuario, id_item)
+    INVENTARIO {
+        int id_inventario PK
+        int quantidade
+        int id_usuario FK
+        int id_item FK
+    }
+
+    MAPA_EVENTOS {
+        int id_usuario PK, FK
+        int id_ponto PK
+        varchar tipo_evento
+        varchar mensagem
+        datetime data_evento
+    }
+
+    COMPRAS {
+        int id_compra PK
+        int quantidade
+        int valor_unitario
+        datetime data_hora
+        int id_usuario FK
+        int id_item FK
+    }
+
+    BATALHAS {
+        int id_batalha PK
+        datetime data_hora
+        int turnos
+        int dinheiro_ganho
+        varchar resultado
+    }
+
+    BATALHAS_FINALIZACOES {
+        char token_execucao PK
+        int id_batalha FK, UK
+        int id_usuario FK
+        int recompensa
+        int capturas_liberadas
+    }
+
+    BATALHA_POKEMONS {
+        int id PK
+        int hp_final
+        boolean desmaiou
+        int id_usuario FK
+        int id_batalha FK
+        int id_pokemon FK
+    }
+
+    TREINADORES {
+        int id_treinador PK
+        int nivel_jornada UK
+        varchar nome
+        varchar nome_insignia
+        varchar descricao
+        int id_tipo_especialidade FK
+    }
+
+    %% UNIQUE compostos: (id_treinador, ordem_batalha) e (id_treinador, ordem_captura)
+    TREINADOR_POKEMONS {
+        int id_treinador PK, FK
+        int id_pokemon PK, FK
+        int ordem_batalha
+        int ordem_captura
+    }
+
+    TREINADORES_PROGRESSO {
+        int id_usuario PK, FK
+        int id_treinador PK, FK
+        int vitorias
+        int capturas_desbloqueadas
+        datetime data_primeira_vitoria
+        datetime data_ultima_vitoria
+    }
+
+    %% UNIQUE composto: (id_usuario, id_treinador, ordem_captura)
+    CAPTURAS_TREINADORES {
+        int id_captura PK
+        int id_usuario FK
+        int id_treinador FK
+        int id_pokemon FK
+        int id_time_pokemon FK, UK
+        int ordem_captura
+        datetime data_captura
+    }
+
+    BATALHAS_CAPTURAS {
+        int id_batalha PK, FK
+        int id_usuario FK
+        int id_treinador FK
+        int id_pokemon FK
+        int ordem_captura
+        int numero_tentativa
+        int chance
+        enum resultado
+        int id_captura FK, UK
+    }
+
+    BATALHA_TREINADORES {
+        int id_batalha PK, FK
+        int id_treinador FK
+    }
+
+    USUARIOS ||--o{ TIMES : possui
+    TIMES ||--o{ TIME_POKEMONS : contem
+    POKEMONS ||--o{ TIME_POKEMONS : especie
+    TIME_POKEMONS ||--o| TIME_POKEMONS_ESTADO : estado
+
+    TIPOS o|--o{ POKEMONS : tipo_principal
+    POKEMONS ||--o{ POKEMON_TIPOS : possui
+    TIPOS ||--o{ POKEMON_TIPOS : classifica
+    TIPOS ||--o{ MOVIMENTOS : classifica
+    POKEMONS ||--o{ POKEMON_MOVIMENTOS : aprende
+    MOVIMENTOS ||--o{ POKEMON_MOVIMENTOS : associado
+    POKEMONS ||--o| POKEMON_EVOLUCOES : origem
+    POKEMONS ||--o| POKEMON_EVOLUCOES : destino
+
+    USUARIOS ||--o{ INVENTARIO : possui
+    ITENS_LOJA ||--o{ INVENTARIO : contabilizado
+    USUARIOS ||--o{ COMPRAS : realiza
+    ITENS_LOJA ||--o{ COMPRAS : comprado
+    USUARIOS ||--o{ MAPA_EVENTOS : explora
+
+    BATALHAS ||--o| BATALHAS_FINALIZACOES : finalizacao
+    USUARIOS ||--o{ BATALHAS_FINALIZACOES : conclui
+    BATALHAS ||--o{ BATALHA_POKEMONS : registra
+    USUARIOS ||--o{ BATALHA_POKEMONS : participa
+    POKEMONS ||--o{ BATALHA_POKEMONS : utilizado
+
+    TIPOS ||--o{ TREINADORES : especialidade
+    TREINADORES ||--o{ TREINADOR_POKEMONS : escala
+    POKEMONS ||--o{ TREINADOR_POKEMONS : compoe
+    USUARIOS ||--o{ TREINADORES_PROGRESSO : progride
+    TREINADORES ||--o{ TREINADORES_PROGRESSO : possui
+    USUARIOS ||--o{ CAPTURAS_TREINADORES : captura
+    TREINADORES ||--o{ CAPTURAS_TREINADORES : libera
+    POKEMONS ||--o{ CAPTURAS_TREINADORES : especie
+    TIME_POKEMONS o|--o| CAPTURAS_TREINADORES : armazenada
+    BATALHAS ||--o| BATALHAS_CAPTURAS : tentativa
+    USUARIOS ||--o{ BATALHAS_CAPTURAS : tenta
+    TREINADORES ||--o{ BATALHAS_CAPTURAS : adversario
+    POKEMONS ||--o{ BATALHAS_CAPTURAS : alvo
+    CAPTURAS_TREINADORES o|--o| BATALHAS_CAPTURAS : resultado
+    BATALHAS ||--o| BATALHA_TREINADORES : enfrenta
+    TREINADORES ||--o{ BATALHA_TREINADORES : desafiado

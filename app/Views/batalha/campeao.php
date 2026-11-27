@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: BatalhaController carrega o perfil final e esta View mostra
+// a conclusão da jornada; o formulário permite voltar ao painel inicial.
 if (!defined('POKEBAGUAL_CAMPEAO_VIEW')) {
     http_response_code(404);
     exit;
@@ -6,12 +8,25 @@ if (!defined('POKEBAGUAL_CAMPEAO_VIEW')) {
 
 // Prepara os dados do perfil e da última captura para exibir a conclusão da jornada.
 $nomeUsuario = (string) ($perfil['nome'] ?? 'Treinador');
-$foto = $perfil['foto'] ?? null;
-$tipoFoto = $perfil['tipo_foto'] ?? '';
-$fotoPermitida = in_array($tipoFoto, ['image/jpeg', 'image/png'], true);
-$fotoSrc = is_string($foto) && $foto !== '' && $fotoPermitida
-    ? 'data:' . $tipoFoto . ';base64,' . base64_encode($foto)
+$fotoCaminho = $perfil['foto_caminho'] ?? null;
+$fotoCaminhoValido = is_string($fotoCaminho)
+    && preg_match(
+        '~\Apublic/uploads/perfil/[a-f0-9]{32}\.(?:jpg|png)\z~',
+        $fotoCaminho
+    ) === 1;
+$fotoSrc = $fotoCaminhoValido
+    ? '/projetoFinalPok-mon/' . $fotoCaminho
     : null;
+$fotoAntiga = $perfil['foto'] ?? null;
+$tipoFotoAntiga = $perfil['tipo_foto'] ?? '';
+if (
+    $fotoSrc === null
+    && is_string($fotoAntiga)
+    && $fotoAntiga !== ''
+    && in_array($tipoFotoAntiga, ['image/jpeg', 'image/png'], true)
+) {
+    $fotoSrc = 'data:' . $tipoFotoAntiga . ';base64,' . base64_encode($fotoAntiga);
+}
 $iniciais = function_exists('mb_substr')
     ? mb_substr($nomeUsuario, 0, 1, 'UTF-8')
     : strtoupper(substr($nomeUsuario, 0, 1));

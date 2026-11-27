@@ -1,5 +1,8 @@
 <?php
 
+// public/index.php registra este carregador antes de criar Controllers.
+// Ele localiza apenas classes App\; classes globais ainda são carregadas por require simples.
+
 // Carrega automaticamente classes que pertencem ao namespace App.
 spl_autoload_register(static function (string $classe): void {
     $prefixo = 'App\\';

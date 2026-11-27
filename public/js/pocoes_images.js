@@ -1,4 +1,5 @@
-// Carrega os ícones dos itens da PokeAPI para os cards do Bolicho.
+// Na apresentação: os cards de bolicho.php e batalha/index.php fornecem
+// data-nome; este script busca ícones. Efeito e inventário são tratados no PHP.
 class CarregadorImagensPocoes {
     // Localiza imagens identificadas com o nome do item no atributo data-nome.
     constructor() {

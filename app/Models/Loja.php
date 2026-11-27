@@ -8,7 +8,11 @@ use PDO;
 use RuntimeException;
 use Throwable;
 
-/** Consulta o catálogo e executa compras persistentes para cada usuário. */
+/**
+ * Na apresentação: concentra as consultas da loja e executa débito,
+ * inventário e histórico de compra juntos; BolichoController valida o pedido
+ * e a View recebe os resultados persistidos.
+ */
 class Loja
 {
     private PDO $db;
@@ -108,13 +112,14 @@ class Loja
 
             $debitar = $this->db->prepare(
                 'UPDATE usuarios
-                 SET dinheiro = dinheiro - :preco
+                 SET dinheiro = dinheiro - :preco_debito
                  WHERE id_usuario = :id_usuario
-                   AND dinheiro >= :preco'
+                   AND dinheiro >= :preco_verificacao'
             );
             $debitar->execute([
-                'preco' => $preco,
+                'preco_debito' => $preco,
                 'id_usuario' => $idUsuario,
+                'preco_verificacao' => $preco,
             ]);
             if ($debitar->rowCount() !== 1) {
                 throw new InvalidArgumentException('O saldo mudou. Tente a compra novamente.');

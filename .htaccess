@@ -1,0 +1,25 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Encaminha a URL raiz para a página inicial sem habilitar listagem de pastas.
+    RewriteRule ^$ public/index.php?rota=inicio [L]
+
+    # Bloqueia arquivos ocultos, incluindo o histórico do Git.
+    RewriteRule (^|/)\. - [F,L]
+
+    # Mantém dados, configuração e documentação fora do acesso público.
+    RewriteRule ^(?:app|config|database|routes|tests)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:AGENTS\.md|README\.md|anotações\.md|bd\.erd)$ - [F,L,NC]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(?:sql|erd|md|log)$">
+        Require all denied
+    </FilesMatch>
+
+    <FilesMatch "^(?:config|HEAD|index|packed-refs|description|COMMIT_EDITMSG|ORIG_HEAD|FETCH_HEAD)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>

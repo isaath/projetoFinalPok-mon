@@ -1,5 +1,6 @@
 <?php
-// Página de apresentação do jogo, com descrição da proposta e retorno ao painel principal.
+// Na apresentação: PaginaController só seleciona esta página pública; não há
+// consulta ao banco. O componente music_player.php é carregado no fim.
 ?><!DOCTYPE html>
 <html lang="pt-br">
 <head>

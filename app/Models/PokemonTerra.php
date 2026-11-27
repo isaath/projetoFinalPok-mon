@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
-/** Pokémon cuja classe herda e identifica o tipo Terra principal. */
+/**
+ * Subclasse do tipo Terra usada por PokemonTipoFactory.
+ * getTipo() identifica o tipo principal; o cálculo de dano usa BatalhaEngine.
+ */
 class PokemonTerra extends Pokemon
 {
     public function getTipo(): string

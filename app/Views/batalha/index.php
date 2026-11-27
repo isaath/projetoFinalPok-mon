@@ -1,4 +1,6 @@
 <?php
+// Na apresentação: BatalhaController monta $dadosBatalha usando Batalha e
+// BatalhaEngine. Esta View mostra o estado e envia a escolha do turno por POST.
 if (!defined('POKEBAGUAL_BATALHA_VIEW')) {
     http_response_code(404);
     exit;
@@ -77,8 +79,9 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalha - PokeBagual</title>
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/pixel_theme.css">
-    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=battle-viewport-fit-2">
+    <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/batalha.css?v=battle-viewport-fit-4">
     <link rel="stylesheet" href="/projetoFinalPok-mon/public/css/music_player.css">
+    <script src="/projetoFinalPok-mon/public/js/pocoes_images.js?v=2" defer></script>
 </head>
 <body class="battle-page">
     <div class="textos_cabecalho">
@@ -373,8 +376,16 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                                             value="<?= (int) $item['id_item'] ?>"
                                             class="battle-choice item-choice"
                                         >
-                                            <strong><?= htmlspecialchars($item['nome'], ENT_QUOTES, 'UTF-8') ?></strong>
-                                            <small>Quantidade: <?= (int) $item['quantidade'] ?></small>
+                                            <img
+                                                class="imagem-item"
+                                                data-nome="<?= htmlspecialchars($item['nome'], ENT_QUOTES, 'UTF-8') ?>"
+                                                alt=""
+                                                loading="lazy"
+                                            >
+                                            <span class="item-choice-copy">
+                                                <strong><?= htmlspecialchars($item['nome'], ENT_QUOTES, 'UTF-8') ?></strong>
+                                                <small>Quantidade: <?= (int) $item['quantidade'] ?></small>
+                                            </span>
                                         </button>
                                     <?php endforeach; ?>
                                     <?php if ($inventario === []): ?>
