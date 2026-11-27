@@ -19,7 +19,7 @@ $equipeAdversario = is_array($dadosBatalha['adversario']['equipe'] ?? null)
     : [];
 
 $nomeTreinador = $treinador['nome'] ?? 'Treinador';
-$insignia = $treinador['nome_insignia'] ?? 'Insignia';
+$insignia = $treinador['nome_insignia'] ?? 'Insígnia';
 $especialidade = $treinador['especialidade'] ?? 'Tipo';
 $nivel = (int) ($dadosBatalha['nivel'] ?? $nivel ?? 1);
 $finalizada = !empty($dadosBatalha['finalizada']);
@@ -175,7 +175,7 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                             </h2>
                             <?php if ($pokemonJogador !== null): ?>
                                 <p><?= htmlspecialchars(implode(' / ', $pokemonJogador['tipos']), ENT_QUOTES, 'UTF-8') ?></p>
-                                <div class="hp-track" aria-label="HP do seu Pokemon">
+                                <div class="hp-track" aria-label="HP do seu Pokémon">
                                     <span style="width: <?= $percentualHpJogador ?>%;"></span>
                                 </div>
                                 <small>
@@ -203,11 +203,11 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                             <h2>
                                 <?= $pokemonAdversario !== null
                                     ? htmlspecialchars($pokemonAdversario['nome'], ENT_QUOTES, 'UTF-8')
-                                    : 'Equipe adversaria derrotada' ?>
+                                    : 'Equipe adversária derrotada' ?>
                             </h2>
                             <?php if ($pokemonAdversario !== null): ?>
                                 <p><?= htmlspecialchars(implode(' / ', $pokemonAdversario['tipos']), ENT_QUOTES, 'UTF-8') ?></p>
-                                <div class="hp-track" aria-label="HP do Pokemon adversario">
+                                <div class="hp-track" aria-label="HP do Pokémon adversário">
                                     <span style="width: <?= $percentualHpAdversario ?>%;"></span>
                                 </div>
                                 <small>
@@ -236,7 +236,7 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                             <?php endforeach; ?>
                         </ol>
                     <?php else: ?>
-                        <p>A batalha comecara quando voce escolher um movimento.</p>
+                        <p>A batalha começará quando você escolher um movimento.</p>
                     <?php endif; ?>
                 </section>
 
@@ -436,11 +436,11 @@ $rotuloStatus = static function (?string $status) use ($nomeStatus): string {
                 <?php elseif ($finalizada): ?>
                     <section class="battle-finish" aria-live="polite">
                         <?php if ($vitoria): ?>
-                            <h2>Voce venceu!</h2>
+                            <h2>Você venceu!</h2>
                             <p>Recompensa: <strong><?= (int) $dadosBatalha['recompensa'] ?> PokePila</strong></p>
                             <a class="battle-submit" href="/projetoFinalPok-mon/public/index.php?rota=captura">Ver captura</a>
                         <?php else: ?>
-                            <h2>Voce perdeu a batalha</h2>
+                            <h2>Você perdeu a batalha</h2>
                             <p>Visite o Pokecenter e tente novamente.</p>
                             <form method="post" action="">
                                 <input type="hidden" name="csrf_token"

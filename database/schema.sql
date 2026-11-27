@@ -614,8 +614,8 @@ WHERE NOT EXISTS (
     WHERE LOWER(existente.nome) = LOWER(catalogo.nome)
 );
 
--- Relações diretas entre estágios cujas espécies existem no catálogo atual.
--- O item genérico avança somente uma etapa por utilização.
+-- Cada relação liga uma espécie à próxima evolução disponível no catálogo.
+-- O item avança um vínculo por uso; espécies sem destino cadastrado não exibem botão de evolução.
 INSERT IGNORE INTO pokemon_evolucoes (id_pokemon_origem, id_pokemon_destino)
 SELECT origem.id_pokemon, destino.id_pokemon
 FROM (
@@ -628,6 +628,8 @@ FROM (
     UNION ALL SELECT 'Bellsprout', 'Weepinbell'
     UNION ALL SELECT 'Weepinbell', 'Victreebel'
     UNION ALL SELECT 'Vulpix', 'Ninetales'
+    -- Graveler não está no catálogo; Geodude evolui para a próxima espécie disponível.
+    UNION ALL SELECT 'Geodude', 'Golem'
     UNION ALL SELECT 'Rhyhorn', 'Rhydon'
     UNION ALL SELECT 'Voltorb', 'Electrode'
     UNION ALL SELECT 'Koffing', 'Weezing'

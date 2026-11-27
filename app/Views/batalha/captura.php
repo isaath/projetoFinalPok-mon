@@ -55,9 +55,9 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
 
         <!-- Antes da insígnia, o jogador pode tentar capturar ou apenas prosseguir. -->
         <?php if ($fasePosVitoria !== 'insignia'): ?>
-            <h1>Uma captura pode estar esperando você!</h1>
+            <h1>Você venceu a batalha!</h1>
             <p class="post-battle-lead">
-                Você venceu <?= htmlspecialchars($nomeTreinador, ENT_QUOTES, 'UTF-8') ?>
+                Você derrotou <?= htmlspecialchars($nomeTreinador, ENT_QUOTES, 'UTF-8') ?>
                 e recebeu <?= $recompensa ?>
                 <img
                     class="reward-coin"
@@ -79,9 +79,10 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
                             <div class="capture-pokemon-fallback" aria-hidden="true">?</div>
                         <?php endif; ?>
                         <h2>
-                            Olha só, você pode tentar capturar o Pokémon
+                            Sua vitória garantiu o Pokémon
                             <?= htmlspecialchars($pokemonTentativa['nome'], ENT_QUOTES, 'UTF-8') ?>!
                         </h2>
+                        <p>Este Pokémon será adicionado à reserva do seu time, sem sorteio.</p>
                     </section>
                     <?php if ($erroImagemCaptura !== null): ?>
                         <p class="post-battle-notice" role="status">
@@ -89,18 +90,14 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
                             Você ainda pode tentar a captura.
                         </p>
                     <?php endif; ?>
-                <?php elseif ($capturaProcessada): ?>
-                    <section class="capture-prompt">
-                        <h2>Você já capturou todos os Pokémon liberados por este líder.</h2>
-                    </section>
                 <?php else: ?>
                     <section class="capture-prompt">
-                        <h2>Não há outro Pokémon liberado para captura nesta vitória.</h2>
+                        <h2>Você já capturou ou já possui todos os Pokémon deste líder.</h2>
                     </section>
                 <?php endif; ?>
             <?php elseif ($captura === null): ?>
                 <section class="capture-prompt">
-                    <h2>Não há outro Pokémon liberado para captura nesta vitória.</h2>
+                    <h2>Você já capturou ou já possui todos os Pokémon deste líder.</h2>
                 </section>
             <?php endif; ?>
 
@@ -128,20 +125,23 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
                     <div>
                         <?php if ($resultadoCaptura === 'capturado'): ?>
                             <h2>
-                                Pokémon capturado.
-                                <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?>
-                                está na reserva do seu time!
+                                Pokémon recebido!
+                                <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?> foi adicionado à reserva do seu time!
                             </h2>
                         <?php elseif ($resultadoCaptura === 'ja_possuia'): ?>
                             <h2>Você já tinha <?= htmlspecialchars($nomePokemon, ENT_QUOTES, 'UTF-8') ?>!</h2>
                             <p>Não foi criada uma cópia; ele continua disponível na sua equipe.</p>
                         <?php else: ?>
-                            <h2>O Pokémon escapou e não foi capturado, tente na próxima!</h2>
+                            <h2>O Pokémon escapou e não foi capturado! Tente novamente na próxima vitória.</h2>
                         <?php endif; ?>
-                        <p>
-                            Tentativa <?= (int) $captura['numero_tentativa'] ?>,
-                            chance de <?= (int) $captura['chance'] ?>%.
-                        </p>
+                        <?php if ((int) $captura['chance'] === 100): ?>
+                            <p>Recompensa garantida pela vitória, sem sorteio.</p>
+                        <?php else: ?>
+                            <p>
+                                Tentativa <?= (int) $captura['numero_tentativa'] ?>,
+                                chance de <?= (int) $captura['chance'] ?>%.
+                            </p>
+                        <?php endif; ?>
                     </div>
                 </section>
             <?php endif; ?>
@@ -161,7 +161,7 @@ $cores = $coresInsignia[$nivel] ?? ['#69768a', '#dce4ef'];
                     <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=captura">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfBatalha, ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="acao" value="tentar_capturar">
-                        <button class="post-battle-button capture-button" type="submit">Tentar capturar</button>
+                        <button class="post-battle-button capture-button" type="submit">Receber Pokémon</button>
                     </form>
                 <?php endif; ?>
                 <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=captura">

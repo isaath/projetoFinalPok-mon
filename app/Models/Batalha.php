@@ -21,7 +21,7 @@ class Batalha
         5 => [130, 40], 6 => [150, 45], 7 => [170, 50], 8 => [190, 55],
     ];
 
-    private const CHANCE_CAPTURA = 50;
+    private const CHANCE_CAPTURA = 100;
 
     private PDO $db;
 
@@ -254,7 +254,7 @@ class Batalha
     {
         $previa = $this->carregarPrevia($idUsuario, $nivel);
         $equipeJogador = $this->carregarEquipeJogador($idUsuario);
-        // O ajuste vale apenas até a primeira vitória e não altera os dados do catálogo.
+        // A primeira luta contra Brock fica mais acessível sem alterar o catálogo.
         $ajustarBrockInicial = $nivel === 1
             && $this->carregarProgressoNiveis($idUsuario)[1]['vitorias'] === 0;
 
@@ -271,13 +271,18 @@ class Batalha
         foreach ($previa['equipe_treinador'] as &$pokemon) {
             $pokemon['id_time_pokemon'] = null;
             if ($ajustarBrockInicial) {
+                // Na primeira tentativa, a equipe de Brock tem 20% menos HP e ataque.
                 $pokemon['hp_maximo'] = max(
                     1,
-                    (int) floor((int) $pokemon['hp_maximo'] * 0.9)
+                    (int) floor((int) $pokemon['hp_maximo'] * 0.8)
                 );
                 $pokemon['forca_ataque'] = max(
                     1,
-                    (int) floor((int) $pokemon['forca_ataque'] * 0.9)
+                    (int) floor((int) $pokemon['forca_ataque'] * 0.8)
+                );
+                $pokemon['ataque_especial'] = max(
+                    1,
+                    (int) floor((int) $pokemon['ataque_especial'] * 0.8)
                 );
             }
             $pokemon['hp_atual'] = (int) $pokemon['hp_maximo'];
@@ -463,7 +468,16 @@ class Batalha
                 $recompensa = self::RECOMPENSAS[(int) $batalha['nivel']][$primeiraVitoria ? 0 : 1];
 
                 $quantidadeAdversarios = count($batalha['adversario']['equipe']);
-                $capturasLiberadas = min($vitoriasAnteriores + 1, $quantidadeAdversarios);
+                // A sequência usa prêmios já registrados para recuperar vitórias antigas sem Pokémon.
+                $quantidadeCapturada = $this->contarCapturasRealizadas(
+                    $idUsuario,
+                    (int) $batalha['id_treinador']
+                );
+                $proximaOrdemCaptura = $quantidadeCapturada + 1;
+                $capturasLiberadas = $proximaOrdemCaptura <= $quantidadeAdversarios
+                    ? $proximaOrdemCaptura
+                    : 0;
+                $capturasDesbloqueadas = min($proximaOrdemCaptura, $quantidadeAdversarios);
                 $salvarProgresso = $this->db->prepare(
                     'INSERT INTO treinadores_progresso
                         (
@@ -475,16 +489,13 @@ class Batalha
                         (:id_usuario, :id_treinador, 1, :capturas, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                      ON DUPLICATE KEY UPDATE
                         vitorias = vitorias + 1,
-                        capturas_desbloqueadas = GREATEST(
-                            capturas_desbloqueadas,
-                            VALUES(capturas_desbloqueadas)
-                        ),
+                        capturas_desbloqueadas = VALUES(capturas_desbloqueadas),
                         data_ultima_vitoria = CURRENT_TIMESTAMP'
                 );
                 $salvarProgresso->execute([
                     'id_usuario' => $idUsuario,
                     'id_treinador' => (int) $batalha['id_treinador'],
-                    'capturas' => $capturasLiberadas,
+                    'capturas' => $capturasDesbloqueadas,
                 ]);
 
                 $creditarRecompensa = $this->db->prepare(
@@ -549,13 +560,23 @@ class Batalha
                 'capturas_liberadas' => $capturasLiberadas,
             ]);
 
+            $captura = null;
+            if ($vitoria && $capturasLiberadas > 0) {
+                $captura = $this->registrarCapturaDaVitoria(
+                    $idUsuario,
+                    (int) $batalha['id_treinador'],
+                    $capturasLiberadas,
+                    $idBatalha
+                );
+            }
+
             $this->db->commit();
 
             return [
                 'id_batalha' => $idBatalha,
                 'recompensa' => $recompensa,
                 'capturas_liberadas' => $capturasLiberadas,
-                'captura' => null,
+                'captura' => $captura,
                 'primeira_vitoria' => $primeiraVitoria,
             ];
         } catch (Throwable $exception) {
@@ -567,17 +588,25 @@ class Batalha
         }
     }
 
-    /** Retorna o próximo Pokémon liberado sem sortear nem gravar uma tentativa. */
+    /** Retorna o próximo Pokémon do líder sem sortear nem gravar uma tentativa. */
     public function carregarProximaCaptura(int $idUsuario, array $batalha): ?array
     {
         $this->validarBatalhaParaCaptura($idUsuario, $batalha);
 
-        return $this->buscarProximoPokemonCapturavel(
+        $ordemCaptura = $this->buscarOrdemCapturaDaBatalha($idUsuario, $batalha);
+        $pokemon = $this->buscarPokemonDaOrdemCaptura(
             $idUsuario,
             (int) $batalha['id_treinador'],
-            (int) ($batalha['capturas_liberadas'] ?? 0),
+            $ordemCaptura,
             false
         );
+
+        return $pokemon === null
+            ? null
+            : [
+                'id_pokemon' => (int) $pokemon['id_pokemon'],
+                'nome' => (string) $pokemon['nome'],
+            ];
     }
 
     /**
@@ -681,18 +710,14 @@ class Batalha
         }
     }
 
-    /**
-     * Encontra o primeiro Pokémon liberado que o jogador ainda não possui.
-     *
-     * Linhas já capturadas ou espécies já presentes no time são puladas.
-     */
-    private function buscarProximoPokemonCapturavel(
+    /** Busca o Pokémon correspondente ao número da vitória contra este treinador. */
+    private function buscarPokemonDaOrdemCaptura(
         int $idUsuario,
         int $idTreinador,
-        int $capturasLiberadas,
+        int $ordemCaptura,
         bool $bloquearLinhas
     ): ?array {
-        if ($capturasLiberadas < 1) {
+        if ($ordemCaptura < 1) {
             return null;
         }
 
@@ -700,7 +725,7 @@ class Batalha
             'SELECT treinador_pokemon.id_pokemon,
                     treinador_pokemon.ordem_captura,
                     pokemon.nome,
-                    captura.id_captura,
+                    pokemon.hp_maximo,
                     EXISTS (
                         SELECT 1
                         FROM time_pokemons AS pokemon_usuario
@@ -712,81 +737,78 @@ class Batalha
              FROM treinador_pokemons AS treinador_pokemon
              INNER JOIN pokemons AS pokemon
                 ON pokemon.id_pokemon = treinador_pokemon.id_pokemon
-             LEFT JOIN capturas_treinadores AS captura
-                ON captura.id_usuario = :id_usuario
-               AND captura.id_treinador = treinador_pokemon.id_treinador
-               AND captura.ordem_captura = treinador_pokemon.ordem_captura
              WHERE treinador_pokemon.id_treinador = :id_treinador
-             ORDER BY treinador_pokemon.ordem_captura'
+               AND treinador_pokemon.ordem_captura = :ordem_captura'
              . ($bloquearLinhas ? ' FOR UPDATE' : '')
+        );
+        $consulta->execute([
+            'id_treinador' => $idTreinador,
+            'id_usuario_dono' => $idUsuario,
+            'ordem_captura' => $ordemCaptura,
+        ]);
+
+        $pokemon = $consulta->fetch(PDO::FETCH_ASSOC);
+        return is_array($pokemon) ? $pokemon : null;
+    }
+
+    /** Usa a ordem persistida na finalização, não um valor possivelmente antigo da sessão. */
+    private function buscarOrdemCapturaDaBatalha(int $idUsuario, array $batalha): int
+    {
+        $consulta = $this->db->prepare(
+            'SELECT capturas_liberadas
+             FROM batalhas_finalizacoes
+             WHERE id_batalha = :id_batalha
+               AND id_usuario = :id_usuario
+               AND token_execucao = :token_execucao'
+        );
+        $consulta->execute([
+            'id_batalha' => (int) $batalha['id_batalha'],
+            'id_usuario' => $idUsuario,
+            'token_execucao' => $batalha['token_execucao'],
+        ]);
+        $ordemCaptura = $consulta->fetchColumn();
+
+        if ($ordemCaptura === false) {
+            throw new RuntimeException('A vitória não está registrada para esta captura.');
+        }
+
+        return (int) $ordemCaptura;
+    }
+
+    /** Conta prêmios já concedidos para continuar a sequência sem pular Pokémon. */
+    private function contarCapturasRealizadas(int $idUsuario, int $idTreinador): int
+    {
+        $consulta = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM capturas_treinadores
+             WHERE id_usuario = :id_usuario
+               AND id_treinador = :id_treinador'
         );
         $consulta->execute([
             'id_usuario' => $idUsuario,
             'id_treinador' => $idTreinador,
-            'id_usuario_dono' => $idUsuario,
         ]);
 
-        $ordemMaximaLiberada = $capturasLiberadas;
-        while (($pokemon = $consulta->fetch(PDO::FETCH_ASSOC)) !== false) {
-            $ordemCaptura = (int) $pokemon['ordem_captura'];
-            if ($ordemCaptura > $ordemMaximaLiberada) {
-                break;
-            }
-            if ($pokemon['id_captura'] !== null) {
-                continue;
-            }
-            if ((int) $pokemon['ja_possui'] === 1) {
-                $ordemMaximaLiberada++;
-                continue;
-            }
-
-            return [
-                'id_pokemon' => (int) $pokemon['id_pokemon'],
-                'nome' => (string) $pokemon['nome'],
-            ];
-        }
-
-        return null;
+        return (int) $consulta->fetchColumn();
     }
 
     /**
-     * Usa a chance fixa aprovada e, no sucesso, adiciona o Pokémon à reserva com HP completo.
+     * Concede o Pokémon correspondente à vitória e registra a recompensa sem sorteio.
      */
     private function registrarCapturaDaVitoria(
         int $idUsuario,
         int $idTreinador,
-        int $capturasLiberadas,
+        int $ordemCaptura,
         int $idBatalha
     ): ?array {
-        $proximoPokemon = $this->buscarProximoPokemonCapturavel(
+        $pokemonCapturado = $this->buscarPokemonDaOrdemCaptura(
             $idUsuario,
             $idTreinador,
-            $capturasLiberadas,
+            $ordemCaptura,
             true
         );
-        if ($proximoPokemon === null) {
+        if ($pokemonCapturado === null) {
             return null;
-        }
-
-        $buscarCaptura = $this->db->prepare(
-            'SELECT pokemon.id_pokemon,
-                    pokemon.nome,
-                    pokemon.hp_maximo,
-                    treinador_pokemon.ordem_captura
-             FROM treinador_pokemons AS treinador_pokemon
-             INNER JOIN pokemons AS pokemon
-                ON pokemon.id_pokemon = treinador_pokemon.id_pokemon
-             WHERE treinador_pokemon.id_treinador = :id_treinador
-               AND treinador_pokemon.id_pokemon = :id_pokemon
-             FOR UPDATE'
-        );
-        $buscarCaptura->execute([
-            'id_treinador' => $idTreinador,
-            'id_pokemon' => $proximoPokemon['id_pokemon'],
-        ]);
-        $pokemonCapturado = $buscarCaptura->fetch(PDO::FETCH_ASSOC);
-        if (!is_array($pokemonCapturado)) {
-            throw new RuntimeException('O Pokémon disponível para captura não foi encontrado.');
         }
 
         $buscarTentativas = $this->db->prepare(
@@ -799,102 +821,99 @@ class Batalha
         $buscarTentativas->execute([
             'id_usuario' => $idUsuario,
             'id_treinador' => $idTreinador,
-            'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+            'ordem_captura' => $ordemCaptura,
         ]);
-        // A chance é fixa, mas o número da tentativa continua sendo registrado.
+        // O número identifica a concessão registrada para esta posição.
         $numeroTentativa = (int) $buscarTentativas->fetchColumn() + 1;
         $chance = self::CHANCE_CAPTURA;
-        $sucesso = random_int(1, 100) <= $chance;
-        $resultado = 'falhou';
+        $resultado = 'capturado';
         $idCaptura = null;
         $idTimePokemon = null;
 
-        if ($sucesso) {
-            $buscarTime = $this->db->prepare(
-                'SELECT id_time
-                 FROM times
-                 WHERE id_usuario = :id_usuario
-                 ORDER BY id_time
-                 LIMIT 1
-                 FOR UPDATE'
+        $buscarTime = $this->db->prepare(
+            'SELECT id_time
+             FROM times
+             WHERE id_usuario = :id_usuario
+             ORDER BY id_time
+             LIMIT 1
+             FOR UPDATE'
+        );
+        $buscarTime->execute(['id_usuario' => $idUsuario]);
+        $idTime = $buscarTime->fetchColumn();
+        if ($idTime === false) {
+            throw new RuntimeException(
+                'Não foi encontrado o time do jogador para guardar a captura.'
             );
-            $buscarTime->execute(['id_usuario' => $idUsuario]);
-            $idTime = $buscarTime->fetchColumn();
-            if ($idTime === false) {
+        }
+        $idTime = (int) $idTime;
+
+        $buscarExistente = $this->db->prepare(
+            'SELECT id_time_pokemon
+             FROM time_pokemons
+             WHERE id_time = :id_time
+               AND id_pokemon = :id_pokemon
+             FOR UPDATE'
+        );
+        $buscarExistente->execute([
+            'id_time' => $idTime,
+            'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+        ]);
+        $idTimePokemon = $buscarExistente->fetchColumn();
+
+        if ($idTimePokemon === false) {
+            // Pokémon recebidos entram depois das três posições reservadas ao time ativo.
+            $buscarUltimaPosicao = $this->db->prepare(
+                'SELECT COALESCE(MAX(posicao), 3)
+                 FROM time_pokemons
+                 WHERE id_time = :id_time'
+            );
+            $buscarUltimaPosicao->execute(['id_time' => $idTime]);
+            $posicao = max(3, (int) $buscarUltimaPosicao->fetchColumn()) + 1;
+            if ($posicao > 255) {
                 throw new RuntimeException(
-                    'Não foi encontrado o time do jogador para guardar a captura.'
+                    'Não há mais posições disponíveis na reserva do time.'
                 );
             }
-            $idTime = (int) $idTime;
 
-            $buscarExistente = $this->db->prepare(
-                'SELECT id_time_pokemon
-                 FROM time_pokemons
-                 WHERE id_time = :id_time
-                   AND id_pokemon = :id_pokemon
-                 FOR UPDATE'
+            $adicionarPokemon = $this->db->prepare(
+                'INSERT INTO time_pokemons (posicao, id_time, id_pokemon)
+                 VALUES (:posicao, :id_time, :id_pokemon)'
             );
-            $buscarExistente->execute([
+            $adicionarPokemon->execute([
+                'posicao' => $posicao,
                 'id_time' => $idTime,
                 'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
             ]);
-            $idTimePokemon = $buscarExistente->fetchColumn();
+            $idTimePokemon = (int) $this->db->lastInsertId();
 
-            if ($idTimePokemon === false) {
-                // Capturas novas entram depois das três posições reservadas ao time ativo.
-                $buscarUltimaPosicao = $this->db->prepare(
-                    'SELECT COALESCE(MAX(posicao), 3)
-                     FROM time_pokemons
-                     WHERE id_time = :id_time'
-                );
-                $buscarUltimaPosicao->execute(['id_time' => $idTime]);
-                $posicao = max(3, (int) $buscarUltimaPosicao->fetchColumn()) + 1;
-                if ($posicao > 255) {
-                    throw new RuntimeException(
-                        'Não há mais posições disponíveis na reserva do time.'
-                    );
-                }
-
-                $adicionarPokemon = $this->db->prepare(
-                    'INSERT INTO time_pokemons (posicao, id_time, id_pokemon)
-                     VALUES (:posicao, :id_time, :id_pokemon)'
-                );
-                $adicionarPokemon->execute([
-                    'posicao' => $posicao,
-                    'id_time' => $idTime,
-                    'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
-                ]);
-                $idTimePokemon = (int) $this->db->lastInsertId();
-
-                $salvarHp = $this->db->prepare(
-                    'INSERT INTO time_pokemons_estado (id_time_pokemon, hp_atual)
-                     VALUES (:id_time_pokemon, :hp_atual)'
-                );
-                $salvarHp->execute([
-                    'id_time_pokemon' => $idTimePokemon,
-                    'hp_atual' => (int) $pokemonCapturado['hp_maximo'],
-                ]);
-                $resultado = 'capturado';
-            } else {
-                $idTimePokemon = null;
-                $resultado = 'ja_possuia';
-            }
-
-            $registrarCaptura = $this->db->prepare(
-                'INSERT INTO capturas_treinadores
-                    (id_usuario, id_treinador, id_pokemon, id_time_pokemon, ordem_captura)
-                 VALUES
-                    (:id_usuario, :id_treinador, :id_pokemon, :id_time_pokemon, :ordem_captura)'
+            $salvarHp = $this->db->prepare(
+                'INSERT INTO time_pokemons_estado (id_time_pokemon, hp_atual)
+                 VALUES (:id_time_pokemon, :hp_atual)'
             );
-            $registrarCaptura->execute([
-                'id_usuario' => $idUsuario,
-                'id_treinador' => $idTreinador,
-                'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+            $salvarHp->execute([
                 'id_time_pokemon' => $idTimePokemon,
-                'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+                'hp_atual' => (int) $pokemonCapturado['hp_maximo'],
             ]);
-            $idCaptura = (int) $this->db->lastInsertId();
+            $resultado = 'capturado';
+        } else {
+            $idTimePokemon = null;
+            $resultado = 'ja_possuia';
         }
+
+        $registrarCaptura = $this->db->prepare(
+            'INSERT INTO capturas_treinadores
+                (id_usuario, id_treinador, id_pokemon, id_time_pokemon, ordem_captura)
+             VALUES
+                (:id_usuario, :id_treinador, :id_pokemon, :id_time_pokemon, :ordem_captura)'
+        );
+        $registrarCaptura->execute([
+            'id_usuario' => $idUsuario,
+            'id_treinador' => $idTreinador,
+            'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
+            'id_time_pokemon' => $idTimePokemon,
+            'ordem_captura' => $ordemCaptura,
+        ]);
+        $idCaptura = (int) $this->db->lastInsertId();
 
         $registrarTentativa = $this->db->prepare(
             'INSERT INTO batalhas_capturas
@@ -913,7 +932,7 @@ class Batalha
             'id_usuario' => $idUsuario,
             'id_treinador' => $idTreinador,
             'id_pokemon' => (int) $pokemonCapturado['id_pokemon'],
-            'ordem_captura' => (int) $pokemonCapturado['ordem_captura'],
+            'ordem_captura' => $ordemCaptura,
             'numero_tentativa' => $numeroTentativa,
             'chance' => $chance,
             'resultado' => $resultado,

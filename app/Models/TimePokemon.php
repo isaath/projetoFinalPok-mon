@@ -25,6 +25,8 @@ class TimePokemon
     /** Busca espécies, posições e HP individual para montar a tela do time. */
     public function listarDoUsuario(int $idUsuario): array
     {
+        // A evolução é opcional: Pokémon sem próximo estágio continuam aparecendo normalmente.
+        // COALESCE transforma a ausência de item em quantidade zero para a View decidir se mostra o botão.
         $consulta = $this->db->prepare(
             'SELECT membro.id_time_pokemon, membro.id_time, membro.id_pokemon,
                     membro.posicao, membro.nome, membro.tipo,
@@ -330,12 +332,13 @@ class TimePokemon
         }
     }
 
-    /**
-     * Substitui o Pokémon da posição 3 por um da reserva e envia o substituído à reserva.
-     */
-    public function colocarNaPosicaoTres(int $idUsuario, int $idTimePokemon): string
-    {
-        if ($idTimePokemon < 1) {
+    /** Substitui a posição escolhida por um Pokémon da reserva. */
+    public function colocarNaPosicao(
+        int $idUsuario,
+        int $idTimePokemon,
+        int $posicaoDestino
+    ): string {
+        if ($idTimePokemon < 1 || $posicaoDestino < 1 || $posicaoDestino > 3) {
             return 'dados_invalidos';
         }
 
@@ -368,14 +371,19 @@ class TimePokemon
                 return 'time_incompleto';
             }
 
-            $idPokemonTerceiro = $posicoes[3];
+            $idPokemonSubstituido = $posicoes[$posicaoDestino] ?? null;
+            if ($idPokemonSubstituido === null) {
+                $this->db->commit();
+                return 'time_incompleto';
+            }
+
             // A posição temporária 0 evita colidir com a chave única durante a troca.
             $this->atualizarPosicao($idTime, $idTimePokemon, 0);
-            $this->atualizarPosicao($idTime, $idPokemonTerceiro, $posicaoReserva);
-            $this->atualizarPosicao($idTime, $idTimePokemon, 3);
+            $this->atualizarPosicao($idTime, $idPokemonSubstituido, $posicaoReserva);
+            $this->atualizarPosicao($idTime, $idTimePokemon, $posicaoDestino);
 
             $this->db->commit();
-            return 'colocado';
+            return 'colocado_' . $posicaoDestino;
         } catch (Throwable $exception) {
             // Reverte a troca inteira se qualquer atualização não puder ser concluída.
             if ($this->db->inTransaction()) {

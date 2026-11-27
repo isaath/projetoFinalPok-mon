@@ -161,52 +161,6 @@ class BatalhaController
                     }
 
                     $dadosBatalha = $estadoSessao;
-                    $pokemonJogador = $this->pokemonAtivo($estadoSessao, 'jogador');
-                    $pokemonAdversario = $this->pokemonAtivo($estadoSessao, 'adversario');
-                    if ($pokemonJogador !== null || $pokemonAdversario !== null) {
-                        try {
-                            // A PokeAPI fornece apenas a imagem; os dados e regras da batalha vêm do sistema.
-                            $servico = new PokeApiService();
-                            if ($pokemonJogador !== null) {
-                                $imagemJogador = $servico->obterImagem($pokemonJogador['nome']);
-                            }
-                            if ($pokemonAdversario !== null) {
-                                $imagemAdversario = $servico->obterImagem($pokemonAdversario['nome']);
-                            }
-                        } catch (RuntimeException | JsonException $exception) {
-                            // Falha visual não cancela a batalha nem altera seu estado persistido.
-                            error_log('Erro ao carregar imagens da batalha: ' . $exception->getMessage());
-                            $erroImagem = 'Não foi possível carregar as imagens pela PokeAPI agora.';
-                        }
-
-                        foreach ($estadoSessao['jogador']['equipe'] as $indice => $pokemonEquipe) {
-                            if (
-                                $indice === (int) ($estadoSessao['jogador']['ativo'] ?? -1)
-                                && is_string($imagemJogador)
-                            ) {
-                                $imagensEquipeJogador[$indice] = $imagemJogador;
-                                continue;
-                            }
-                            if (
-                                $indice === (int) ($estadoSessao['jogador']['ativo'] ?? -1)
-                                && $erroImagem !== null
-                            ) {
-                                $imagensEquipeJogador[$indice] = null;
-                                continue;
-                            }
-                            try {
-                                $imagensEquipeJogador[$indice] = (new PokeApiService())
-                                    ->obterImagem((string) $pokemonEquipe['nome']);
-                            } catch (RuntimeException | JsonException $exception) {
-                                error_log(
-                                    'Erro ao carregar sprite de '
-                                    . $pokemonEquipe['nome'] . ': '
-                                    . $exception->getMessage()
-                                );
-                                $imagensEquipeJogador[$indice] = null;
-                            }
-                        }
-                    }
                 }
             } catch (PDOException $exception) {
                 error_log('Erro de banco de dados na batalha: ' . $exception->getMessage());
@@ -236,6 +190,41 @@ class BatalhaController
         $pokemonAdversario = $dadosBatalha === null
             ? null
             : $this->pokemonAtivo($dadosBatalha, 'adversario');
+
+        // Carrega os sprites depois da validação para que avisos não ocultem as imagens.
+        if ($dadosBatalha !== null) {
+            $servicoImagens = new PokeApiService();
+
+            foreach ($dadosBatalha['jogador']['equipe'] as $indice => $pokemonEquipe) {
+                try {
+                    $imagemEquipe = $servicoImagens->obterImagem((string) $pokemonEquipe['nome']);
+                    $imagensEquipeJogador[$indice] = $imagemEquipe;
+                    if ($indice === (int) ($dadosBatalha['jogador']['ativo'] ?? -1)) {
+                        $imagemJogador = $imagemEquipe;
+                    }
+                } catch (RuntimeException | JsonException $exception) {
+                    error_log(
+                        'Erro ao carregar sprite de '
+                        . $pokemonEquipe['nome'] . ': '
+                        . $exception->getMessage()
+                    );
+                    $imagensEquipeJogador[$indice] = null;
+                    if ($indice === (int) ($dadosBatalha['jogador']['ativo'] ?? -1)) {
+                        $erroImagem = 'Não foi possível carregar as imagens pela PokeAPI agora.';
+                    }
+                }
+            }
+
+            if ($pokemonAdversario !== null) {
+                try {
+                    $imagemAdversario = $servicoImagens->obterImagem($pokemonAdversario['nome']);
+                } catch (RuntimeException | JsonException $exception) {
+                    error_log('Erro ao carregar imagem do Pokémon adversário: ' . $exception->getMessage());
+                    $erroImagem = 'Não foi possível carregar as imagens pela PokeAPI agora.';
+                }
+            }
+        }
+
         $csrfBatalha = $_SESSION['csrf_batalha'];
         $inventario = $dadosBatalha === null
             ? []
@@ -313,7 +302,29 @@ class BatalhaController
                         $batalha['fase_pos_vitoria'] = 'resultado';
                         $_SESSION['batalha'] = $batalha;
                     } elseif ($acao === 'prosseguir') {
-                        $batalha['fase_pos_vitoria'] = 'insignia';
+                        if ($fasePosVitoria === 'captura') {
+                            $pokemonPendente = $modeloBatalha->carregarProximaCaptura(
+                                $idUsuario,
+                                $batalha
+                            );
+                            if ($pokemonPendente !== null) {
+                                $batalha['captura'] = $modeloBatalha->tentarCaptura(
+                                    $idUsuario,
+                                    $batalha
+                                );
+                                if ($batalha['captura'] === null) {
+                                    throw new RuntimeException(
+                                        'Não foi possível conceder o Pokémon desta vitória.'
+                                    );
+                                }
+                                $batalha['tentativa_captura_processada'] = true;
+                                $batalha['fase_pos_vitoria'] = 'resultado';
+                            } else {
+                                $batalha['fase_pos_vitoria'] = 'insignia';
+                            }
+                        } else {
+                            $batalha['fase_pos_vitoria'] = 'insignia';
+                        }
                         $_SESSION['batalha'] = $batalha;
                     } else {
                         http_response_code(400);
@@ -348,14 +359,41 @@ class BatalhaController
         if ($fasePosVitoria === 'captura' && $captura === null) {
             try {
                 $pokemonTentativa = $modeloBatalha->carregarProximaCaptura($idUsuario, $batalha);
-                if ($pokemonTentativa !== null) {
-                    // Carrega a arte da espécie apresentada na tela de tentativa de captura.
-                    $imagemPokemonTentativa = (new PokeApiService())
-                        ->obterImagem($pokemonTentativa['nome']);
+                if (
+                    $_SERVER['REQUEST_METHOD'] === 'GET'
+                    && $pokemonTentativa !== null
+                ) {
+                    $captura = $modeloBatalha->tentarCaptura($idUsuario, $batalha);
+                    if ($captura === null) {
+                        throw new RuntimeException(
+                            'Não foi possível conceder o Pokémon desta vitória.'
+                        );
+                    }
+                    $batalha['captura'] = $captura;
+                    $batalha['fase_pos_vitoria'] = 'resultado';
+                    $batalha['tentativa_captura_processada'] = true;
+                    $_SESSION['batalha'] = $batalha;
+                    $fasePosVitoria = 'resultado';
+                } elseif ($pokemonTentativa !== null) {
+                    // Carrega a arte da espécie apresentada na tela de captura pendente.
+                    try {
+                        $imagemPokemonTentativa = (new PokeApiService())
+                            ->obterImagem($pokemonTentativa['nome']);
+                    } catch (RuntimeException | JsonException $exception) {
+                        error_log(
+                            'Erro ao carregar imagem do Pokémon da captura: '
+                            . $exception->getMessage()
+                        );
+                        $erroImagemCaptura = 'Não foi possível carregar a imagem do Pokémon agora.';
+                    }
                 }
-            } catch (PDOException | RuntimeException | JsonException $exception) {
-                error_log('Erro ao preparar a tentativa de captura: ' . $exception->getMessage());
-                $erroImagemCaptura = 'Não foi possível carregar a imagem do Pokémon agora.';
+            } catch (PDOException $exception) {
+                error_log('Erro de banco de dados ao conceder o Pokémon: ' . $exception->getMessage());
+                http_response_code(500);
+                $erroCaptura = 'Não foi possível conceder o Pokémon desta vitória agora.';
+            } catch (RuntimeException $exception) {
+                error_log('Erro ao conceder o Pokémon: ' . $exception->getMessage());
+                $erroCaptura = $exception->getMessage();
             }
         }
 
@@ -493,12 +531,17 @@ class BatalhaController
             && is_array($estado)
             && (int) ($estado['id_usuario'] ?? 0) === $idUsuario
             && (int) ($estado['nivel'] ?? 0) === $nivel
-            && !empty($estado['finalizada'])
-            && !empty($estado['resultado_salvo'])
         ) {
-            $novoEstado = $modeloBatalha->carregarDadosCombate($idUsuario, $nivel);
-            $_SESSION['batalha'] = $novoEstado;
-            return;
+            if (!empty($estado['finalizada']) && !empty($estado['resultado_salvo'])) {
+                $novoEstado = $modeloBatalha->carregarDadosCombate($idUsuario, $nivel);
+                $_SESSION['batalha'] = $novoEstado;
+                return;
+            }
+
+            if (empty($estado['finalizada'])) {
+                // Ignora o reenvio do botão se a primeira solicitação já reiniciou a batalha.
+                return;
+            }
         }
 
         if (

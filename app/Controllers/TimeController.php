@@ -160,11 +160,20 @@ class TimeController
                     try {
                         // Converte a ação do formulário em uma chamada explícita ao Model.
                         if ($acao === 'colocar') {
-                            $resultado = $modelo->colocarNaPosicaoTres(
-                                $idUsuario,
-                                $idTimePokemon
+                            $posicao = filter_var(
+                                $_POST['posicao'] ?? null,
+                                FILTER_VALIDATE_INT
                             );
+
+                            $resultado = $posicao === false
+                                ? 'dados_invalidos'
+                                : $modelo->colocarNaPosicao(
+                                    $idUsuario,
+                                    $idTimePokemon,
+                                    $posicao
+                                );
                         } elseif ($acao === 'evoluir') {
+                            // Primeiro confirma a evolução e o item; depois consulta a API e aplica os dados no Model.
                             $preparacao = $modelo->prepararEvolucao(
                                 $idUsuario,
                                 $idTimePokemon
@@ -273,7 +282,17 @@ class TimeController
         switch ($resultado) {
             case 'movido':
                 return ['tipo' => 'sucesso', 'texto' => 'A prioridade do time foi atualizada.'];
-            case 'colocado':
+            case 'colocado_1':
+                return [
+                    'tipo' => 'sucesso',
+                    'texto' => 'Pokémon colocado na posição 1; o anterior foi para a reserva.',
+                ];
+            case 'colocado_2':
+                return [
+                    'tipo' => 'sucesso',
+                    'texto' => 'Pokémon colocado na posição 2; o anterior foi para a reserva.',
+                ];
+            case 'colocado_3':
                 return [
                     'tipo' => 'sucesso',
                     'texto' => 'Pokémon colocado na posição 3; o anterior foi para a reserva.',

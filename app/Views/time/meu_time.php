@@ -78,14 +78,17 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                             <?php endif; ?>
 
                             <?php if (!empty($pokemon['nome_evolucao'])): ?>
+                                <!-- A descrição aparece para toda espécie com próxima evolução cadastrada. -->
                                 <div class="evolucao">
                                     <p>
                                         Próxima evolução:
                                         <strong><?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?></strong>
                                     </p>
+                                    <p>Use um Item Evolutivo para alcançar esse próximo estágio.</p>
                                     <?php if ((int) $pokemon['evolucao_ja_possuida'] === 1): ?>
                                         <p>Seu time já possui essa espécie.</p>
                                     <?php elseif ((int) $pokemon['quantidade_item_evolutivo'] > 0): ?>
+                                        <!-- O botão só aparece quando há item; o Controller busca os dados e o Model salva a evolução. -->
                                         <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time"
                                               onsubmit="return confirm('Evoluir este Pokémon? Um Item Evolutivo será consumido e o HP será restaurado ao máximo.');">
                                             <input type="hidden" name="csrf_token"
@@ -93,7 +96,11 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                             <input type="hidden" name="acao" value="evoluir">
                                             <input type="hidden" name="id_time_pokemon"
                                                    value="<?= (int) $pokemon['id_time_pokemon'] ?>">
-                                            <button type="submit" class="btn-evoluir">Usar Item Evolutivo</button>
+                                            <button type="submit" class="btn-evoluir"
+                                                    aria-label="Evoluir para <?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?>">
+                                                <img src="/projetoFinalPok-mon/public/css/img/btn_evoluir.png"
+                                                     alt="Evoluir">
+                                            </button>
                                         </form>
                                     <?php else: ?>
                                         <p>Compre um Item Evolutivo no Bolicho para evoluir.</p>
@@ -137,7 +144,7 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
             <?php if ($reservas === []): ?>
                 <p class="vazio">Você ainda não possui Pokémon na reserva.</p>
             <?php else: ?>
-                <!-- Um Pokémon reserva pode substituir apenas o membro da posição 3. -->
+                <!-- Cada Pokémon da reserva pode substituir qualquer posição do time ativo. -->
                 <div class="grade-reservas">
                     <?php foreach ($reservas as $pokemon): ?>
                         <article class="cartao-pokemon reserva">
@@ -154,14 +161,17 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                 HP <?= (int) $pokemon['hp_atual'] ?> / <?= (int) $pokemon['hp_maximo'] ?>
                             </p>
                             <?php if (!empty($pokemon['nome_evolucao'])): ?>
+                                <!-- A mesma descrição e regra de evolução valem para Pokémon na reserva. -->
                                 <div class="evolucao">
                                     <p>
                                         Próxima evolução:
                                         <strong><?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?></strong>
                                     </p>
+                                    <p>Use um Item Evolutivo para alcançar esse próximo estágio.</p>
                                     <?php if ((int) $pokemon['evolucao_ja_possuida'] === 1): ?>
                                         <p>Seu time já possui essa espécie.</p>
                                     <?php elseif ((int) $pokemon['quantidade_item_evolutivo'] > 0): ?>
+                                        <!-- O botão só aparece quando há item; o Controller busca os dados e o Model salva a evolução. -->
                                         <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time"
                                               onsubmit="return confirm('Evoluir este Pokémon? Um Item Evolutivo será consumido e o HP será restaurado ao máximo.');">
                                             <input type="hidden" name="csrf_token"
@@ -169,30 +179,40 @@ if (!isset($ativos, $reservas, $token) || !is_array($ativos) || !is_array($reser
                                             <input type="hidden" name="acao" value="evoluir">
                                             <input type="hidden" name="id_time_pokemon"
                                                    value="<?= (int) $pokemon['id_time_pokemon'] ?>">
-                                            <button type="submit" class="btn-evoluir">Usar Item Evolutivo</button>
+                                            <button type="submit" class="btn-evoluir"
+                                                    aria-label="Evoluir para <?= htmlspecialchars(ucfirst($pokemon['nome_evolucao']), ENT_QUOTES, 'UTF-8') ?>">
+                                                <img src="/projetoFinalPok-mon/public/css/img/btn_evoluir.png"
+                                                     alt="Evoluir">
+                                            </button>
                                         </form>
                                     <?php else: ?>
                                         <p>Compre um Item Evolutivo no Bolicho para evoluir.</p>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
-                            <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time">
-                                <input type="hidden" name="csrf_token"
-                                       value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-                                <input type="hidden" name="acao" value="colocar">
-                                <input type="hidden" name="id_time_pokemon"
-                                       value="<?= (int) $pokemon['id_time_pokemon'] ?>">
-                                <button type="submit" class="btn_pixel">
-                                    <img src="/projetoFinalPok-mon/public/css/img/btn_jogar.png"
-                                         alt="Colocar no lugar do Pokémon 3"
-                                         style="width: 170px !important; height: auto;">
-                                </button>
-                            </form>
+                            <div class="botoes-reserva">
+                                <?php for ($destino = 1; $destino <= 3; $destino++): ?>
+                                    <form method="post" action="/projetoFinalPok-mon/public/index.php?rota=meu_time">
+                                        <input type="hidden" name="csrf_token"
+                                               value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+                                        <input type="hidden" name="acao" value="colocar">
+                                        <input type="hidden" name="id_time_pokemon"
+                                               value="<?= (int) $pokemon['id_time_pokemon'] ?>">
+                                        <input type="hidden" name="posicao" value="<?= $destino ?>">
+                                        <button type="submit" class="btn-mudar-posicao">
+                                            <img
+                                                src="/projetoFinalPok-mon/public/css/img/mudar_p_<?= $destino ?>.png"
+                                                alt="Mudar para posição <?= $destino ?>"
+                                            >
+                                        </button>
+                                    </form>
+                                <?php endfor; ?>
+                            </div>
                         </article>
                     <?php endforeach; ?>
                 </div>
                 <p class="aviso-reserva">
-                    Ao colocar um Pokémon da reserva, o que estiver na posição 3 vai para a reserva.
+                    Ao escolher uma posição, o Pokémon que já está nela vai para a reserva.
                 </p>
             <?php endif; ?>
         </section>

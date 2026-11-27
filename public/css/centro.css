@@ -138,6 +138,18 @@ h1 {
     font-weight: 700;
 }
 
+.visita form {
+    flex: 0 0 auto;
+}
+
+.visita .btn_pixel {
+    display: inline-block;
+}
+
+.visita .btn_pixel img {
+    max-width: 100%;
+}
+
 button {
     padding: 13px 20px;
     border: 0;
